@@ -8,8 +8,11 @@ dependencies, no tracking — just three files you can drop on any static host.
 
 ## What's in it
 
+- **Liquid-glass material** in the spirit of macOS Tahoe — transparent,
+  heavily saturated panes with a bright specular top edge, soft inner glow,
+  capsule controls and springy presses
 - **Animated backdrop** — drifting aurora blobs, a faint grid and film grain
-- **Glassmorphism card** with a spinning gradient ring around your avatar
+- **Spinning gradient ring** around your avatar
 - **Staggered entrance** animation for every element
 - **Cursor-following spotlight** and a sheen sweep on each link
 - **Featured links** with an animated gradient border
@@ -94,7 +97,13 @@ theme: {
 }
 ```
 
-A few combinations that work well:
+The glass itself is tuned by a second set of tokens at the top of
+`index.html` — `--glass-blur`, `--rim-top`, `--rim-side`, `--rim-bottom`,
+`--inner-glow` and `--spec`. Raise `--rim-top` and `--spec` for a glassier,
+more reflective surface; lower them for something flatter and calmer. Each is
+defined once per theme.
+
+A few accent combinations that work well:
 
 | Look | `accentFrom` → `accentTo` |
 | --- | --- |

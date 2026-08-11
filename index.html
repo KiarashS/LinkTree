@@ -40,12 +40,24 @@
   --blob-opacity:  0.55;
   --grain-opacity: 0.035;
 
-  --modal-bg:   rgba(255, 255, 255, 0.88);
+  --modal-bg:   rgba(255, 255, 255, 0.72);
 
-  --radius:     18px;
-  --radius-lg:  28px;
+  /* Liquid glass: a transparent, heavily saturated pane with a bright
+     specular top edge, dimmer sides, and a soft inner glow. */
+  --glass-blur:  blur(26px) saturate(190%) brightness(1.06);
+  --rim-top:     rgba(255, 255, 255, 0.95);
+  --rim-side:    rgba(255, 255, 255, 0.55);
+  --rim-bottom:  rgba(255, 255, 255, 0.38);
+  --inner-glow:  rgba(255, 255, 255, 0.42);
+  --spec:        rgba(255, 255, 255, 0.55);
+  --spec-soft:   rgba(255, 255, 255, 0.10);
+
+  --radius:     22px;
+  --radius-lg:  34px;
+  --radius-sm:  16px;
   --ring:       color-mix(in srgb, var(--accent-from) 55%, transparent);
   --ease:       cubic-bezier(.22, 1, .36, 1);
+  --spring:     cubic-bezier(.34, 1.4, .64, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -71,7 +83,14 @@
     --sheen:         rgba(255, 255, 255, 0.14);
     --blob-opacity:  0.42;
     --grain-opacity: 0.05;
-    --modal-bg:      rgba(19, 20, 33, 0.88);
+    --modal-bg:      rgba(19, 20, 33, 0.72);
+    --glass-blur:    blur(28px) saturate(200%) brightness(1.12);
+    --rim-top:       rgba(255, 255, 255, 0.52);
+    --rim-side:      rgba(255, 255, 255, 0.15);
+    --rim-bottom:    rgba(255, 255, 255, 0.10);
+    --inner-glow:    rgba(255, 255, 255, 0.10);
+    --spec:          rgba(255, 255, 255, 0.28);
+    --spec-soft:     rgba(255, 255, 255, 0.05);
   }
 }
 :root[data-theme="dark"] {
@@ -90,7 +109,14 @@
   --sheen:         rgba(255, 255, 255, 0.14);
   --blob-opacity:  0.42;
   --grain-opacity: 0.05;
-  --modal-bg:      rgba(19, 20, 33, 0.88);
+  --modal-bg:      rgba(19, 20, 33, 0.72);
+  --glass-blur:    blur(28px) saturate(200%) brightness(1.12);
+  --rim-top:       rgba(255, 255, 255, 0.52);
+  --rim-side:      rgba(255, 255, 255, 0.15);
+  --rim-bottom:    rgba(255, 255, 255, 0.10);
+  --inner-glow:    rgba(255, 255, 255, 0.10);
+  --spec:          rgba(255, 255, 255, 0.28);
+  --spec-soft:     rgba(255, 255, 255, 0.05);
 }
 
 /* ==================================================================
@@ -108,8 +134,10 @@ body {
   align-items: center;
   justify-content: center;
   gap: 24px;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-               "Helvetica Neue", Arial, "Apple Color Emoji", sans-serif;
+  /* SF first — this is the type the glass language was drawn against. */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif,
+               system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+               "Apple Color Emoji", sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.55;
@@ -123,6 +151,50 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   outline: 2px solid var(--ring);
   outline-offset: 3px;
   border-radius: 12px;
+}
+
+/* ==================================================================
+   2b. The glass material
+   Every pane shares this: a transparent, saturated backdrop; a bright
+   specular hairline along the top that falls off around the sides; and
+   a soft inner glow so the surface reads as thick rather than flat.
+   ================================================================== */
+/* Kept pseudo-element-free on purpose: the link rows already spend both
+   ::before and ::after on the spotlight and the sheen sweep.
+
+   Two tiers. Panes float directly over the page and carry the real
+   backdrop blur; inset surfaces sit on a pane that has already blurred
+   the background, so they take only the rim and specular — stacking a
+   second blur on top of the first just turns them muddy. */
+.card, .toolbar, .modal, .toast,
+.link, .social, .badge, .mail {
+  /* An elliptical highlight anchored to the top edge. Its height is in px
+     so it hugs the edge of a tall card the same way it does a 40px chip,
+     and being radial it fades out on every side — a linear band sized the
+     same way leaves a hard seam where the band stops. */
+  background-image:
+    radial-gradient(150% 88px at 22% 0%, var(--spec), transparent 72%),
+    linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
+  box-shadow:
+    inset 0  1.5px 0 var(--rim-top),
+    inset  1px 0   0 var(--rim-side),
+    inset -1px 0   0 var(--rim-side),
+    inset 0 -1px   0 var(--rim-bottom),
+    inset 0 0 26px 2px var(--inner-glow),
+    var(--shadow-sm);
+}
+.card, .toolbar, .modal, .toast {
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.card, .modal {
+  box-shadow:
+    inset 0  1.5px 0 var(--rim-top),
+    inset  1px 0   0 var(--rim-side),
+    inset -1px 0   0 var(--rim-side),
+    inset 0 -1px   0 var(--rim-bottom),
+    inset 0 0 40px 4px var(--inner-glow),
+    var(--shadow-lg);
 }
 
 /* ==================================================================
@@ -201,30 +273,30 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* ==================================================================
    4. Top bar (theme + share)
    ================================================================== */
+/* The controls cluster into one floating capsule rather than sitting as
+   separate buttons — the glass is the bar, the chips ride inside it. */
 .toolbar {
   position: fixed;
   top: max(16px, env(safe-area-inset-top));
   right: 16px;
   display: flex;
-  gap: 8px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
   z-index: 10;
 }
 .chip {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   color: var(--text-soft);
-  transition: transform .35s var(--ease), background-color .3s, color .3s, border-color .3s;
+  transition: transform .4s var(--spring), background-color .3s, color .3s;
 }
-.chip:hover { transform: translateY(-2px) scale(1.06); color: var(--text); background: var(--surface-hover); }
-.chip:active { transform: scale(.94); }
+.chip:hover { color: var(--text); background-color: var(--surface-hover); }
+.chip:active { transform: scale(.88); transition-duration: .1s; }
 .chip svg { width: 19px; height: 19px; }
 .chip .icon-moon { display: none; }
 :root[data-theme="dark"] .chip .icon-moon { display: block; }
@@ -243,27 +315,25 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   width: min(100%, 512px);
   padding: clamp(24px, 5vw, 38px) clamp(18px, 4vw, 30px) clamp(20px, 4vw, 28px);
   border-radius: var(--radius-lg);
-  background: var(--surface);
+  background-color: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
   position: relative;
   isolation: isolate;
 }
-/* Soft light along the top edge. */
+/* A wide specular that tracks the pointer across the whole pane, the way
+   light slides over a curved sheet of glass. */
 .card::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, var(--sheen), transparent 40%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
   pointer-events: none;
+  background: radial-gradient(520px circle at var(--px, 50%) var(--py, 0%),
+              var(--spec-soft), transparent 65%);
+  opacity: 0;
+  transition: opacity .6s var(--ease);
 }
+.card:hover::before { opacity: 1; }
 
 /* ---------- Profile ---------- */
 .profile { text-align: center; display: grid; gap: 10px; justify-items: center; }
@@ -309,7 +379,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   object-fit: cover;
   display: block;
   background: var(--bg-deep);
-  border: 2px solid var(--bg);
+  border: 2px solid color-mix(in srgb, var(--bg) 55%, transparent);
   transition: transform .5s var(--ease);
 }
 .avatar-ring:hover .avatar { transform: scale(1.05); }
@@ -320,7 +390,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-size: 40px; font-weight: 700; letter-spacing: .02em;
   color: #fff;
   background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
-  border: 2px solid var(--bg);
+  border: 2px solid color-mix(in srgb, var(--bg) 55%, transparent);
 }
 
 .name {
@@ -363,7 +433,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text-soft);
-  background: var(--surface-2);
+  background-color: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 999px;
 }
@@ -389,15 +459,15 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   margin: 18px 0 4px;
 }
 .social {
-  width: 44px; height: 44px;
+  width: 46px; height: 46px;
   display: grid; place-items: center;
-  border-radius: 14px;
+  border-radius: 999px;
   color: var(--text-soft);
-  background: var(--surface-2);
+  background-color: var(--surface-2);
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
-  transition: transform .35s var(--ease), color .25s, border-color .25s;
+  transition: transform .45s var(--spring), color .25s, border-color .25s;
 }
 .social svg { width: 19px; height: 19px; position: relative; z-index: 1; transition: transform .35s var(--ease); }
 .social::before {
@@ -410,7 +480,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .social:hover { transform: translateY(-4px); color: #fff; border-color: transparent; }
 .social:hover::before { opacity: 1; }
 .social:hover svg { transform: scale(1.12); }
-.social:active { transform: translateY(-1px) scale(.95); }
+.social:active { transform: translateY(-1px) scale(.9); transition-duration: .1s; }
 
 /* ---------- Links ---------- */
 /* minmax(0, 1fr) keeps long labels from pushing the track wider than the card. */
@@ -426,12 +496,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   gap: 14px;
   padding: 14px 14px 14px 15px;
   border-radius: var(--radius);
-  background: var(--surface-2);
+  background-color: var(--surface-2);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
   overflow: hidden;
   isolation: isolate;
-  transition: transform .4s var(--ease), background-color .3s, border-color .3s, box-shadow .4s var(--ease);
+  transition: transform .45s var(--spring), background-color .3s, border-color .3s, box-shadow .4s var(--ease);
 }
 /* Cursor-following spotlight. */
 .link::before {
@@ -458,20 +527,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 .link:hover {
   transform: translateY(-3px);
-  background: var(--surface-hover);
+  background-color: var(--surface-hover);
   border-color: var(--border-strong);
-  box-shadow: var(--shadow-lg);
 }
 .link:hover::before { opacity: 1; }
 .link:hover::after { opacity: .5; animation: sweep .85s var(--ease); }
 @keyframes sweep { to { left: 115%; } }
-.link:active { transform: translateY(-1px) scale(.99); }
+.link:active { transform: translateY(-1px) scale(.975); transition-duration: .1s; }
 
 .link__icon {
   flex: none;
   width: 42px; height: 42px;
   display: grid; place-items: center;
-  border-radius: 13px;
+  border-radius: var(--radius-sm);
   color: var(--text);
   background: linear-gradient(150deg,
               color-mix(in srgb, var(--accent-from) 20%, transparent),
@@ -589,11 +657,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   margin: auto;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  background: var(--modal-bg);
+  background-color: var(--modal-bg);
   color: var(--text);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(30px) saturate(150%);
-  -webkit-backdrop-filter: blur(30px) saturate(150%);
   overflow: hidden;
 }
 .modal::backdrop {
@@ -628,7 +693,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   flex: none;
   width: 44px; height: 44px;
   display: grid; place-items: center;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   color: #fff;
   background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
   box-shadow: 0 8px 22px color-mix(in srgb, var(--accent-from) 35%, transparent);
@@ -655,7 +720,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   border-radius: 50%;
   color: var(--text-soft);
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background-color: var(--surface-2);
   transition: transform .3s var(--ease), background-color .25s, color .25s;
 }
 .modal__close svg { width: 15px; height: 15px; }
@@ -679,7 +744,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   gap: 12px;
   padding: 13px 12px 13px 14px;
   border-radius: var(--radius);
-  background: var(--surface-2);
+  background-color: var(--surface-2);
   border: 1px solid var(--border);
   transition: transform .35s var(--ease), background-color .25s, border-color .25s;
   animation: mail-in .5s var(--ease) backwards;
@@ -693,9 +758,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   flex: none;
   width: 38px; height: 38px;
   display: grid; place-items: center;
-  border-radius: 12px;
+  border-radius: 13px;
   color: var(--text-soft);
-  background: var(--surface);
+  background-color: var(--surface);
   border: 1px solid var(--border);
 }
 .mail__icon svg { width: 17px; height: 17px; }
@@ -782,11 +847,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-size: 14px;
   font-weight: 550;
   color: var(--text);
-  background: var(--surface-hover);
+  background-color: var(--surface-hover);
   border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   opacity: 0;
   pointer-events: none;
   transition: transform .5s var(--ease), opacity .35s var(--ease);
@@ -1190,6 +1252,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (fine && !calm) {
       card.addEventListener('pointermove', function (event) {
+        // Wide specular sliding across the pane, plus a tighter one on the row.
+        var c = card.getBoundingClientRect();
+        card.style.setProperty('--px', (event.clientX - c.left) + 'px');
+        card.style.setProperty('--py', (event.clientY - c.top) + 'px');
+
         var el = event.target.closest('.link');
         if (!el) return;
         var r = el.getBoundingClientRect();
