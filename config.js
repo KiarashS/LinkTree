@@ -17,7 +17,15 @@ window.LINKTREE_CONFIG = {
   profile: {
     name: "Kiarash",
     handle: "@KiarashS",
-    tagline: "Software engineer · builder of things for the web.",
+
+    // A single string shows as static text. A LIST types itself out one
+    // phrase at a time, holds, backspaces and moves to the next, forever.
+    tagline: [
+      "Researcher",
+      "ML/AI Enthusiast",
+      "Senior Software Engineer",
+      "Blogger",
+    ],
     // Any image URL. This one is pulled straight from your GitHub avatar.
     avatar: "https://avatars.githubusercontent.com/u/1054134?v=4",
     // Shown while the avatar loads, or if it fails to load.
@@ -25,6 +33,19 @@ window.LINKTREE_CONFIG = {
     // Small pill under your name. Set to "" to hide.
     status: "Available for interesting work",
     location: "",
+  },
+
+  /* Pacing for the typed tagline above. All times are milliseconds.
+     `smartBackspace` keeps the shared opening of two consecutive phrases
+     instead of deleting and retyping it. */
+  typing: {
+    typeSpeed: 90,
+    backSpeed: 45,
+    holdDelay: 1800,     // pause once a phrase is fully typed
+    startDelay: 500,
+    cursor: "|",
+    smartBackspace: true,
+    loop: true,
   },
 
   /* Accent colours for the glow, gradients and highlights.

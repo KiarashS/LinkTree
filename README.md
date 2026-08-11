@@ -11,6 +11,8 @@ dependencies, no tracking — just three files you can drop on any static host.
 - **Liquid-glass material** in the spirit of macOS Tahoe — transparent,
   heavily saturated panes with a bright specular top edge, soft inner glow,
   capsule controls and springy presses
+- **Typed tagline** that cycles through as many phrases as you like, with a
+  blinking cursor and smart backspacing
 - **Animated backdrop** — drifting aurora blobs, a faint grid and film grain
 - **Spinning gradient ring** around your avatar
 - **Staggered entrance** animation for every element
@@ -55,6 +57,48 @@ Built-in icons: `github`, `linkedin`, `x`, `instagram`, `youtube`, `telegram`,
 `medium`, `devto`, `dribbble`, `mastodon`, `mail`, `globe`, `blog`, `rss`,
 `docs`, `resume`, `calendar`, `music`, `store`, `chat`, `star`, `link`.
 Anything else falls back to a generic link icon.
+
+### The typed tagline
+
+Give `tagline` a **list** and it types each phrase out, holds, backspaces and
+moves to the next, forever:
+
+```js
+tagline: [
+  "Researcher",
+  "ML/AI Enthusiast",
+  "Senior Software Engineer",
+  "Blogger",
+],
+```
+
+Give it a **plain string** instead and it renders as static text, no animation:
+
+```js
+tagline: "Software engineer · builder of things for the web.",
+```
+
+Pacing lives in the `typing` block (all times in milliseconds):
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `typeSpeed` | `90` | Delay between typed characters |
+| `backSpeed` | `45` | Delay between deleted characters |
+| `holdDelay` | `1800` | Pause once a phrase is complete |
+| `startDelay` | `500` | Wait before the first character |
+| `cursor` | `"\|"` | The blinking character. `""` hides it |
+| `smartBackspace` | `true` | Keep the shared opening of adjacent phrases |
+| `loop` | `true` | `false` stops on the last phrase |
+
+`smartBackspace` only deletes back to the last character two neighbouring
+phrases share — so `"Blogger"` → `"Blogging"` rewrites just the tail rather
+than retyping the whole word. Order your phrases with that in mind.
+
+Two things worth knowing: typed phrases **don't wrap**, because a word hopping
+to a second line mid-keystroke reads as a glitch — so keep them short. And
+visitors who ask their system for reduced motion get the first phrase as plain
+static text with no cursor. The full list is always exposed to screen readers
+as ordinary sentences, so nothing is lost to assistive tech.
 
 ### Several email addresses
 

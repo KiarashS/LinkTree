@@ -424,6 +424,35 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   max-width: 34ch;
   text-wrap: balance;
 }
+/* Reserve the line so the card doesn't jump as the phrase empties out.
+   Typed phrases deliberately don't wrap — a word hopping to a second line
+   mid-keystroke reads as a glitch — so keep them short. */
+.tagline--typed {
+  min-height: 1.55em;
+  max-width: 100%;
+  text-wrap: nowrap;
+}
+@media (max-width: 380px) { .tagline--typed { font-size: 14px; } }
+.typing { color: var(--text); font-weight: 550; }
+.type-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--accent-from);
+  font-weight: 400;
+  animation: blink 1.05s steps(1, end) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Available to assistive tech, invisible on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 .meta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 4px; }
 .badge {
   display: inline-flex;
@@ -992,6 +1021,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
       });
     }
+    function num(value, fallback) {
+      return typeof value === 'number' && isFinite(value) && value >= 0 ? value : fallback;
+    }
     // Only allow link targets we are happy to render.
     function safeUrl(raw) {
       var v = String(raw == null ? '' : raw).trim();
@@ -1031,6 +1063,25 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         esc(profile.initials || (profile.name || '?').charAt(0)) + '</div>&quot;">'
       : '<div class="avatar-fallback">' + esc(profile.initials || (profile.name || '?').charAt(0)) + '</div>';
 
+    /* A string stays static; a list gets typed out. Either way the full
+       text is available to screen readers as plain, non-animated copy. */
+    var typing  = CFG.typing || {};
+    var phrases = (Array.isArray(profile.tagline) ? profile.tagline : [profile.tagline])
+                    .filter(function (t) { return typeof t === 'string' && t !== ''; });
+
+    var taglineHtml = '';
+    if (phrases.length === 1) {
+      taglineHtml = '<p class="tagline reveal" ' + delay() + '>' + esc(phrases[0]) + '</p>';
+    } else if (phrases.length > 1) {
+      taglineHtml =
+        '<p class="tagline tagline--typed reveal" ' + delay() + '>' +
+          '<span class="sr-only">' + esc(phrases.join('. ')) + '</span>' +
+          '<span class="typing" aria-hidden="true"></span>' +
+          '<span class="type-cursor" aria-hidden="true">' +
+            esc(typing.cursor == null ? '|' : typing.cursor) + '</span>' +
+        '</p>';
+    }
+
     var badges = '';
     if (profile.status)   badges += '<span class="badge"><span class="dot"></span>' + esc(profile.status) + '</span>';
     if (profile.location) badges += '<span class="badge">' + svg('pin') + esc(profile.location) + '</span>';
@@ -1039,7 +1090,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       '<div class="avatar-ring reveal" ' + delay() + '>' + avatar + '</div>' +
       '<h1 class="name reveal" ' + delay() + '>' + esc(profile.name || 'Your name') + '</h1>' +
       (profile.handle  ? '<p class="handle reveal" ' + delay() + '>' + esc(profile.handle) + '</p>' : '') +
-      (profile.tagline ? '<p class="tagline reveal" ' + delay() + '>' + esc(profile.tagline) + '</p>' : '') +
+      taglineHtml +
       (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '') +
     '</section>';
 
@@ -1120,6 +1171,63 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     card.innerHTML = html;
 
     if (profile.name) document.title = profile.name + ' — Links';
+
+    /* ---------------- Typed tagline ----------------
+       Types a phrase, holds, backspaces, moves to the next, loops. With
+       smartBackspace it stops deleting at the last character two adjacent
+       phrases share, so "Blogger" → "Blogging" only rewrites the tail. */
+    (function typeTagline() {
+      var el = card.querySelector('.typing');
+      if (!el || phrases.length < 2) return;
+
+      var cursor     = card.querySelector('.type-cursor');
+      var typeSpeed  = num(typing.typeSpeed, 90);
+      var backSpeed  = num(typing.backSpeed, 45);
+      var holdDelay  = num(typing.holdDelay, 1800);
+      var startDelay = num(typing.startDelay, 500);
+      var loop       = typing.loop !== false;
+      var smart      = typing.smartBackspace !== false;
+
+      // Reduced motion: settle on the first phrase, no typing, no blink.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        el.textContent = phrases[0];
+        if (cursor) cursor.remove();
+        return;
+      }
+
+      var index = 0;
+      var count = 0;
+
+      function sharedPrefix(a, b) {
+        var i = 0;
+        while (i < a.length && i < b.length && a.charAt(i) === b.charAt(i)) i++;
+        return i;
+      }
+      function write() { el.textContent = phrases[index].slice(0, count); }
+
+      function type() {
+        if (count < phrases[index].length) {
+          count++;
+          write();
+          setTimeout(type, typeSpeed);
+        } else {
+          setTimeout(erase, holdDelay);
+        }
+      }
+      function erase() {
+        var next = (index + 1) % phrases.length;
+        var floor = smart ? sharedPrefix(phrases[index], phrases[next]) : 0;
+        if (count > floor) {
+          count--;
+          write();
+          setTimeout(erase, backSpeed);
+        } else if (loop || next !== 0) {
+          index = next;
+          setTimeout(type, typeSpeed);
+        }
+      }
+      setTimeout(type, startDelay);
+    })();
 
     /* ---------------- Email chooser ---------------- */
     var dlg = document.getElementById('emailer');
