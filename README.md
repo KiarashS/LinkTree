@@ -167,6 +167,13 @@ The glass itself is tuned by a second set of tokens at the top of
 more reflective surface; lower them for something flatter and calmer. Each is
 defined once per theme.
 
+Two tokens control how much of the background reaches your text. `--pane` is
+the card's own fill — unlike `--surface` it *occludes*, so the aurora reads
+around the card rather than through the words. `--blob-opacity` sets how
+strong the drifting colour is. Lowering `--pane`'s alpha or raising
+`--blob-opacity` makes the page more atmospheric and less readable; the
+shipped values keep every row above 4.5:1 in both themes.
+
 A few accent combinations that work well:
 
 | Look | `accentFrom` → `accentTo` |
