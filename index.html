@@ -786,6 +786,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-size: 14.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  user-select: all;          /* one click selects the whole address */
+  -webkit-user-select: all;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -855,7 +857,18 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   z-index: 50;
 }
 .toast.is-visible { transform: translate(-50%, 0); opacity: 1; }
-.toast svg { width: 16px; height: 16px; color: #22c55e; }
+.toast svg { width: 16px; height: 16px; color: #22c55e; flex: none; }
+.toast--plain svg { color: var(--text-faint); }
+/* The manual-copy fallback: the toast has to be reachable and selectable. */
+.toast.is-selectable {
+  pointer-events: auto;
+  max-width: calc(100vw - 32px);
+}
+.toast.is-selectable span {
+  user-select: all;
+  -webkit-user-select: all;
+  overflow-wrap: anywhere;
+}
 
 /* ==================================================================
    7. Entrance animation
@@ -1154,12 +1167,25 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       if (!dlg.open) return;
       if (calm) { dlg.close(); return; }
       dlg.classList.add('is-closing');
-      dlg.addEventListener('animationend', function handler(event) {
-        if (event.target !== dlg) return;               // ignore child animations
-        dlg.removeEventListener('animationend', handler);
+
+      // Close on whichever comes first: the exit animation ending, or a
+      // timer. Animations don't run in a backgrounded tab, so waiting on
+      // animationend alone can leave the popup stuck open.
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        clearTimeout(guard);
+        dlg.removeEventListener('animationend', onEnd);
         dlg.close();
         dlg.classList.remove('is-closing');
-      });
+      }
+      function onEnd(event) {
+        if (event.target !== dlg) return;               // ignore child animations
+        finish();
+      }
+      var guard = setTimeout(finish, 400);
+      dlg.addEventListener('animationend', onEnd);
     }
 
     document.addEventListener('click', function (event) {
@@ -1182,11 +1208,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     /* ---------------- Toast ---------------- */
     var toast = document.getElementById('toast');
     var toastTimer;
-    function showToast(message) {
-      toast.innerHTML = svg('check') + '<span>' + esc(message) + '</span>';
+    /* opts.icon picks the glyph; opts.selectable keeps the toast up and
+       lets the visitor select its text — the last resort when the browser
+       refuses to write to the clipboard for us. */
+    function showToast(message, opts) {
+      opts = opts || {};
+      toast.innerHTML = svg(opts.icon || 'check') + '<span>' + esc(message) + '</span>';
+      toast.classList.toggle('toast--plain', opts.icon === 'link');
+      toast.classList.toggle('is-selectable', !!opts.selectable);
       toast.classList.add('is-visible');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () { toast.classList.remove('is-visible'); }, 2200);
+      toastTimer = setTimeout(function () {
+        toast.classList.remove('is-visible');
+      }, opts.selectable ? 8000 : 2200);
     }
 
     /* ---------------- Copy to clipboard ---------------- */
@@ -1227,23 +1261,45 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           if (label) { label.textContent = labelText; label.classList.remove('is-copied'); }
         }, 1600);
       }).catch(function () {
-        if (!row) showToast('Press ⌘/Ctrl + C to copy');
+        // Same rule as Share: never fail silently. Inside the popup the
+        // toast is hidden behind the dialog, so the row says it itself.
+        if (label) {
+          label.textContent = 'Select to copy';
+          setTimeout(function () { label.textContent = labelText; }, 2600);
+        } else {
+          showToast('Press ⌘/Ctrl + C to copy');
+        }
       });
     });
 
-    /* ---------------- Share ---------------- */
+    /* ---------------- Share ----------------
+       Opens the native share sheet where there is one (phones, mostly),
+       and copies the address everywhere else. Every failure path has to
+       end in visible feedback: an embedded or permission-less page can
+       reject BOTH the share sheet and the clipboard, and a button that
+       silently does nothing reads as broken. */
     document.getElementById('share').addEventListener('click', function () {
-      var data = {
-        title: document.title,
-        text: profile.tagline || document.title,
-        url: location.href
-      };
-      if (navigator.share) {
-        navigator.share(data).catch(function () {});
-      } else {
-        copyText(location.href)
+      var url = location.href;
+      var data = { title: document.title, text: profile.tagline || document.title, url: url };
+
+      function copyLink() {
+        copyText(url)
           .then(function () { showToast('Link copied'); })
-          .catch(function () {});
+          .catch(function () {
+            // Nothing automatic worked — show the address so it can be
+            // selected and copied by hand.
+            showToast(url, { icon: 'link', selectable: true });
+          });
+      }
+
+      if (navigator.share && (!navigator.canShare || navigator.canShare(data))) {
+        navigator.share(data).catch(function (err) {
+          // Dismissing the share sheet is a choice, not a failure.
+          if (err && err.name === 'AbortError') return;
+          copyLink();
+        });
+      } else {
+        copyLink();
       }
     });
 
