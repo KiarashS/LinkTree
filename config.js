@@ -15,7 +15,11 @@
 window.LINKTREE_CONFIG = {
   /* ---------------------------------------------------------------- */
   profile: {
-    name: "Kiarash",
+    name: "Kiarash Soleimanzadeh",
+    // The part of your name that gets the animated gradient treatment.
+    // Must appear in `name` above. Omit it and the first word is used;
+    // set it to "" to render the whole name plain.
+    nameHighlight: "Kiarash",
     handle: "@KiarashS",
 
     // A single string shows as static text. A LIST types itself out one
@@ -117,7 +121,7 @@ window.LINKTREE_CONFIG = {
     addresses: [
       {
         label: "Personal",
-        address: "goudarzi.mit@gmail.com",
+        address: "kiarash.sz@icloud.com",
         note: "Anything and everything — I read all of it",
         primary: true,
       },

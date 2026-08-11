@@ -58,6 +58,26 @@ Built-in icons: `github`, `linkedin`, `x`, `instagram`, `youtube`, `telegram`,
 `docs`, `resume`, `calendar`, `music`, `store`, `chat`, `star`, `link`.
 Anything else falls back to a generic link icon.
 
+### Highlighting part of your name
+
+`nameHighlight` picks the slice of `name` that gets the animated accent
+gradient and its soft bloom; the rest stays plain:
+
+```js
+name: "Kiarash Soleimanzadeh",
+nameHighlight: "Kiarash",
+```
+
+Omit `nameHighlight` and the first word is used. Set it to `""` to render the
+whole name plain. If the string doesn't appear in `name`, the name renders
+plain rather than breaking.
+
+The gradient uses `--accent-ink-from` / `--accent-ink-to`, which are your
+accent colours darkened for the light theme — raw cyan on a white card is
+about 1.9:1, well under any legibility bar. Both ends clear 4.5:1 in both
+themes at every point of the sweep, and they're derived with `color-mix`, so
+changing `accentFrom` / `accentTo` still flows through.
+
 ### The typed tagline
 
 Give `tagline` a **list** and it types each phrase out, holds, backspaces and

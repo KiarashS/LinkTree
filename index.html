@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Kiarash — Links</title>
+<title>Kiarash Soleimanzadeh — Links</title>
 <meta name="description" content="All of my links in one place: website, blog, GitHub, email and more." />
 <meta name="color-scheme" content="dark light" />
 
 <!-- Social preview -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Kiarash — Links" />
+<meta property="og:title" content="Kiarash Soleimanzadeh — Links" />
 <meta property="og:description" content="All of my links in one place: website, blog, GitHub, email and more." />
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/1054134?v=4" />
 <meta name="twitter:card" content="summary" />
@@ -52,6 +52,12 @@
   --spec:        rgba(255, 255, 255, 0.55);
   --spec-soft:   rgba(255, 255, 255, 0.10);
 
+  /* The accents as *ink*. Raw cyan on white is ~1.9:1, so the light theme
+     darkens both ends; the dark theme uses them as-is. Derived with
+     color-mix so a custom accent in config.js still flows through. */
+  --accent-ink-from: color-mix(in srgb, var(--accent-from) 82%, #0a0a20);
+  --accent-ink-to:   color-mix(in srgb, var(--accent-to) 50%, #052b38);
+
   --radius:     22px;
   --radius-lg:  34px;
   --radius-sm:  16px;
@@ -91,6 +97,8 @@
     --inner-glow:    rgba(255, 255, 255, 0.10);
     --spec:          rgba(255, 255, 255, 0.28);
     --spec-soft:     rgba(255, 255, 255, 0.05);
+    --accent-ink-from: var(--accent-from);
+    --accent-ink-to:   var(--accent-to);
   }
 }
 :root[data-theme="dark"] {
@@ -117,6 +125,8 @@
   --inner-glow:    rgba(255, 255, 255, 0.10);
   --spec:          rgba(255, 255, 255, 0.28);
   --spec-soft:     rgba(255, 255, 255, 0.05);
+  --accent-ink-from: var(--accent-from);
+  --accent-ink-to:   var(--accent-to);
 }
 
 /* ==================================================================
@@ -395,20 +405,31 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .name {
   margin: 6px 0 0;
-  font-size: clamp(24px, 5.5vw, 30px);
+  font-size: clamp(23px, 5.2vw, 29px);
   font-weight: 750;
   letter-spacing: -0.025em;
-  line-height: 1.15;
-  background: linear-gradient(120deg, var(--text) 20%, color-mix(in srgb, var(--accent-from) 70%, var(--text)) 50%, var(--text) 80%);
-  background-size: 220% 100%;
+  line-height: 1.18;
+  color: var(--text);
+}
+/* The highlighted part of the name carries the accent gradient, sweeping
+   slowly, with a soft bloom underneath. No white stop in the ramp — it
+   would punch a hole through the letters against a light background. */
+.name__accent {
+  background: linear-gradient(100deg,
+    var(--accent-ink-from) 0%,
+    var(--accent-ink-to) 30%,
+    var(--accent-ink-from) 62%,
+    var(--accent-ink-to) 100%);
+  background-size: 260% 100%;
   -webkit-background-clip: text;
           background-clip: text;
   color: transparent;
-  animation: shimmer 7s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--accent-from) 42%, transparent));
+  animation: name-sweep 7s ease-in-out infinite;
 }
-@keyframes shimmer {
-  0%, 100% { background-position: 120% 0; }
-  50%      { background-position: -20% 0; }
+@keyframes name-sweep {
+  0%, 100% { background-position: 100% 0; }
+  50%      { background-position: 0 0; }
 }
 .handle {
   margin: 0;
@@ -1063,6 +1084,22 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         esc(profile.initials || (profile.name || '?').charAt(0)) + '</div>&quot;">'
       : '<div class="avatar-fallback">' + esc(profile.initials || (profile.name || '?').charAt(0)) + '</div>';
 
+    /* Wrap the highlighted slice of the name so it can take the gradient,
+       leaving the rest as plain text. Defaults to the first word; an
+       explicit "" renders the whole name plain. */
+    var fullName = profile.name || 'Your name';
+    var highlight = profile.nameHighlight;
+    if (highlight === undefined) highlight = fullName.split(' ')[0];
+
+    var nameHtml, at = highlight ? fullName.indexOf(highlight) : -1;
+    if (at < 0) {
+      nameHtml = esc(fullName);
+    } else {
+      nameHtml = esc(fullName.slice(0, at)) +
+        '<span class="name__accent">' + esc(highlight) + '</span>' +
+        esc(fullName.slice(at + highlight.length));
+    }
+
     /* A string stays static; a list gets typed out. Either way the full
        text is available to screen readers as plain, non-animated copy. */
     var typing  = CFG.typing || {};
@@ -1088,7 +1125,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
     var html = '<section class="profile">' +
       '<div class="avatar-ring reveal" ' + delay() + '>' + avatar + '</div>' +
-      '<h1 class="name reveal" ' + delay() + '>' + esc(profile.name || 'Your name') + '</h1>' +
+      '<h1 class="name reveal" ' + delay() + '>' + nameHtml + '</h1>' +
       (profile.handle  ? '<p class="handle reveal" ' + delay() + '>' + esc(profile.handle) + '</p>' : '') +
       taglineHtml +
       (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '') +
