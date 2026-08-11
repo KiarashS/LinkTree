@@ -69,10 +69,11 @@ window.LINKTREE_CONFIG = {
     },
     {
       label: "Email me",
-      description: "goudarzi.mit@gmail.com",
-      url: "mailto:goudarzi.mit@gmail.com",
+      description: "Pick the right inbox — personal, work or press",
+      // `action: "emails"` opens the email chooser below instead of
+      // navigating anywhere. No `url` needed.
+      action: "emails",
       icon: "mail",
-      copy: "goudarzi.mit@gmail.com",
     },
     {
       label: "Résumé",
@@ -83,13 +84,43 @@ window.LINKTREE_CONFIG = {
   ],
 
   /* ---------------------------------------------------------------- */
+  /* The email chooser. Any link or social with `action: "emails"`      */
+  /* opens this list in a popup. Add or remove rows freely — one        */
+  /* address works just as well as five.                                */
+  /*                                                                    */
+  /*   primary: true  → highlighted row, shown with a gradient icon     */
+  /*   note           → the small grey line under the address           */
+  emailer: {
+    title: "Say hello",
+    subtitle: "Tap an address to copy it, or open it in your mail app.",
+    addresses: [
+      {
+        label: "Personal",
+        address: "goudarzi.mit@gmail.com",
+        note: "Anything and everything — I read all of it",
+        primary: true,
+      },
+      {
+        label: "Work",
+        address: "you@yourcompany.com",
+        note: "Consulting, contracts and collaborations",
+      },
+      {
+        label: "Press",
+        address: "press@example.com",
+        note: "Talks, interviews and quotes",
+      },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- */
   /* Small round icon buttons under your name. Keep this list short.   */
   socials: [
     { label: "GitHub", url: "https://github.com/KiarashS", icon: "github" },
     { label: "X", url: "https://x.com/your-handle", icon: "x" },
     { label: "LinkedIn", url: "https://www.linkedin.com/in/your-handle", icon: "linkedin" },
     { label: "Telegram", url: "https://t.me/your-handle", icon: "telegram" },
-    { label: "Email", url: "mailto:goudarzi.mit@gmail.com", icon: "mail" },
+    { label: "Email", action: "emails", icon: "mail" },
   ],
 
   /* ---------------------------------------------------------------- */

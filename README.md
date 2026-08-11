@@ -14,7 +14,9 @@ dependencies, no tracking — just three files you can drop on any static host.
 - **Cursor-following spotlight** and a sheen sweep on each link
 - **Featured links** with an animated gradient border
 - **Dark / light theme** — follows the system by default, toggle is remembered
-- **Copy-to-clipboard** buttons (great for your email address) with a toast
+- **Email chooser popup** — one row opens a glass modal listing every address
+  (personal, work, press…), each with copy and compose buttons
+- **Copy-to-clipboard** buttons with a toast
 - **Share button** using the Web Share API, falling back to copying the URL
 - **Fully responsive**, keyboard accessible, and respects
   `prefers-reduced-motion` and print styles
@@ -50,6 +52,35 @@ Built-in icons: `github`, `linkedin`, `x`, `instagram`, `youtube`, `telegram`,
 `medium`, `devto`, `dribbble`, `mastodon`, `mail`, `globe`, `blog`, `rss`,
 `docs`, `resume`, `calendar`, `music`, `store`, `chat`, `star`, `link`.
 Anything else falls back to a generic link icon.
+
+### Several email addresses
+
+Rather than one `mailto:` row, the page can open a popup listing every inbox
+you want to publish. Any link or social with `action: "emails"` opens it:
+
+```js
+{ label: "Email me", description: "Pick the right inbox", action: "emails", icon: "mail" }
+```
+
+The addresses themselves live in one place, so a link and a social icon can
+share the same list:
+
+```js
+emailer: {
+  title: "Say hello",
+  subtitle: "Tap an address to copy it, or open it in your mail app.",
+  addresses: [
+    { label: "Personal", address: "you@gmail.com",  note: "Anything and everything", primary: true },
+    { label: "Work",     address: "you@company.com", note: "Consulting and contracts" },
+  ],
+}
+```
+
+`primary: true` gives a row the gradient icon and an accent border. Each row
+has a copy button (the label flips to "Copied") and a compose button that
+opens the visitor's mail app. The popup closes on Esc, on a backdrop click,
+or via the close button, and returns focus to whatever opened it. Add as many
+or as few addresses as you like — a single one works fine.
 
 ### Changing the colours
 

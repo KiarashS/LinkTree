@@ -40,6 +40,8 @@
   --blob-opacity:  0.55;
   --grain-opacity: 0.035;
 
+  --modal-bg:   rgba(255, 255, 255, 0.88);
+
   --radius:     18px;
   --radius-lg:  28px;
   --ring:       color-mix(in srgb, var(--accent-from) 55%, transparent);
@@ -69,6 +71,7 @@
     --sheen:         rgba(255, 255, 255, 0.14);
     --blob-opacity:  0.42;
     --grain-opacity: 0.05;
+    --modal-bg:      rgba(19, 20, 33, 0.88);
   }
 }
 :root[data-theme="dark"] {
@@ -87,6 +90,7 @@
   --sheen:         rgba(255, 255, 255, 0.14);
   --blob-opacity:  0.42;
   --grain-opacity: 0.05;
+  --modal-bg:      rgba(19, 20, 33, 0.88);
 }
 
 /* ==================================================================
@@ -570,6 +574,191 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .heart { color: #f43f5e; display: inline-block; animation: beat 1.8s ease-in-out infinite; }
 @keyframes beat { 10%, 30% { transform: scale(1.22); } 20%, 40%, 100% { transform: scale(1); } }
 
+/* ==================================================================
+   5b. Email chooser
+   ================================================================== */
+
+/* A link that opens the popup is a <button>, not a stack of anchors. */
+.link--action { width: 100%; text-align: left; }
+.link--action:hover .link__arrow { transform: translateY(3px); }
+
+.modal {
+  width: min(100% - 32px, 460px);
+  max-height: calc(100svh - 48px);
+  padding: 0;
+  margin: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--modal-bg);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  overflow: hidden;
+}
+.modal::backdrop {
+  background: rgba(6, 6, 16, 0.55);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.modal[open]           { animation: modal-in .42s var(--ease); }
+.modal[open]::backdrop  { animation: fade-in .42s var(--ease); }
+.modal.is-closing           { animation: modal-out .18s ease-in forwards; }
+.modal.is-closing::backdrop { animation: fade-out .18s ease-in forwards; }
+@keyframes modal-in  { from { opacity: 0; transform: translateY(16px) scale(.94); } }
+@keyframes modal-out { to   { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes fade-in   { from { opacity: 0; } }
+@keyframes fade-out  { to   { opacity: 0; } }
+
+/* Header: a wash of the accent, so the popup reads as part of the card. */
+.modal__head {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(120% 140% at 0% 0%,
+      color-mix(in srgb, var(--accent-from) 20%, transparent), transparent 70%),
+    radial-gradient(100% 140% at 100% 0%,
+      color-mix(in srgb, var(--accent-to) 16%, transparent), transparent 70%);
+}
+.modal__stamp {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent-from) 35%, transparent);
+  animation: stamp-in .5s var(--ease) backwards .1s;
+}
+.modal__stamp svg { width: 21px; height: 21px; }
+@keyframes stamp-in { from { opacity: 0; transform: scale(.5) rotate(-18deg); } }
+.modal__titles { flex: 1; min-width: 0; padding-top: 2px; }
+.modal__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.modal__sub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+.modal__close {
+  flex: none;
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: transform .3s var(--ease), background-color .25s, color .25s;
+}
+.modal__close svg { width: 15px; height: 15px; }
+.modal__close:hover { background: var(--surface-hover); color: var(--text); transform: rotate(90deg); }
+
+.modal__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* keep long addresses in the box */
+  gap: 10px;
+  padding: 16px;
+  overflow-y: auto;
+  max-height: min(60svh, 480px);
+}
+
+/* One address. The label sits on the hairline like a tab. */
+.mail {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 12px 13px 14px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: transform .35s var(--ease), background-color .25s, border-color .25s;
+  animation: mail-in .5s var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 65ms + 120ms);
+}
+@keyframes mail-in { from { opacity: 0; transform: translateY(10px); } }
+.mail:hover { background: var(--surface-hover); border-color: var(--border-strong); transform: translateX(3px); }
+.mail--primary { border-color: color-mix(in srgb, var(--accent-from) 45%, transparent); }
+
+.mail__icon {
+  flex: none;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  color: var(--text-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.mail__icon svg { width: 17px; height: 17px; }
+.mail--primary .mail__icon {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+}
+
+.mail__body { min-width: 0; flex: 1; overflow: hidden; }
+.mail__label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  transition: color .25s;
+}
+.mail__label.is-copied { color: #22c55e; }
+.mail__addr {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mail__note {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mail__actions { flex: none; display: flex; gap: 4px; }
+.mail__btn {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  color: var(--text-faint);
+  border: 1px solid transparent;
+  transition: background-color .25s, color .25s, transform .25s var(--ease), border-color .25s;
+}
+.mail__btn svg { width: 16px; height: 16px; }
+.mail__btn:hover { background: var(--surface-hover); color: var(--text); border-color: var(--border); }
+.mail__btn:active { transform: scale(.9); }
+.mail__btn.is-done { color: #22c55e; }
+
+/* Narrow screens: drop the note and let the address wrap rather than
+   truncate — the address is the whole point of the row. */
+@media (max-width: 430px) {
+  .mail__note { display: none; }
+  .mail__addr {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+}
+
 /* On phones, reclaim the space taken by the decorative arrow so long
    values (an email address, say) still fit on one line. */
 @media (max-width: 430px) {
@@ -665,6 +854,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     <!-- rendered from config.js -->
   </main>
 
+  <dialog class="modal" id="emailer" aria-labelledby="emailer-title">
+    <!-- rendered from config.js -->
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
@@ -704,6 +897,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       link:     ['s', '<path d="M10.3 13.7a4.6 4.6 0 0 0 6.9.5l2.8-2.8a4.6 4.6 0 0 0-6.5-6.5L11.9 6.5"/><path d="M13.7 10.3a4.6 4.6 0 0 0-6.9-.5L4 12.6a4.6 4.6 0 0 0 6.5 6.5l1.6-1.6"/>'],
       arrow:    ['s', '<path d="M7 17 17 7"/><path d="M8 7h9v9"/>'],
       copy:     ['s', '<rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5.5 15A2.5 2.5 0 0 1 3 12.5v-8A2.5 2.5 0 0 1 5.5 2h8A2.5 2.5 0 0 1 16 4.5"/>'],
+      chevron:  ['s', '<path d="m6 9.5 6 6 6-6"/>'],
+      close:    ['s', '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>'],
+      compose:  ['s', '<path d="M11 4H5.5A2.5 2.5 0 0 0 3 6.5v12A2.5 2.5 0 0 0 5.5 21h12a2.5 2.5 0 0 0 2.5-2.5V13"/><path d="M18.4 2.6a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>'],
+      at:       ['s', '<circle cx="12" cy="12" r="3.8"/><path d="M15.8 8.2v5.3a2.9 2.9 0 0 0 5.8 0v-1.3A9.6 9.6 0 1 0 17.9 20"/>'],
       check:    ['s', '<path d="m4.5 12.5 5 5 10-11"/>'],
       pin:      ['s', '<path d="M20 10c0 5.5-8 12-8 12s-8-6.5-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="2.8"/>']
     };
@@ -775,6 +972,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     if (socials.length) {
       html += '<nav class="socials" aria-label="Social profiles">';
       socials.forEach(function (s) {
+        if (s.action === 'emails') {
+          html += '<button class="social reveal" ' + delay() + ' type="button" data-open-emails' +
+                  ' aria-label="' + esc(s.label || 'Email') + '" title="' + esc(s.label || '') + '">' +
+                  svg(s.icon) + '</button>';
+          return;
+        }
         var url = safeUrl(s.url);
         html += '<a class="social reveal" ' + delay() + ' href="' + esc(url) + '"' +
                 (isExternal(url) ? ' target="_blank" rel="noopener noreferrer"' : '') +
@@ -788,6 +991,21 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     if (links.length) {
       html += '<ul class="links">';
       links.forEach(function (l) {
+        // A link that opens the email chooser is one button, not a row of anchors.
+        if (l.action === 'emails') {
+          html += '<li class="reveal" ' + delay() + '>' +
+            '<button class="link link--action' + (l.featured ? ' link--featured' : '') + '"' +
+              ' type="button" data-open-emails>' +
+              (l.featured ? '<span class="border-glow" aria-hidden="true"></span>' : '') +
+              '<span class="link__icon" aria-hidden="true">' + svg(l.icon) + '</span>' +
+              '<span class="link__body">' +
+                '<span class="link__label">' + esc(l.label || 'Email') + '</span>' +
+                (l.description ? '<span class="link__desc">' + esc(l.description) + '</span>' : '') +
+              '</span>' +
+              '<span class="link__arrow" aria-hidden="true">' + svg('chevron') + '</span>' +
+            '</button></li>';
+          return;
+        }
         var url = safeUrl(l.url);
         html += '<li class="reveal" ' + delay() + '>' +
           '<div class="link' + (l.featured ? ' link--featured' : '') + '">' +
@@ -828,6 +1046,77 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
     if (profile.name) document.title = profile.name + ' — Links';
 
+    /* ---------------- Email chooser ---------------- */
+    var dlg = document.getElementById('emailer');
+    var mailer = CFG.emailer || {};
+    var addresses = mailer.addresses || [];
+
+    var modalHtml =
+      '<div class="modal__head">' +
+        '<span class="modal__stamp" aria-hidden="true">' + svg('at') + '</span>' +
+        '<div class="modal__titles">' +
+          '<h2 class="modal__title" id="emailer-title">' + esc(mailer.title || 'Get in touch') + '</h2>' +
+          (mailer.subtitle ? '<p class="modal__sub">' + esc(mailer.subtitle) + '</p>' : '') +
+        '</div>' +
+        '<button class="modal__close" type="button" data-close-emails aria-label="Close">' +
+          svg('close') + '</button>' +
+      '</div><div class="modal__body">';
+
+    addresses.forEach(function (m, n) {
+      var addr = String(m.address || '');
+      modalHtml +=
+        '<div class="mail' + (m.primary ? ' mail--primary' : '') + '" style="--i:' + n + '">' +
+          '<span class="mail__icon" aria-hidden="true">' + svg('mail') + '</span>' +
+          '<span class="mail__body">' +
+            (m.label ? '<span class="mail__label">' + esc(m.label) + '</span>' : '') +
+            '<span class="mail__addr">' + esc(addr) + '</span>' +
+            (m.note ? '<span class="mail__note">' + esc(m.note) + '</span>' : '') +
+          '</span>' +
+          '<span class="mail__actions">' +
+            '<button class="mail__btn" type="button" data-copy="' + esc(addr) + '"' +
+              ' aria-label="Copy ' + esc(addr) + '" title="Copy address">' + svg('copy') + '</button>' +
+            '<a class="mail__btn" href="mailto:' + esc(encodeURI(addr)) + '"' +
+              ' aria-label="Compose to ' + esc(addr) + '" title="Open in mail app">' + svg('compose') + '</a>' +
+          '</span>' +
+        '</div>';
+    });
+    modalHtml += '</div>';
+    dlg.innerHTML = modalHtml;
+
+    function openEmailer() {
+      if (typeof dlg.showModal !== 'function') return;   // very old browsers
+      dlg.classList.remove('is-closing');
+      dlg.showModal();
+    }
+    function closeEmailer() {
+      if (!dlg.open) return;
+      if (calm) { dlg.close(); return; }
+      dlg.classList.add('is-closing');
+      dlg.addEventListener('animationend', function handler(event) {
+        if (event.target !== dlg) return;               // ignore child animations
+        dlg.removeEventListener('animationend', handler);
+        dlg.close();
+        dlg.classList.remove('is-closing');
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      if (event.target.closest('[data-open-emails]')) { event.preventDefault(); openEmailer(); }
+      else if (event.target.closest('[data-close-emails]')) closeEmailer();
+    });
+
+    // Esc: animate out instead of the instant native close.
+    dlg.addEventListener('cancel', function (event) { event.preventDefault(); closeEmailer(); });
+
+    // Click on the backdrop (the dialog element itself) closes it.
+    dlg.addEventListener('click', function (event) {
+      if (event.target !== dlg) return;
+      var r = dlg.getBoundingClientRect();
+      var inside = event.clientX >= r.left && event.clientX <= r.right &&
+                   event.clientY >= r.top  && event.clientY <= r.bottom;
+      if (!inside) closeEmailer();
+    });
+
     /* ---------------- Toast ---------------- */
     var toast = document.getElementById('toast');
     var toastTimer;
@@ -854,19 +1143,30 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       });
     }
 
-    card.addEventListener('click', function (event) {
-      var btn = event.target.closest('.copy-btn');
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('[data-copy]');
       if (!btn) return;
       event.preventDefault();
+
+      // The toast lives below the dialog's top layer, so a copy made inside
+      // the popup confirms itself on the row instead.
+      var row = btn.closest('.mail');
+      var label = row && row.querySelector('.mail__label');
+      var labelText = label && label.textContent;
+
       copyText(btn.getAttribute('data-copy')).then(function () {
         btn.innerHTML = svg('check');
         btn.classList.add('is-done');
-        showToast('Copied to clipboard');
+        if (label) { label.textContent = 'Copied'; label.classList.add('is-copied'); }
+        else showToast('Copied to clipboard');
         setTimeout(function () {
           btn.innerHTML = svg('copy');
           btn.classList.remove('is-done');
+          if (label) { label.textContent = labelText; label.classList.remove('is-copied'); }
         }, 1600);
-      }).catch(function () { showToast('Press ⌘/Ctrl + C to copy'); });
+      }).catch(function () {
+        if (!row) showToast('Press ⌘/Ctrl + C to copy');
+      });
     });
 
     /* ---------------- Share ---------------- */
