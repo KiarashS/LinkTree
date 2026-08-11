@@ -28,7 +28,7 @@
   --bg-deep:       #e8eaf6;
   --surface:       rgba(255, 255, 255, 0.72);
   --surface-2:     rgba(255, 255, 255, 0.55);
-  --surface-hover: rgba(255, 255, 255, 0.92);
+  --surface-hover: rgba(15, 18, 45, 0.07);   /* hover darkens in light */
   --border:        rgba(15, 18, 45, 0.10);
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
@@ -55,6 +55,11 @@
   --inner-glow:  rgba(255, 255, 255, 0.42);
   --spec:        rgba(255, 255, 255, 0.55);
   --spec-soft:   rgba(255, 255, 255, 0.10);
+
+  /* Interaction is light on the material, never a hue. Accent is reserved
+     for identity (name, avatar ring) and for the featured link. */
+  --hover-fill:  rgba(15, 18, 45, 0.07);
+  --hover-glow:  rgba(15, 18, 45, 0.05);
 
   /* The accents as *ink*. Raw cyan on white is ~1.9:1, so the light theme
      darkens both ends; the dark theme uses them as-is. Derived with
@@ -104,6 +109,8 @@
     --inner-glow:    rgba(255, 255, 255, 0.10);
     --spec:          rgba(255, 255, 255, 0.28);
     --spec-soft:     rgba(255, 255, 255, 0.05);
+    --hover-fill:    rgba(255, 255, 255, 0.10);
+    --hover-glow:    rgba(255, 255, 255, 0.10);
     --accent-ink-from: var(--accent-from);
     --accent-ink-to:   var(--accent-to);
   }
@@ -135,6 +142,8 @@
   --inner-glow:    rgba(255, 255, 255, 0.10);
   --spec:          rgba(255, 255, 255, 0.28);
   --spec-soft:     rgba(255, 255, 255, 0.05);
+  --hover-fill:    rgba(255, 255, 255, 0.10);
+  --hover-glow:    rgba(255, 255, 255, 0.10);
   --accent-ink-from: var(--accent-from);
   --accent-ink-to:   var(--accent-to);
 }
@@ -533,11 +542,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .social::before {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  background: var(--hover-fill);
   opacity: 0;
   transition: opacity .3s var(--ease);
 }
-.social:hover { transform: translateY(-4px); color: #fff; border-color: transparent; }
+.social:hover { transform: translateY(-4px); color: var(--text); border-color: var(--border-strong); }
 .social:hover::before { opacity: 1; }
 .social:hover svg { transform: scale(1.12); }
 .social:active { transform: translateY(-1px) scale(.9); transition-duration: .1s; }
@@ -568,7 +577,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   position: absolute;
   inset: 0;
   background: radial-gradient(240px circle at var(--mx) var(--my),
-              color-mix(in srgb, var(--accent-from) 22%, transparent), transparent 70%);
+              var(--hover-glow), transparent 70%);
   opacity: 0;
   transition: opacity .35s var(--ease);
   z-index: -1;
@@ -610,7 +619,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .link__icon svg { width: 19px; height: 19px; }
 .link:hover .link__icon {
   transform: scale(1.08) rotate(-5deg);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent-from) 30%, transparent);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--text) 20%, transparent);
 }
 
 .link__body { min-width: 0; flex: 1; overflow: hidden; }
@@ -909,7 +918,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-size: 14px;
   font-weight: 550;
   color: var(--text);
-  background-color: var(--surface-hover);
+  background-color: var(--pane);
   border: 1px solid var(--border-strong);
   opacity: 0;
   pointer-events: none;
