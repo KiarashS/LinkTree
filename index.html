@@ -963,6 +963,52 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 
 /* ==================================================================
+   6b. Tooltip
+   A help tag in the same material as the rest: glass, rimmed, no arrow,
+   the way macOS draws them. Replaces the native title= tooltip, which
+   ignores styling and is slow and inconsistent between browsers.
+   ================================================================== */
+.tip {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 60;
+  max-width: 260px;
+  padding: 6px 11px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 550;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  color: var(--text);
+  background-color: var(--pane);
+  background-image:
+    radial-gradient(150% 42px at 22% 0%, var(--spec), transparent 72%),
+    linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
+  border: 1px solid var(--border-strong);
+  /* The tight black layer is what separates a pale tip from a pale card;
+     --shadow-lg alone is too diffuse to draw an edge in light mode. */
+  box-shadow:
+    inset 0 1px 0 var(--rim-top),
+    inset 1px 0 0 var(--rim-side),
+    inset -1px 0 0 var(--rim-side),
+    inset 0 -1px 0 var(--rim-bottom),
+    0 2px 10px rgba(0, 0, 0, 0.18),
+    var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  opacity: 0;
+  transform: translate3d(0, 3px, 0) scale(.96);
+  transform-origin: var(--tip-origin, 50% 100%);
+  pointer-events: none;
+  transition: opacity .13s var(--ease), transform .18s var(--spring);
+}
+.tip.is-visible { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+
+/* Touch has no hover, so a tooltip would only ever flash on tap. */
+@media (hover: none) { .tip { display: none; } }
+
+/* ==================================================================
    7. Entrance animation
    ================================================================== */
 .reveal {
@@ -1001,13 +1047,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   </div>
 
   <div class="toolbar">
-    <button class="chip" id="share" type="button" aria-label="Share this page" title="Share">
+    <button class="chip" id="share" type="button" aria-label="Share this page" data-tip="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
         <line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
       </svg>
     </button>
-    <button class="chip" id="theme" type="button" aria-label="Toggle colour theme" title="Toggle theme">
+    <button class="chip" id="theme" type="button" aria-label="Toggle colour theme" data-tip="Toggle theme">
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
         <circle cx="12" cy="12" r="4.2"/>
         <path d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>
@@ -1025,6 +1071,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   <dialog class="modal" id="emailer" aria-labelledby="emailer-title">
     <!-- rendered from config.js -->
   </dialog>
+
+  <div class="tip" id="tip" aria-hidden="true"></div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1186,14 +1234,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       socials.forEach(function (s) {
         if (s.action === 'emails') {
           html += '<button class="social reveal" ' + delay() + ' type="button" data-open-emails' +
-                  ' aria-label="' + esc(s.label || 'Email') + '" title="' + esc(s.label || '') + '">' +
+                  ' aria-label="' + esc(s.label || 'Email') + '" data-tip="' + esc(s.label || '') + '">' +
                   svg(s.icon) + '</button>';
           return;
         }
         var url = safeUrl(s.url);
         html += '<a class="social reveal" ' + delay() + ' href="' + esc(url) + '"' +
                 (isExternal(url) ? ' target="_blank" rel="noopener noreferrer"' : '') +
-                ' aria-label="' + esc(s.label || 'Link') + '" title="' + esc(s.label || '') + '">' +
+                ' aria-label="' + esc(s.label || 'Link') + '" data-tip="' + esc(s.label || '') + '">' +
                 svg(s.icon) + '</a>';
       });
       html += '</nav>';
@@ -1232,7 +1280,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
             '</a>' +
             (l.copy
               ? '<button class="copy-btn" type="button" data-copy="' + esc(l.copy) +
-                '" aria-label="Copy ' + esc(l.label || 'value') + '" title="Copy">' + svg('copy') + '</button>'
+                '" aria-label="Copy ' + esc(l.label || 'value') + '" data-tip="Copy">' + svg('copy') + '</button>'
               : '') +
             '<a class="link__arrow" href="' + esc(url) + '" tabindex="-1" aria-hidden="true"' +
               (isExternal(url) ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' +
@@ -1257,6 +1305,87 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     card.innerHTML = html;
 
     if (profile.name) document.title = profile.name + ' — Links';
+
+    /* ---------------- Tooltip ----------------
+       Hover or keyboard focus on anything carrying data-tip. Mirrors the
+       macOS behaviour: a delay before the first one, then instant while
+       you keep moving between controls, and a short grace period after
+       leaving before it goes cold again. */
+    (function tooltips() {
+      var tip = document.getElementById('tip');
+      if (!tip || !window.matchMedia('(hover: hover)').matches) return;
+
+      var OPEN_DELAY = 480, WARM_FOR = 900, GAP = 9, EDGE = 8;
+      var showTimer, coolTimer, warm = false, current = null;
+
+      function place(el) {
+        var r = el.getBoundingClientRect();
+        var t = tip.getBoundingClientRect();
+        var left = r.left + (r.width - t.width) / 2;
+        left = Math.max(EDGE, Math.min(left, window.innerWidth - t.width - EDGE));
+
+        // Above by default; flip below when there isn't room up there.
+        var above = r.top - t.height - GAP;
+        var below = r.bottom + GAP;
+        var top = above >= EDGE ? above : below;
+        tip.style.setProperty('--tip-origin',
+          (r.left + r.width / 2 - left) + 'px ' + (above >= EDGE ? '100%' : '0%'));
+        tip.style.transform = '';           // let the class drive it
+        tip.style.left = Math.round(left) + 'px';
+        tip.style.top  = Math.round(top) + 'px';
+      }
+
+      function show(el) {
+        var text = el.getAttribute('data-tip');
+        if (!text) return;
+        current = el;
+        tip.textContent = text;
+        tip.style.left = '-9999px';         // measure off-screen first
+        tip.style.top = '0px';
+        place(el);
+        tip.classList.add('is-visible');
+        warm = true;
+        clearTimeout(coolTimer);
+      }
+
+      function hide() {
+        clearTimeout(showTimer);
+        current = null;
+        tip.classList.remove('is-visible');
+        clearTimeout(coolTimer);
+        coolTimer = setTimeout(function () { warm = false; }, WARM_FOR);
+      }
+
+      function queue(el) {
+        clearTimeout(showTimer);
+        if (warm) { show(el); return; }     // already in tooltip mode
+        showTimer = setTimeout(function () { show(el); }, OPEN_DELAY);
+      }
+
+      function target(node) {
+        return node && node.closest ? node.closest('[data-tip]') : null;
+      }
+
+      document.addEventListener('pointerover', function (e) {
+        var el = target(e.target);
+        if (!el || el === current) return;
+        queue(el);
+      });
+      document.addEventListener('pointerout', function (e) {
+        var el = target(e.target);
+        if (el && !el.contains(e.relatedTarget)) hide();
+      });
+      // A click means the control did its job; the tip is just in the way.
+      document.addEventListener('pointerdown', hide, true);
+      document.addEventListener('focusin', function (e) {
+        var el = target(e.target);
+        if (el) show(el); else hide();
+      });
+      document.addEventListener('focusout', hide);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+      window.addEventListener('scroll', hide, true);
+      window.addEventListener('blur', hide);
+    })();
 
     /* ---------------- Typed tagline ----------------
        Types a phrase, holds, backspaces, moves to the next, loops. With
@@ -1327,7 +1456,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           '<h2 class="modal__title" id="emailer-title">' + esc(mailer.title || 'Get in touch') + '</h2>' +
           (mailer.subtitle ? '<p class="modal__sub">' + esc(mailer.subtitle) + '</p>' : '') +
         '</div>' +
-        '<button class="modal__close" type="button" data-close-emails aria-label="Close">' +
+        '<button class="modal__close" type="button" data-close-emails aria-label="Close" data-tip="Close">' +
           svg('close') + '</button>' +
       '</div><div class="modal__body">';
 
@@ -1343,9 +1472,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           '</span>' +
           '<span class="mail__actions">' +
             '<button class="mail__btn" type="button" data-copy="' + esc(addr) + '"' +
-              ' aria-label="Copy ' + esc(addr) + '" title="Copy address">' + svg('copy') + '</button>' +
+              ' aria-label="Copy ' + esc(addr) + '" data-tip="Copy address">' + svg('copy') + '</button>' +
             '<a class="mail__btn" href="mailto:' + esc(encodeURI(addr)) + '"' +
-              ' aria-label="Compose to ' + esc(addr) + '" title="Open in mail app">' + svg('compose') + '</a>' +
+              ' aria-label="Compose to ' + esc(addr) + '" data-tip="Open in mail app">' + svg('compose') + '</a>' +
           '</span>' +
         '</div>';
     });

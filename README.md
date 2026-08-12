@@ -21,6 +21,8 @@ dependencies, no tracking — just three files you can drop on any static host.
 - **Dark / light theme** — follows the system by default, toggle is remembered
 - **Email chooser popup** — one row opens a glass modal listing every address
   (personal, work, press…), each with copy and compose buttons
+- **Glass tooltips** replacing the browser's `title=` popup, with the macOS
+  timing: a delay before the first, instant while you keep moving
 - **Copy-to-clipboard** buttons with a toast
 - **Share button** using the Web Share API, falling back to copying the URL
 - **Fully responsive**, keyboard accessible, and respects
