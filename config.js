@@ -175,7 +175,7 @@ window.LINKTREE_CONFIG = {
 
   /* ---------------------------------------------------------------- */
   footer: {
-    text: "#BeHappy",
+    text: "Made with Love",
     // Shown next to the year. Set to "" to hide the link.
     linkLabel: "kiarashs.ir",
     linkUrl: "https://www.kiarashs.ir/",
