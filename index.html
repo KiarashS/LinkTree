@@ -46,7 +46,7 @@
      is behind it; --pane occludes, so the aurora reads *around* the card
      instead of through the text. */
   --pane:       rgba(255, 255, 255, 0.86);
-  --tip-bg:     rgba(255, 255, 255, 0.60);
+  --tip-bg:     rgba(255, 255, 255, 0.52);
   --modal-bg:   rgba(255, 255, 255, 0.86);
 
   /* Liquid glass: a transparent, heavily saturated pane with a bright
@@ -104,7 +104,7 @@
     --texture-opacity: 0.14;
     --texture-filter:  none;
     --pane:          rgba(17, 18, 28, 0.88);
-    --tip-bg:        rgba(24, 25, 38, 0.62);
+    --tip-bg:        rgba(26, 27, 41, 0.46);
     --modal-bg:      rgba(17, 18, 28, 0.88);
     /* Lower saturate/brightness than before: at 200% the filter amplified
        the blob colour before the pane ever covered it. */
@@ -140,7 +140,7 @@
   --texture-opacity: 0.14;
   --texture-filter:  none;
   --pane:          rgba(17, 18, 28, 0.88);
-  --tip-bg:        rgba(24, 25, 38, 0.62);
+  --tip-bg:        rgba(26, 27, 41, 0.46);
   --modal-bg:      rgba(17, 18, 28, 0.88);
   /* Lower saturate/brightness than before: at 200% the filter amplified
      the blob colour before the pane ever covered it. */
@@ -974,6 +974,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .tip {
   position: fixed;
   top: 0; left: 0;
+  right: auto; bottom: auto;    /* undo the UA popover inset */
+  margin: 0;                    /* undo the UA popover centring */
+  overflow: visible;
   z-index: 60;
   max-width: 260px;
   padding: 6px 11px;
@@ -985,9 +988,16 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   white-space: nowrap;
   color: var(--text);
   background-color: var(--tip-bg);
+  /* A tooltip mostly floats over flat surfaces — the card's own fill — where
+     a backdrop blur has no detail to work on and a thin fill just reads as a
+     paler chip. So the glass here is intrinsic: a bright specular across the
+     top half, a soft return light along the bottom, and a hard rim. */
   background-image:
-    radial-gradient(150% 42px at 22% 0%, var(--spec), transparent 72%),
-    linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--spec) 85%, transparent) 0%,
+      color-mix(in srgb, var(--spec) 18%, transparent) 42%,
+      transparent 62%),
+    radial-gradient(120% 70% at 50% 118%, var(--spec-soft), transparent 70%);
   border: 1px solid var(--border-strong);
   /* The tight black layer is what separates a pale tip from a pale card;
      --shadow-lg alone is too diffuse to draw an edge in light mode. */
@@ -996,6 +1006,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     inset 1px 0 0 var(--rim-side),
     inset -1px 0 0 var(--rim-side),
     inset 0 -1px 0 var(--rim-bottom),
+    inset 0 -6px 12px -8px var(--spec),
     0 2px 10px rgba(0, 0, 0, 0.18),
     var(--shadow-lg);
   backdrop-filter: blur(34px) saturate(210%) brightness(1.08);
@@ -1075,7 +1086,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     <!-- rendered from config.js -->
   </dialog>
 
-  <div class="tip" id="tip" aria-hidden="true"></div>
+  <div class="tip" id="tip" popover="manual" aria-hidden="true"></div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1340,11 +1351,27 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         tip.style.top  = Math.round(top) + 'px';
       }
 
+      var canPopover = typeof tip.showPopover === 'function';
+      var closeTimer;
+
+      function open() {
+        if (!canPopover) return;
+        clearTimeout(closeTimer);
+        if (!tip.matches(':popover-open')) { try { tip.showPopover(); } catch (e) {} }
+      }
+      function close() {
+        if (!canPopover) return;
+        closeTimer = setTimeout(function () {
+          if (tip.matches(':popover-open')) { try { tip.hidePopover(); } catch (e) {} }
+        }, 220);
+      }
+
       function show(el) {
         var text = el.getAttribute('data-tip');
         if (!text) return;
         current = el;
         tip.textContent = text;
+        open();
         tip.style.left = '-9999px';         // measure off-screen first
         tip.style.top = '0px';
         place(el);
@@ -1357,6 +1384,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         clearTimeout(showTimer);
         current = null;
         tip.classList.remove('is-visible');
+        close();
         clearTimeout(coolTimer);
         coolTimer = setTimeout(function () { warm = false; }, WARM_FOR);
       }
