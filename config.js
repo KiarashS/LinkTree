@@ -134,25 +134,25 @@ window.LINKTREE_CONFIG = {
     subtitle: "Tap an address to copy it, or open it in your mail app.",
     addresses: [
       {
-        label: "Primary",
-        address: "kiarash.sz@icloud.com",
+        label: "Work",
+        address: "kiarash.smz@gmail.com",
         note: "The one I read first",
         primary: true,
       },
       {
-        label: "Website",
-        address: "hello@kiarashs.ir",
-        note: "Anything to do with kiarashs.ir",
-      },
-      {
-        label: "Google",
-        address: "kiarash.smz@gmail.com",
-        note: "Docs, Drive and everything Google",
-      },
-      {
-        label: "Microsoft",
+        label: "Work",
         address: "kiarash.s@hotmail.com",
         note: "Teams, Outlook and Microsoft services",
+      },
+      {
+        label: "Personal",
+        address: "kiarash.sz@icloud.com",
+        note: "For Apple services",
+      },
+      {
+        label: "Personal",
+        address: "hello@kiarashs.ir",
+        note: "Anything to do with kiarashs.ir",
       },
     ],
   },
