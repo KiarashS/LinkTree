@@ -8,8 +8,8 @@
  * Available `icon` values:
  *   github, linkedin, x, facebook, instagram, youtube, telegram,
  *   whatsapp, medium, devto, dribbble, mastodon, scholar, academic,
- *   donate, coffee, mail, globe, blog, rss, docs, resume, calendar, music,
- *   store, chat, star, link
+ *   donate, coffee, arxiv, researchgate, mail, globe, blog, rss, docs,
+ *   resume, calendar, music, store, chat, star, link
  * Anything unrecognised falls back to a generic link icon.
  * ------------------------------------------------------------------ */
 
