@@ -87,12 +87,12 @@ window.LINKTREE_CONFIG = {
       url: "https://kiarashs.ir/blog",
       icon: "blog",
     },
-    {
+    /*{
       label: "Google Scholar",
       description: "Papers, citations and co-authors",
       url: "https://go.kiarashs.ir/scholar",
       icon: "scholar",
-    },
+    },*/
     {
       label: "GitHub",
       description: "Open-source work and side projects",
@@ -113,13 +113,13 @@ window.LINKTREE_CONFIG = {
       action: "emails",
       icon: "mail",
     },
-    {
+    /*{
       label: "Buy Me a Coffee",
       description: "Support my work if something here helped you",
       url: "https://go.kiarashs.ir/donate",
       // "coffee" is the cup; "donate" is a heart, if you'd rather have that.
       icon: "coffee",
-    },
+    },*/
   ],
 
   /* ---------------------------------------------------------------- */
@@ -161,15 +161,15 @@ window.LINKTREE_CONFIG = {
   /* Small round icon buttons under your name. Keep this list short.   */
   socials: [
     { label: "GitHub", url: "https://go.kiarashs.ir/github", icon: "github" },
-    { label: "LinkedIn", url: "https://go.kiarashs.ir/linkedin", icon: "linkedin" },
+    /*{ label: "LinkedIn", url: "https://go.kiarashs.ir/linkedin", icon: "linkedin" },
     { label: "X", url: "https://go.kiarashs.ir/twitter", icon: "x" },
-    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },
+    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },*/
     // TODO: go.kiarashs.ir/facebook currently redirects to facebook.com with
     // no profile path — point this at your real page, or delete the row.
-    { label: "Facebook", url: "https://go.kiarashs.ir/facebook", icon: "facebook" },
+    /*{ label: "Facebook", url: "https://go.kiarashs.ir/facebook", icon: "facebook" },*/
     // TODO: there is no go.kiarashs.ir/whatsapp shortlink yet. wa.me needs
     // your number in full international form, digits only, e.g. 447700900123.
-    { label: "WhatsApp", url: "https://wa.me/YOUR-NUMBER", icon: "whatsapp" },
+    /*{ label: "WhatsApp", url: "https://wa.me/YOUR-NUMBER", icon: "whatsapp" },*/
     { label: "Email", action: "emails", icon: "mail" },
   ],
 
