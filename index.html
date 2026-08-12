@@ -39,6 +39,8 @@
   --sheen:         rgba(255, 255, 255, 0.85);
   --blob-opacity:  0.42;
   --grain-opacity: 0.035;
+  --texture-opacity: 0.06;
+  --texture-filter: invert(1);
 
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
@@ -98,6 +100,8 @@
     --sheen:         rgba(255, 255, 255, 0.14);
     --blob-opacity:  0.26;
     --grain-opacity: 0.05;
+    --texture-opacity: 0.14;
+    --texture-filter:  none;
     --pane:          rgba(17, 18, 28, 0.88);
     --modal-bg:      rgba(17, 18, 28, 0.88);
     /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -131,6 +135,8 @@
   --sheen:         rgba(255, 255, 255, 0.14);
   --blob-opacity:  0.26;
   --grain-opacity: 0.05;
+  --texture-opacity: 0.14;
+  --texture-filter:  none;
   --pane:          rgba(17, 18, 28, 0.88);
   --modal-bg:      rgba(17, 18, 28, 0.88);
   /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -193,8 +199,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
    Two tiers. Panes float directly over the page and carry the real
    backdrop blur; inset surfaces sit on a pane that has already blurred
-   the background, so they take only the rim and specular — stacking a
-   second blur on top of the first just turns them muddy. */
+   the background, so they take only the rim and specular. Measured: a
+   backdrop-filter on the rows changes 0 of 378,000 pixels, because an
+   ancestor with backdrop-filter is a backdrop root — the rows would be
+   blurring the card's own flat fill. */
 .card, .toolbar, .modal, .toast,
 .link, .social, .badge, .mail {
   /* An elliptical highlight anchored to the top edge. Its height is in px
@@ -297,6 +305,21 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   inset: 0;
   opacity: var(--grain-opacity);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Mid-frequency texture. The film grain above is nearly per-pixel, so a
+   28px backdrop blur averages it to a flat tone; features at ~60-100px
+   survive the blur as soft structure, which is what gives the glass
+   something to actually refract. Sits behind --pane, so text is unaffected. */
+.texture {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.055' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.52'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cfilter id='t' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013' numOctaves='4' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.42'/%3E%3C/filter%3E%3Crect width='800' height='800' filter='url(%23t)'/%3E%3C/svg%3E");
+  background-size: 420px 420px, cover;
+  background-repeat: repeat, no-repeat;
+  opacity: var(--texture-opacity);
+  filter: var(--texture-filter, none);
+  pointer-events: none;
 }
 
 /* ==================================================================
@@ -974,6 +997,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     <div class="blob blob--1"></div>
     <div class="blob blob--2"></div>
     <div class="blob blob--3"></div>
+    <div class="texture"></div>
   </div>
 
   <div class="toolbar">
