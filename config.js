@@ -6,9 +6,10 @@
  * itself.
  *
  * Available `icon` values:
- *   github, linkedin, x, instagram, youtube, telegram, medium, devto,
- *   dribbble, mastodon, mail, globe, blog, rss, docs, resume, calendar,
- *   music, store, chat, star, link
+ *   github, linkedin, x, facebook, instagram, youtube, telegram,
+ *   whatsapp, medium, devto, dribbble, mastodon, scholar, academic,
+ *   donate, mail, globe, blog, rss, docs, resume, calendar, music,
+ *   store, chat, star, link
  * Anything unrecognised falls back to a generic link icon.
  * ------------------------------------------------------------------ */
 
@@ -69,42 +70,54 @@ window.LINKTREE_CONFIG = {
   links: [
     {
       label: "My Website",
-      description: "Portfolio, projects and everything else",
-      url: "https://example.com",
+      description: "Home base — about me, writing and projects",
+      url: "https://kiarashs.ir/",
       icon: "globe",
       featured: true,
     },
     {
+      label: "Academic Profile",
+      description: "Research interests, education and publications",
+      url: "https://profile.kiarashs.ir/",
+      icon: "academic",
+    },
+    {
       label: "Blog",
-      description: "Writing about code, tools and ideas",
-      url: "https://example.com/blog",
+      description: "Writing on ML/AI, engineering and ideas",
+      url: "https://kiarashs.ir/blog",
       icon: "blog",
     },
     {
+      label: "Google Scholar",
+      description: "Papers, citations and co-authors",
+      url: "https://go.kiarashs.ir/scholar",
+      icon: "scholar",
+    },
+    {
       label: "GitHub",
-      description: "Open source work and side projects",
-      url: "https://github.com/KiarashS",
+      description: "Open-source work and side projects",
+      url: "https://go.kiarashs.ir/github",
       icon: "github",
     },
     {
-      label: "LinkedIn",
-      description: "Experience and professional profile",
-      url: "https://www.linkedin.com/in/your-handle",
-      icon: "linkedin",
+      label: "My Directory",
+      description: "An index of the sites and resources I maintain",
+      url: "https://directory.kiarashs.ir/",
+      icon: "docs",
     },
     {
-      label: "Email me",
-      description: "Pick the right inbox — personal, work or press",
+      label: "Emails",
+      description: "Four inboxes — pick whichever fits",
       // `action: "emails"` opens the email chooser below instead of
       // navigating anywhere. No `url` needed.
       action: "emails",
       icon: "mail",
     },
     {
-      label: "Résumé",
-      description: "The one-page version (PDF)",
-      url: "https://example.com/resume.pdf",
-      icon: "resume",
+      label: "Buy Me a Coffee",
+      description: "Support my work if something here helped you",
+      url: "https://go.kiarashs.ir/donate",
+      icon: "donate",
     },
   ],
 
@@ -120,20 +133,25 @@ window.LINKTREE_CONFIG = {
     subtitle: "Tap an address to copy it, or open it in your mail app.",
     addresses: [
       {
-        label: "Personal",
+        label: "Primary",
         address: "kiarash.sz@icloud.com",
-        note: "Anything and everything — I read all of it",
+        note: "The one I read first",
         primary: true,
       },
       {
-        label: "Work",
-        address: "you@yourcompany.com",
-        note: "Consulting, contracts and collaborations",
+        label: "Website",
+        address: "hello@kiarashs.ir",
+        note: "Anything to do with kiarashs.ir",
       },
       {
-        label: "Press",
-        address: "press@example.com",
-        note: "Talks, interviews and quotes",
+        label: "Google",
+        address: "kiarash.smz@gmail.com",
+        note: "Docs, Drive and everything Google",
+      },
+      {
+        label: "Microsoft",
+        address: "kiarash.s@hotmail.com",
+        note: "Teams, Outlook and Microsoft services",
       },
     ],
   },
@@ -141,18 +159,24 @@ window.LINKTREE_CONFIG = {
   /* ---------------------------------------------------------------- */
   /* Small round icon buttons under your name. Keep this list short.   */
   socials: [
-    { label: "GitHub", url: "https://github.com/KiarashS", icon: "github" },
-    { label: "X", url: "https://x.com/your-handle", icon: "x" },
-    { label: "LinkedIn", url: "https://www.linkedin.com/in/your-handle", icon: "linkedin" },
-    { label: "Telegram", url: "https://t.me/your-handle", icon: "telegram" },
+    { label: "GitHub", url: "https://go.kiarashs.ir/github", icon: "github" },
+    { label: "LinkedIn", url: "https://go.kiarashs.ir/linkedin", icon: "linkedin" },
+    { label: "X", url: "https://go.kiarashs.ir/twitter", icon: "x" },
+    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },
+    // TODO: go.kiarashs.ir/facebook currently redirects to facebook.com with
+    // no profile path — point this at your real page, or delete the row.
+    { label: "Facebook", url: "https://go.kiarashs.ir/facebook", icon: "facebook" },
+    // TODO: there is no go.kiarashs.ir/whatsapp shortlink yet. wa.me needs
+    // your number in full international form, digits only, e.g. 447700900123.
+    { label: "WhatsApp", url: "https://wa.me/YOUR-NUMBER", icon: "whatsapp" },
     { label: "Email", action: "emails", icon: "mail" },
   ],
 
   /* ---------------------------------------------------------------- */
   footer: {
-    text: "Made with care",
+    text: "#BeHappy",
     // Shown next to the year. Set to "" to hide the link.
-    linkLabel: "source on GitHub",
-    linkUrl: "https://github.com/KiarashS/LinkTree",
+    linkLabel: "kiarashs.ir",
+    linkUrl: "https://www.kiarashs.ir/",
   },
 };
