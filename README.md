@@ -55,7 +55,7 @@ dependencies, no tracking — just three files you can drop on any static host.
 
 Built-in icons: `github`, `linkedin`, `x`, `facebook`, `instagram`, `youtube`,
 `telegram`, `whatsapp`, `medium`, `devto`, `dribbble`, `mastodon`, `scholar`,
-`academic`, `donate`, `mail`, `globe`, `blog`, `rss`, `docs`, `resume`,
+`academic`, `donate`, `coffee`, `mail`, `globe`, `blog`, `rss`, `docs`, `resume`,
 `calendar`, `music`, `store`, `chat`, `star`, `link`.
 Anything else falls back to a generic link icon.
 

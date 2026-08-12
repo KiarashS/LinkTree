@@ -8,7 +8,7 @@
  * Available `icon` values:
  *   github, linkedin, x, facebook, instagram, youtube, telegram,
  *   whatsapp, medium, devto, dribbble, mastodon, scholar, academic,
- *   donate, mail, globe, blog, rss, docs, resume, calendar, music,
+ *   donate, coffee, mail, globe, blog, rss, docs, resume, calendar, music,
  *   store, chat, star, link
  * Anything unrecognised falls back to a generic link icon.
  * ------------------------------------------------------------------ */
@@ -117,7 +117,8 @@ window.LINKTREE_CONFIG = {
       label: "Buy Me a Coffee",
       description: "Support my work if something here helped you",
       url: "https://go.kiarashs.ir/donate",
-      icon: "donate",
+      // "coffee" is the cup; "donate" is a heart, if you'd rather have that.
+      icon: "coffee",
     },
   ],
 
