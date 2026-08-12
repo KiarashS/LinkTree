@@ -44,6 +44,9 @@ window.LINKTREE_CONFIG = {
      `smartBackspace` keeps the shared opening of two consecutive phrases
      instead of deleting and retyping it. */
   typing: {
+    // Static lead-in shown before the typed phrase, in a muted colour.
+    // Set to "" for none. Only applies when `tagline` is a list.
+    prefix: "I'm a ",
     typeSpeed: 90,
     backSpeed: 45,
     holdDelay: 1800,     // pause once a phrase is fully typed

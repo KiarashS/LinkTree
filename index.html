@@ -500,6 +500,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 @media (max-width: 380px) { .tagline--typed { font-size: 14px; } }
 .typing { color: var(--text); font-weight: 550; }
+/* Muted lead-in. white-space: pre keeps its trailing space from collapsing
+   against the typed word. */
+.tagline__lead {
+  color: var(--text-faint);
+  font-weight: 450;
+  white-space: pre;
+}
 .type-cursor {
   display: inline-block;
   margin-left: 2px;
@@ -1223,9 +1230,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     if (phrases.length === 1) {
       taglineHtml = '<p class="tagline reveal" ' + delay() + '>' + esc(phrases[0]) + '</p>';
     } else if (phrases.length > 1) {
+      var prefix = typeof typing.prefix === 'string' ? typing.prefix : '';
       taglineHtml =
         '<p class="tagline tagline--typed reveal" ' + delay() + '>' +
-          '<span class="sr-only">' + esc(phrases.join('. ')) + '</span>' +
+          '<span class="sr-only">' + esc(prefix + phrases.join(', ')) + '</span>' +
+          (prefix ? '<span class="tagline__lead" aria-hidden="true">' +
+                      esc(prefix) + '</span>' : '') +
           '<span class="typing" aria-hidden="true"></span>' +
           '<span class="type-cursor" aria-hidden="true">' +
             esc(typing.cursor == null ? '|' : typing.cursor) + '</span>' +

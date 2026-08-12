@@ -102,10 +102,11 @@ Give it a **plain string** instead and it renders as static text, no animation:
 tagline: "Software engineer · builder of things for the web.",
 ```
 
-Pacing lives in the `typing` block (all times in milliseconds):
+Pacing and the lead-in live in the `typing` block (times in milliseconds):
 
 | Option | Default | What it does |
 | --- | --- | --- |
+| `prefix` | `"I'm a "` | Static muted text before the typed phrase. `""` for none |
 | `typeSpeed` | `90` | Delay between typed characters |
 | `backSpeed` | `45` | Delay between deleted characters |
 | `holdDelay` | `1800` | Pause once a phrase is complete |
@@ -117,6 +118,12 @@ Pacing lives in the `typing` block (all times in milliseconds):
 `smartBackspace` only deletes back to the last character two neighbouring
 phrases share — so `"Blogger"` → `"Blogging"` rewrites just the tail rather
 than retyping the whole word. Order your phrases with that in mind.
+
+`prefix` renders in the muted text colour so the typed phrase stays the
+emphasis, and it only applies when `tagline` is a list. Mind the article: a
+fixed `"I'm a "` reads wrong before a phrase starting with a vowel *sound*
+(`"a ML/AI Enthusiast"` should be `an`). Either word the phrases around it, or
+set `prefix: "I'm "` and put the article in each phrase.
 
 Two things worth knowing: typed phrases **don't wrap**, because a word hopping
 to a second line mid-keystroke reads as a glitch — so keep them short. And
