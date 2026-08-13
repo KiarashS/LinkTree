@@ -79,7 +79,7 @@ window.LINKTREE_CONFIG = {
       featured: true,
     },
     {
-      label: "Academic Profile",
+      label: "Profile",
       description: "Research interests, education and publications",
       url: "https://profile.kiarashs.ir/",
       icon: "academic",
