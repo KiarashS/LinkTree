@@ -77,7 +77,7 @@ window.LINKTREE_CONFIG = {
       url: "https://kiarashs.ir/",
       // "home" matches the house your own site uses; "globe" is the alternative.
       icon: "home",
-      featured: true,
+      featured: false,
     },
     {
       label: "Profile",
@@ -141,7 +141,7 @@ window.LINKTREE_CONFIG = {
         label: "Work",
         address: "kiarash.smz@gmail.com",
         note: "The one I read first",
-        primary: true,
+        primary: false,
       },
       {
         label: "Work",
