@@ -59,7 +59,7 @@ Built-in icons: `github`, `linkedin`, `x`, `facebook`, `instagram`, `youtube`,
 `telegram`, `whatsapp`, `medium`, `devto`, `dribbble`, `mastodon`, `scholar`,
 `academic`, `arxiv`, `researchgate`, `donate`, `coffee`, `mail`, `globe`, `blog`,
 `rss`, `docs`, `resume`,
-`calendar`, `music`, `store`, `chat`, `star`, `link`.
+`calendar`, `music`, `store`, `chat`, `star`, `home`, `link`.
 Anything else falls back to a generic link icon.
 
 ### Highlighting part of your name

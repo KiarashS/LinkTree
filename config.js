@@ -9,7 +9,7 @@
  *   github, linkedin, x, facebook, instagram, youtube, telegram,
  *   whatsapp, medium, devto, dribbble, mastodon, scholar, academic,
  *   donate, coffee, arxiv, researchgate, mail, globe, blog, rss, docs,
- *   resume, calendar, music, store, chat, star, link
+ *   resume, calendar, music, store, chat, star, home, link
  * Anything unrecognised falls back to a generic link icon.
  * ------------------------------------------------------------------ */
 
@@ -75,7 +75,8 @@ window.LINKTREE_CONFIG = {
       label: "My Website",
       description: "Home base — about me, writing and projects",
       url: "https://kiarashs.ir/",
-      icon: "globe",
+      // "home" matches the house your own site uses; "globe" is the alternative.
+      icon: "home",
       featured: true,
     },
     {

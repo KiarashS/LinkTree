@@ -1121,6 +1121,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       dribbble: ['s', '<circle cx="12" cy="12" r="10"/><path d="M8.6 2.7c3.9 4.5 6 9.6 6.7 18.1M2.3 10.3c6.9.2 12-1.3 15.9-5.1M21.8 13.5c-6.2-1.8-10.9-1.1-14.6 4"/>'],
       mastodon: ['s', '<path d="M18.6 15.2c-2.1.25-4.4.32-6.6.32-2.6 0-5.2-.15-7-.5"/><path d="M8.2 13.8V9.9c0-1.3.8-2.1 1.9-2.1 1.2 0 1.9.9 1.9 2.2v2.1"/><path d="M12 12.1V10c0-1.3.7-2.2 1.9-2.2 1.1 0 1.9.8 1.9 2.1v3.9"/><path d="M20.5 13.6c0 3.2-.4 5.4-3.6 6-1.7.3-3.4.4-5.1.4-2.7-.1-5.5.4-7.6-1.2"/><path d="M3.5 13.6V8.2C3.5 4.9 5.7 3 8.6 2.6c2.3-.3 4.6-.3 6.9 0 2.9.4 5 2.3 5 5.6v5.4"/>'],
       mail:     ['s', '<rect x="2" y="4.5" width="20" height="15" rx="3"/><path d="m3 7 7.6 5.4a2.4 2.4 0 0 0 2.8 0L21 7"/>'],
+      home:     ['s', '<path d="M3 9.7 12 2.6l9 7.1V20a2.4 2.4 0 0 1-2.4 2.4H5.4A2.4 2.4 0 0 1 3 20z"/><path d="M9.4 22.4v-7.7a1 1 0 0 1 1-1h3.2a1 1 0 0 1 1 1v7.7"/>'],
       globe:    ['s', '<circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19"/><path d="M12 2.5a15 15 0 0 1 4 9.5 15 15 0 0 1-4 9.5 15 15 0 0 1-4-9.5 15 15 0 0 1 4-9.5z"/>'],
       blog:     ['s', '<path d="M3.5 3.5h6a3.5 3.5 0 0 1 3.5 3.5v13a2.6 2.6 0 0 0-2.6-2.6H3.5z"/><path d="M20.5 3.5h-6A3.5 3.5 0 0 0 11 7v13a2.6 2.6 0 0 1 2.6-2.6h6.9z"/>'],
       rss:      ['s', '<path d="M4.5 11a8.5 8.5 0 0 1 8.5 8.5"/><path d="M4.5 4.5a15 15 0 0 1 15 15"/><circle cx="5.2" cy="18.8" r="1.4" fill="currentColor" stroke="none"/>'],
@@ -1420,9 +1421,20 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       });
       // A click means the control did its job; the tip is just in the way.
       document.addEventListener('pointerdown', hide, true);
+      // Old Safari lacks :focus-visible; there, fall back to showing on focus.
+      var hasFocusVisible = (function () {
+        try { document.querySelector(':focus-visible'); return true; }
+        catch (e) { return false; }
+      })();
+
       document.addEventListener('focusin', function (e) {
         var el = target(e.target);
-        if (el) show(el); else hide();
+        if (!el) { hide(); return; }
+        // Only keyboard focus should raise a tip. Opening the email popup
+        // moves focus to its close button programmatically, which is focus
+        // but not :focus-visible — without this the tip fires on open.
+        if (hasFocusVisible && !el.matches(':focus-visible')) { hide(); return; }
+        show(el);
       });
       document.addEventListener('focusout', hide);
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
