@@ -72,7 +72,7 @@ window.LINKTREE_CONFIG = {
   /* `copy: "..."` adds a small copy-to-clipboard button on the right. */
   links: [
     {
-      label: "My Website",
+      label: "Website",
       description: "Home base — about me, writing and projects",
       url: "https://kiarashs.ir/",
       // "home" matches the house your own site uses; "globe" is the alternative.
@@ -104,7 +104,7 @@ window.LINKTREE_CONFIG = {
       icon: "github",
     },
     {
-      label: "My Directory",
+      label: "Directory",
       description: "An index of the sites and resources I maintain",
       url: "https://directory.kiarashs.ir/",
       icon: "docs",
