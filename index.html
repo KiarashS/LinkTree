@@ -353,13 +353,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .chip:hover { color: var(--text); background-color: var(--surface-hover); }
 .chip:active { transform: scale(.88); transition-duration: .1s; }
 .chip svg { width: 19px; height: 19px; }
-.chip .icon-moon { display: none; }
-:root[data-theme="dark"] .chip .icon-moon { display: block; }
-:root[data-theme="dark"] .chip .icon-sun  { display: none; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .chip .icon-moon { display: block; }
-  :root:not([data-theme="light"]) .chip .icon-sun  { display: none; }
-}
+#theme svg { display: none; }
+#theme[data-mode="auto"]  .icon-auto,
+#theme[data-mode="light"] .icon-sun,
+#theme[data-mode="dark"]  .icon-moon { display: block; }
 .chip svg { transition: transform .5s var(--ease); }
 .chip:hover svg { transform: rotate(20deg); }
 
@@ -1074,7 +1071,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         <line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
       </svg>
     </button>
-    <button class="chip" id="theme" type="button" aria-label="Toggle colour theme" data-tip="Toggle theme">
+    <button class="chip" id="theme" type="button" data-mode="auto">
+      <svg class="icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/>
+      </svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
         <circle cx="12" cy="12" r="4.2"/>
         <path d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>
@@ -1174,20 +1175,36 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     }
     function isExternal(url) { return /^https?:/i.test(url); }
 
-    /* ---------------- Theme ---------------- */
+    /* ---------------- Theme ----------------
+       Three states, cycling System -> Light -> Dark. A two-state toggle is a
+       one-way door: the first click pins a theme forever and there is no way
+       back to following the system. In "auto" no data-theme is stamped at
+       all, so prefers-color-scheme decides — including when the visitor
+       changes their system setting while the page is open. */
     var root = document.documentElement;
+    var themeBtn = document.getElementById('theme');
+    var MODES = ['auto', 'light', 'dark'];
+    var LABELS = { auto: 'System', light: 'Light', dark: 'Dark' };
+
     var stored = null;
     try { stored = localStorage.getItem('linktree-theme'); } catch (e) {}
-    var initial = stored || (theme.default && theme.default !== 'auto' ? theme.default : null);
-    if (initial === 'dark' || initial === 'light') root.setAttribute('data-theme', initial);
+    var mode = stored || theme.default || 'auto';
+    if (MODES.indexOf(mode) < 0) mode = 'auto';
 
-    document.getElementById('theme').addEventListener('click', function () {
-      var isDark = root.getAttribute('data-theme')
-        ? root.getAttribute('data-theme') === 'dark'
-        : window.matchMedia('(prefers-color-scheme: dark)').matches;
-      var next = isDark ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      try { localStorage.setItem('linktree-theme', next); } catch (e) {}
+    function applyMode(m) {
+      if (m === 'auto') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', m);
+      themeBtn.setAttribute('data-mode', m);
+      themeBtn.setAttribute('data-tip', 'Theme: ' + LABELS[m]);
+      themeBtn.setAttribute('aria-label',
+        'Colour theme: ' + LABELS[m] + '. Click to change.');
+    }
+    applyMode(mode);
+
+    themeBtn.addEventListener('click', function () {
+      mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+      applyMode(mode);
+      try { localStorage.setItem('linktree-theme', mode); } catch (e) {}
     });
 
     /* ---------------- Accent ---------------- */

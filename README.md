@@ -18,7 +18,8 @@ dependencies, no tracking — just three files you can drop on any static host.
 - **Staggered entrance** animation for every element
 - **Cursor-following spotlight** and a sheen sweep on each link
 - **Featured links** with an animated gradient border
-- **Dark / light theme** — follows the system by default, toggle is remembered
+- **Theme follows the system** by default; the control cycles System → Light →
+  Dark, so a visitor can always hand control back
 - **Email chooser popup** — one row opens a glass modal listing every address
   (personal, work, press…), each with copy and compose buttons
 - **Glass tooltips** replacing the browser's `title=` popup, with the macOS

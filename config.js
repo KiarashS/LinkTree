@@ -62,7 +62,9 @@ window.LINKTREE_CONFIG = {
   theme: {
     accentFrom: "#7c5cff",
     accentTo: "#22d3ee",
-    // "auto" follows the visitor's system setting. Or force "dark" / "light".
+    // Starting mode for a first-time visitor: "auto" follows their system
+    // setting. The toggle cycles System -> Light -> Dark, and whatever they
+    // pick is remembered — including "auto", so they can hand control back.
     default: "auto",
   },
 
