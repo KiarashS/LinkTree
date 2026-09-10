@@ -35,6 +35,10 @@ dependencies, no tracking — just three files you can drop on any static host.
 | --- | --- |
 | `config.js` | **Edit this.** Your name, avatar, links and colours. |
 | `index.html` | Layout, styles and rendering logic. Rarely needs touching. |
+| `avatar.jpg` | Your photo, served from here rather than a third party. |
+| `og.jpg` | 1200×630 social preview card. |
+| `CNAME` | Custom domain for GitHub Pages. |
+| `scripts/checks.js` | Optional dev tooling — see [Checks](#checks). |
 | `README.md` | This file. |
 
 ## Getting started
@@ -155,6 +159,18 @@ emailer: {
 }
 ```
 
+Addresses are stored split, so no `user@domain` string sits in the source for
+a harvester to lift with a regex:
+
+```js
+{ label: "Work", user: "you", domain: "gmail.com", note: "…" }
+```
+
+The page joins them at render time. `address: "you@gmail.com"` still works if
+you'd rather not bother. This stops naive scrapers, not ones that run
+JavaScript — the same limit any client-side obfuscation has, including the
+HTML entities it replaced.
+
 `primary: true` gives a row the gradient icon and an accent border. Each row
 has a copy button (the label flips to "Copied") and a compose button that
 opens the visitor's mail app. The popup closes on Esc, on a backdrop click,
@@ -194,6 +210,42 @@ A few accent combinations that work well:
 | Sunset | `#f97316` → `#ec4899` |
 | Mint | `#22c55e` → `#06b6d4` |
 | Royal | `#6366f1` → `#a855f7` |
+
+### Search engines
+
+The `seo` block feeds a JSON-LD `Person` record, built from config at render
+time so it can't drift from what the page actually links to:
+
+```js
+seo: {
+  url: "https://links.kiarashs.ir/",
+  jobTitle: "Researcher, Senior Software Engineer",
+  sameAs: ["https://github.com/…", "https://scholar.google.com/…"],
+}
+```
+
+Give `sameAs` the **canonical destinations**, not shortlinks that redirect —
+a redirector is a weaker signal for tying your profiles together.
+
+The social card is `og.jpg` at 1200×630 with `twitter:card:
+summary_large_image`, so shared links render as a full-width preview rather
+than a thumbnail. Regenerate it however you like; only the dimensions and the
+filename matter.
+
+## Checks
+
+`scripts/checks.js` guards the things that are easy to break by editing
+`config.js` and hard to spot by eye: text contrast in both themes, overflow at
+four widths, placeholder URLs left behind, plain email addresses leaking into
+the source, the popup opening, and the JSON-LD parsing.
+
+```bash
+npm i -D playwright pngjs && npx playwright install chromium
+node scripts/checks.js
+```
+
+It exits non-zero on failure, so CI can use it unchanged. The site itself
+stays dependency-free; nothing here ships to visitors.
 
 ## Deploying to GitHub Pages
 
