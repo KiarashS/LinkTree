@@ -32,7 +32,7 @@ window.LINKTREE_CONFIG = {
       "Blogger",
     ],
     // Any image URL. This one is pulled straight from your GitHub avatar.
-    avatar: "https://avatars.githubusercontent.com/u/1054134?v=4",
+    avatar: "avatar.jpg",
     // Shown while the avatar loads, or if it fails to load.
     initials: "K",
     // Small pill under your name. Set to "" to hide.
@@ -135,29 +135,34 @@ window.LINKTREE_CONFIG = {
   /*                                                                    */
   /*   primary: true  → highlighted row, shown with a gradient icon     */
   /*   note           → the small grey line under the address           */
+  /*                                                                    */
+  /* Addresses are split into `user` + `domain` and joined at render     */
+  /* time, so no plain user@domain string sits in the source for a       */
+  /* harvester to regex out. `address: "..."` still works if you would   */
+  /* rather not bother.                                                  */
   emailer: {
     title: "Say hello",
     subtitle: "Tap an address to copy it, or open it in your mail app.",
     addresses: [
       {
         label: "Work",
-        address: "kiarash.smz@gmail.com",
+        user: "kiarash.smz", domain: "gmail.com",
         note: "The one I read first",
         primary: false,
       },
       {
         label: "Work",
-        address: "kiarash.s@hotmail.com",
+        user: "kiarash.s", domain: "hotmail.com",
         note: "Teams, Outlook and Microsoft services",
       },
       {
         label: "Personal",
-        address: "kiarash.sz@icloud.com",
+        user: "kiarash.sz", domain: "icloud.com",
         note: "For Apple services",
       },
       {
         label: "Personal",
-        address: "hello@kiarashs.ir",
+        user: "hello", domain: "kiarashs.ir",
         note: "Anything to do with kiarashs.ir",
       },
     ],
@@ -178,6 +183,23 @@ window.LINKTREE_CONFIG = {
     /*{ label: "WhatsApp", url: "https://wa.me/YOUR-NUMBER", icon: "whatsapp" },*/
     { label: "Email", action: "emails", icon: "mail" },
   ],
+
+  /* ---------------------------------------------------------------- */
+  /* Structured data, so search engines can tie your profiles together.  */
+  /* `sameAs` wants canonical destinations, not redirectors — these are  */
+  /* where the go.kiarashs.ir shortlinks actually land.                  */
+  seo: {
+    url: "https://links.kiarashs.ir/",
+    jobTitle: "Researcher, Senior Software Engineer",
+    sameAs: [
+      "https://github.com/KiarashS",
+      "https://scholar.google.com/citations?hl=en&user=PlzgVJMAAAAJ",
+      "https://linkedin.com/in/thekiarash",
+      "https://twitter.com/ItIsKiarash",
+      "https://www.youtube.com/c/KiarashS",
+      "https://kiarashs.ir/",
+    ],
+  },
 
   /* ---------------------------------------------------------------- */
   footer: {
