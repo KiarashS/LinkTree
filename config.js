@@ -25,11 +25,13 @@ window.LINKTREE_CONFIG = {
 
     // A single string shows as static text. A LIST types itself out one
     // phrase at a time, holds, backspaces and moves to the next, forever.
+    // Each phrase carries its own article, so the vowel-sound cases read
+    // correctly ("an ML/AI Enthusiast", not "a").
     tagline: [
-      "Researcher",
-      "ML/AI Enthusiast",
-      "Senior Software Engineer",
-      "Blogger",
+      "a Researcher",
+      "an ML/AI Enthusiast",
+      "a Senior Software Engineer",
+      "a Blogger",
     ],
     // Any image URL. This one is pulled straight from your GitHub avatar.
     avatar: "avatar.jpg",
@@ -46,7 +48,7 @@ window.LINKTREE_CONFIG = {
   typing: {
     // Static lead-in shown before the typed phrase, in a muted colour.
     // Set to "" for none. Only applies when `tagline` is a list.
-    prefix: "I'm a ",
+    prefix: "I'm ",
     typeSpeed: 90,
     backSpeed: 45,
     holdDelay: 1800,     // pause once a phrase is fully typed
@@ -172,15 +174,13 @@ window.LINKTREE_CONFIG = {
   /* Small round icon buttons under your name. Keep this list short.   */
   socials: [
     { label: "GitHub", url: "https://go.kiarashs.ir/github", icon: "github" },
-    /*{ label: "LinkedIn", url: "https://go.kiarashs.ir/linkedin", icon: "linkedin" },
+    /*{ label: "LinkedIn", url: "https://go.kiarashs.ir/linkedin", icon: "linkedin" },*/
     { label: "X", url: "https://go.kiarashs.ir/twitter", icon: "x" },
-    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },*/
-    // TODO: go.kiarashs.ir/facebook currently redirects to facebook.com with
-    // no profile path — point this at your real page, or delete the row.
-    /*{ label: "Facebook", url: "https://go.kiarashs.ir/facebook", icon: "facebook" },*/
-    // TODO: there is no go.kiarashs.ir/whatsapp shortlink yet. wa.me needs
-    // your number in full international form, digits only, e.g. 447700900123.
-    /*{ label: "WhatsApp", url: "https://wa.me/YOUR-NUMBER", icon: "whatsapp" },*/
+    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },
+    // Facebook and WhatsApp rows removed: the facebook shortlink resolves to
+    // facebook.com with no profile path, and no whatsapp shortlink exists.
+    // The `facebook` and `whatsapp` icons are still in the set when you have
+    // real targets for them.
     { label: "Email", action: "emails", icon: "mail" },
   ],
 

@@ -36,6 +36,7 @@ dependencies, no tracking — just three files you can drop on any static host.
 | `config.js` | **Edit this.** Your name, avatar, links and colours. |
 | `index.html` | Layout, styles and rendering logic. Rarely needs touching. |
 | `avatar.jpg` | Your photo, served from here rather than a third party. |
+| `favicons/` | Tab icon, shared with blog.kiarashs.ir. |
 | `og.jpg` | 1200×630 social preview card. |
 | `CNAME` | Custom domain for GitHub Pages. |
 | `scripts/checks.js` | Optional dev tooling — see [Checks](#checks). |
@@ -125,10 +126,9 @@ phrases share — so `"Blogger"` → `"Blogging"` rewrites just the tail rather
 than retyping the whole word. Order your phrases with that in mind.
 
 `prefix` renders in the muted text colour so the typed phrase stays the
-emphasis, and it only applies when `tagline` is a list. Mind the article: a
-fixed `"I'm a "` reads wrong before a phrase starting with a vowel *sound*
-(`"a ML/AI Enthusiast"` should be `an`). Either word the phrases around it, or
-set `prefix: "I'm "` and put the article in each phrase.
+emphasis, and it only applies when `tagline` is a list. The article lives in
+each phrase rather than the prefix — `"I'm "` plus `"an ML/AI Enthusiast"` —
+because a fixed `"I'm a "` reads wrong before a vowel *sound*.
 
 Two things worth knowing: typed phrases **don't wrap**, because a word hopping
 to a second line mid-keystroke reads as a glitch — so keep them short. And
