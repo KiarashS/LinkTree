@@ -175,8 +175,8 @@ window.LINKTREE_CONFIG = {
   socials: [
     { label: "GitHub", url: "https://go.kiarashs.ir/github", icon: "github" },
     /*{ label: "LinkedIn", url: "https://go.kiarashs.ir/linkedin", icon: "linkedin" },*/
-    { label: "X", url: "https://go.kiarashs.ir/twitter", icon: "x" },
-    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },
+    /*{ label: "X", url: "https://go.kiarashs.ir/twitter", icon: "x" },
+    { label: "YouTube", url: "https://go.kiarashs.ir/youtube", icon: "youtube" },*/
     // Facebook and WhatsApp rows removed: the facebook shortlink resolves to
     // facebook.com with no profile path, and no whatsapp shortlink exists.
     // The `facebook` and `whatsapp` icons are still in the set when you have
