@@ -195,11 +195,11 @@ window.LINKTREE_CONFIG = {
   /* The newest posts, read live from the blog's feed. Atom or RSS both   */
   /* work. Remove `feed` to drop the section. Any failure (feed down,     */
   /* CORS, bad XML) leaves it out silently rather than showing an error.  */
-  blog: {
+  /*blog: {
     feed: "https://blog.kiarashs.ir/feed.xml",
     heading: "Latest writing",
     count: 3,
-  },
+  },*/
 
   /* ---------------------------------------------------------------- */
   /* The QR panel behind the toolbar button. `image` is a file in this   */
