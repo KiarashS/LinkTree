@@ -114,6 +114,13 @@ window.LINKTREE_CONFIG = {
       icon: "docs",
     },
     {
+      label: "Save my contact",
+      description: "Downloads a vCard with my details",
+      // Built from this config at click time — no second copy to maintain.
+      action: "vcard",
+      icon: "contact",
+    },
+    {
       label: "Emails",
       description: "Four inboxes — pick whichever fits",
       // `action: "emails"` opens the email chooser below instead of
@@ -183,6 +190,26 @@ window.LINKTREE_CONFIG = {
     // real targets for them.
     { label: "Email", action: "emails", icon: "mail" },
   ],
+
+  /* ---------------------------------------------------------------- */
+  /* The newest posts, read live from the blog's feed. Atom or RSS both   */
+  /* work. Remove `feed` to drop the section. Any failure (feed down,     */
+  /* CORS, bad XML) leaves it out silently rather than showing an error.  */
+  blog: {
+    feed: "https://blog.kiarashs.ir/feed.xml",
+    heading: "Latest writing",
+    count: 3,
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* The QR panel behind the toolbar button. `image` is a file in this   */
+  /* repo; regenerate it if `url` ever changes.                          */
+  qr: {
+    title: "Scan to open",
+    subtitle: "Point a camera at the code.",
+    image: "qr.svg",
+    url: "https://links.kiarashs.ir/",
+  },
 
   /* ---------------------------------------------------------------- */
   /* Structured data, so search engines can tie your profiles together.  */

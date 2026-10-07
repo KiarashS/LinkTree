@@ -39,8 +39,8 @@
 
   --bg:            #f4f5fb;
   --bg-deep:       #e8eaf6;
-  --surface:       rgba(255, 255, 255, 0.72);
-  --surface-2:     rgba(255, 255, 255, 0.55);
+  --surface:       rgba(255, 255, 255, 0.82);
+  --surface-2:     rgba(255, 255, 255, 0.95);
   --surface-hover: rgba(15, 18, 45, 0.07);   /* hover darkens in light */
   --border:        rgba(15, 18, 45, 0.10);
   --border-strong: rgba(15, 18, 45, 0.18);
@@ -58,9 +58,9 @@
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
      instead of through the text. */
-  --pane:       rgba(255, 255, 255, 0.86);
+  --pane:       rgba(229, 233, 246, 0.84);
   --tip-bg:     rgba(255, 255, 255, 0.52);
-  --modal-bg:   rgba(255, 255, 255, 0.86);
+  --modal-bg:   rgba(229, 233, 246, 0.86);
 
   /* Liquid glass: a transparent, heavily saturated pane with a bright
      specular top edge, dimmer sides, and a soft inner glow. */
@@ -946,6 +946,69 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 
 /* ==================================================================
+   5c. QR panel and latest posts
+   ================================================================== */
+.modal--qr { width: min(100% - 32px, 332px); text-align: center; }
+.modal--qr .modal__body { padding: 20px; justify-items: center; }
+/* The code is dark modules on transparent, so it needs a light tile of its
+   own — on the dark theme it would otherwise disappear into the glass. */
+.qr-tile {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+.qr-tile img { width: 100%; height: auto; display: block; }
+.qr-url {
+  margin: 14px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft);
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
+.posts { margin-top: 22px; display: grid; gap: 10px; }
+.posts__head {
+  margin: 0 2px 2px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.posts ul { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.post {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  background-image:
+    radial-gradient(150% 60px at 22% 0%, var(--spec), transparent 72%),
+    linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
+  box-shadow: inset 0 1px 0 var(--rim-top), inset 0 -1px 0 var(--rim-bottom), var(--shadow-sm);
+  transition: transform .35s var(--spring), background-color .25s, border-color .25s;
+}
+.post:hover { background-color: var(--surface-hover); border-color: var(--border-strong); transform: translateX(3px); }
+.post__title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.post__date { flex: none; font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+@media (max-width: 430px) { .post__date { display: none; } }
+
+/* ==================================================================
    6. Toast
    ================================================================== */
 .toast {
@@ -1108,6 +1171,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
         <line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
       </svg>
     </button>
+    <button class="chip" id="qrbtn" type="button" aria-label="Show QR code" data-tip="QR code">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.6"/>
+        <path d="M14 14h3.2v3.2H14zM20.4 14H21M14 20.4h3.2M20.4 20.4H21M20.4 17.2H21"/>
+      </svg>
+    </button>
     <button class="chip" id="theme" type="button" data-mode="auto">
       <svg class="icon-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
         <circle cx="12" cy="12" r="9"/>
@@ -1150,6 +1220,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   </main>
 
   <dialog class="modal" id="emailer" aria-labelledby="emailer-title">
+    <!-- rendered from config.js -->
+  </dialog>
+
+  <dialog class="modal modal--qr" id="qrbox" aria-labelledby="qrbox-title">
     <!-- rendered from config.js -->
   </dialog>
 
@@ -1206,6 +1280,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       arrow:    ['s', '<path d="M7 17 17 7"/><path d="M8 7h9v9"/>'],
       copy:     ['s', '<rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5.5 15A2.5 2.5 0 0 1 3 12.5v-8A2.5 2.5 0 0 1 5.5 2h8A2.5 2.5 0 0 1 16 4.5"/>'],
       chevron:  ['s', '<path d="m6 9.5 6 6 6-6"/>'],
+      qr:       ['s', '<rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><path d="M14 14h3.2v3.2H14zM20.4 14H21M14 20.4h3.2M20.4 20.4H21M20.4 17.2H21"/>'],
+      contact:  ['s', '<circle cx="12" cy="8.2" r="4"/><path d="M4.6 21a7.4 7.4 0 0 1 14.8 0"/>'],
+      download: ['s', '<path d="M12 3.4v11.4"/><path d="m7.6 10.6 4.4 4.4 4.4-4.4"/><path d="M4.4 19.2h15.2"/>'],
       facebook: ['f', '<path d="M24 12.07C24 5.44 18.63.07 12 .07S0 5.44 0 12.07c0 5.99 4.39 10.95 10.13 11.85v-8.38H7.08v-3.47h3.05V9.43c0-3.01 1.79-4.67 4.53-4.67 1.31 0 2.69.24 2.69.24v2.95h-1.51c-1.49 0-1.96.93-1.96 1.87v2.25h3.33l-.53 3.47h-2.8v8.38C19.61 23.02 24 18.06 24 12.07z"/>'],
       whatsapp: ['s', '<path d="M3.2 20.8l1.35-4.2A8.7 8.7 0 1 1 7.9 19.7z"/><path d="M9.1 9.35c.18-.45.44-.55.72-.55h.55c.2 0 .38.03.56.46l.64 1.5c.09.21.03.4-.09.55l-.4.47c-.12.15-.17.3-.09.47.4.85 1.1 1.55 1.95 1.95.17.08.32.03.47-.09l.47-.4c.15-.12.34-.18.55-.09l1.5.64c.43.18.46.36.46.56v.55c0 .28-.1.54-.55.72-.4.16-.85.2-1.27.12-2.45-.47-4.6-2.62-5.07-5.07-.08-.42-.04-.87.12-1.27z"/>'],
       scholar:  ['f', '<path d="M5.05 13.2L0 9.1 12 0l12 9.1-5.05 4.1C17.72 10.83 15.08 9.2 12 9.2s-5.72 1.63-6.95 4z"/><circle cx="12" cy="17.9" r="6.1"/>'],
@@ -1377,17 +1454,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       html += '<ul class="links">';
       links.forEach(function (l) {
         // A link that opens the email chooser is one button, not a row of anchors.
-        if (l.action === 'emails') {
+        if (l.action === 'emails' || l.action === 'vcard') {
+          var hook = l.action === 'emails' ? 'data-open-emails' : 'data-vcard';
+          var tail = l.action === 'emails' ? 'chevron' : 'download';
           html += '<li class="reveal" ' + delay() + '>' +
             '<button class="link link--action' + (l.featured ? ' link--featured' : '') + '"' +
-              ' type="button" data-open-emails>' +
+              ' type="button" ' + hook + '>' +
               (l.featured ? '<span class="border-glow" aria-hidden="true"></span>' : '') +
               '<span class="link__icon" aria-hidden="true">' + svg(l.icon) + '</span>' +
               '<span class="link__body">' +
                 '<span class="link__label">' + esc(l.label || 'Email') + '</span>' +
                 (l.description ? '<span class="link__desc">' + esc(l.description) + '</span>' : '') +
               '</span>' +
-              '<span class="link__arrow" aria-hidden="true">' + svg('chevron') + '</span>' +
+              '<span class="link__arrow" aria-hidden="true">' + svg(tail) + '</span>' +
             '</button></li>';
           return;
         }
@@ -1597,6 +1676,195 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       setTimeout(type, startDelay);
     })();
 
+    /* ---------------- vCard ----------------
+       Built from the same config the page renders, so there is no second copy
+       of the contact details to keep in sync. The addresses are assembled here
+       from user + domain, so no plain address lands in the source. */
+    document.addEventListener('click', function (event) {
+      if (!event.target.closest('[data-vcard]')) return;
+      event.preventDefault();
+
+      var seo = CFG.seo || {};
+      var addrs = ((CFG.emailer || {}).addresses || []).map(function (m) {
+        return m.address || (m.user && m.domain ? m.user + '@' + m.domain : '');
+      }).filter(Boolean);
+
+      // Escape per RFC 6350: backslash, comma, semicolon, newline.
+      function v(t) {
+        return String(t == null ? '' : t)
+          .replace(/\\/g, '\\\\').replace(/,/g, '\\,')
+          .replace(/;/g, '\\;').replace(/\n/g, '\\n');
+      }
+      var parts = fullName.trim().split(/\s+/);
+      var last = parts.length > 1 ? parts.pop() : '';
+      var first = parts.join(' ');
+
+      var lines = ['BEGIN:VCARD', 'VERSION:3.0',
+                   'FN:' + v(fullName), 'N:' + v(last) + ';' + v(first) + ';;;'];
+      if (seo.jobTitle) lines.push('TITLE:' + v(seo.jobTitle));
+      addrs.forEach(function (a, i) {
+        lines.push('EMAIL;TYPE=INTERNET' + (i === 0 ? ';TYPE=PREF' : '') + ':' + v(a));
+      });
+      if (seo.url) lines.push('URL:' + v(seo.url));
+      (seo.sameAs || []).forEach(function (u) { lines.push('URL:' + v(u)); });
+      if (profile.handle) lines.push('NICKNAME:' + v(profile.handle.replace(/^@/, '')));
+      lines.push('REV:' + new Date().toISOString().replace(/\.\d+Z$/, 'Z'));
+      lines.push('END:VCARD');
+
+      var blob = new Blob([lines.join('\r\n')], { type: 'text/vcard;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fullName.replace(/\s+/g, '-') + '.vcf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      showToast('Contact card downloaded');
+    });
+
+    /* ---------------- Latest posts ----------------
+       Pulled live from the blog's Atom feed. Entirely optional: any failure
+       leaves the section absent rather than showing an error, because this is
+       decoration on a page whose job is the links above it. */
+    (function latestPosts() {
+      var cfg = CFG.blog || {};
+      if (!cfg.feed) return;
+
+      var start = function () { load(); };
+      if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 2500 });
+      else setTimeout(start, 1200);
+
+      function load() {
+      fetch(cfg.feed, { mode: 'cors' })
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+        .then(function (xml) {
+          var doc = new DOMParser().parseFromString(xml, 'application/xml');
+          if (doc.querySelector('parsererror')) throw new Error('bad feed');
+
+          // Atom <entry> or RSS <item>, whichever the feed uses.
+          var nodes = [].slice.call(doc.querySelectorAll('entry, item'));
+          var items = nodes.map(function (n) {
+            var linkEl = n.querySelector('link[href]');
+            var href = linkEl ? linkEl.getAttribute('href')
+                              : (n.querySelector('link') || {}).textContent;
+            // Published, not updated: an old post that got a typo fix last week
+            // should not jump to the top of "latest". RSS only has pubDate, and
+            // some Atom feeds omit published, so fall back to updated.
+            var dateEl = n.querySelector('published, pubDate') || n.querySelector('updated');
+            var when = dateEl ? dateEl.textContent : '';
+            return {
+              title: (n.querySelector('title') || {}).textContent || '',
+              href: href || '',
+              date: when ? new Date(when) : null
+            };
+          }).filter(function (i) { return i.title && safeUrl(i.href) !== '#'; });
+
+          // Feed order is not reliably newest-first, so sort it.
+          items.sort(function (a, b) { return (b.date || 0) - (a.date || 0); });
+          items = items.slice(0, num(cfg.count, 3));
+          if (!items.length) return;
+
+          var fmt = new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric' });
+          var html = '<h2 class="posts__head">' + esc(cfg.heading || 'Latest writing') + '</h2><ul>';
+          items.forEach(function (i) {
+            html += '<li><a class="post" href="' + esc(safeUrl(i.href)) + '"' +
+                    ' target="_blank" rel="noopener noreferrer">' +
+                      '<span class="post__title">' + esc(i.title) + '</span>' +
+                      (i.date && !isNaN(i.date) ?
+                        '<span class="post__date">' + esc(fmt.format(i.date)) + '</span>' : '') +
+                    '</a></li>';
+          });
+          html += '</ul>';
+
+          var section = document.createElement('section');
+          section.className = 'posts reveal';
+          section.innerHTML = html;
+          var foot = card.querySelector('.foot');
+          foot ? card.insertBefore(section, foot) : card.appendChild(section);
+        })
+        .catch(function () { /* feed down or blocked: show nothing */ });
+      }
+    })();
+
+    /* ---------------- Dialogs ----------------
+       One set of open/close/dismiss helpers, shared by the email chooser and
+       the QR panel, so both animate out the same way and neither can be left
+       stuck open. */
+    function openDialog(d) {
+      if (!d || typeof d.showModal !== 'function') return;   // very old browsers
+      d.classList.remove('is-closing');
+      d.showModal();
+    }
+
+    function closeDialog(d) {
+      if (!d || !d.open) return;
+      if (calm) { d.close(); return; }
+      d.classList.add('is-closing');
+
+      // Close on whichever comes first: the exit animation ending, or a timer.
+      // Animations don't run in a backgrounded tab, so waiting on animationend
+      // alone can leave a dialog stuck open.
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        clearTimeout(guard);
+        d.removeEventListener('animationend', onEnd);
+        d.close();
+        d.classList.remove('is-closing');
+      }
+      function onEnd(event) {
+        if (event.target !== d) return;                 // ignore child animations
+        finish();
+      }
+      var guard = setTimeout(finish, 400);
+      d.addEventListener('animationend', onEnd);
+    }
+
+    function wireDismiss(d) {
+      // Esc: animate out instead of the instant native close.
+      d.addEventListener('cancel', function (event) { event.preventDefault(); closeDialog(d); });
+      // A click on the backdrop is a click on the dialog element itself.
+      d.addEventListener('click', function (event) {
+        if (event.target !== d) return;
+        var r = d.getBoundingClientRect();
+        var inside = event.clientX >= r.left && event.clientX <= r.right &&
+                     event.clientY >= r.top  && event.clientY <= r.bottom;
+        if (!inside) closeDialog(d);
+      });
+    }
+
+    /* ---------------- QR panel ---------------- */
+    (function qrPanel() {
+      var box = document.getElementById('qrbox');
+      var btn = document.getElementById('qrbtn');
+      var qr = CFG.qr || {};
+      if (!box || !btn) return;
+      if (qr.enabled === false) { btn.remove(); box.remove(); return; }
+
+      var url = qr.url || (CFG.seo && CFG.seo.url) || location.href;
+      box.innerHTML =
+        '<div class="modal__head">' +
+          '<span class="modal__stamp" aria-hidden="true">' + svg('qr') + '</span>' +
+          '<div class="modal__titles">' +
+            '<h2 class="modal__title" id="qrbox-title">' + esc(qr.title || 'Scan to open') + '</h2>' +
+            '<p class="modal__sub">' + esc(qr.subtitle || 'Point a camera at the code.') + '</p>' +
+          '</div>' +
+          '<button class="modal__close" type="button" data-close-qr aria-label="Close" data-tip="Close">' +
+            svg('close') + '</button>' +
+        '</div>' +
+        '<div class="modal__body">' +
+          '<div class="qr-tile"><img src="' + esc(qr.image || 'qr.svg') + '" alt="QR code for ' + esc(url) + '" /></div>' +
+          '<p class="qr-url">' + esc(url.replace(/^https?:\/\//, '').replace(/\/$/, '')) + '</p>' +
+        '</div>';
+
+      btn.addEventListener('click', function () { openDialog(box); });
+      box.addEventListener('click', function (e) {
+        if (e.target.closest('[data-close-qr]')) closeDialog(box);
+      });
+      wireDismiss(box);
+    })();
+
     /* ---------------- Email chooser ---------------- */
     var dlg = document.getElementById('emailer');
     var mailer = CFG.emailer || {};
@@ -1637,52 +1905,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     modalHtml += '</div>';
     dlg.innerHTML = modalHtml;
 
-    function openEmailer() {
-      if (typeof dlg.showModal !== 'function') return;   // very old browsers
-      dlg.classList.remove('is-closing');
-      dlg.showModal();
-    }
-    function closeEmailer() {
-      if (!dlg.open) return;
-      if (calm) { dlg.close(); return; }
-      dlg.classList.add('is-closing');
-
-      // Close on whichever comes first: the exit animation ending, or a
-      // timer. Animations don't run in a backgrounded tab, so waiting on
-      // animationend alone can leave the popup stuck open.
-      var done = false;
-      function finish() {
-        if (done) return;
-        done = true;
-        clearTimeout(guard);
-        dlg.removeEventListener('animationend', onEnd);
-        dlg.close();
-        dlg.classList.remove('is-closing');
-      }
-      function onEnd(event) {
-        if (event.target !== dlg) return;               // ignore child animations
-        finish();
-      }
-      var guard = setTimeout(finish, 400);
-      dlg.addEventListener('animationend', onEnd);
-    }
+    function openEmailer() { openDialog(dlg); }
+    function closeEmailer() { closeDialog(dlg); }
 
     document.addEventListener('click', function (event) {
       if (event.target.closest('[data-open-emails]')) { event.preventDefault(); openEmailer(); }
       else if (event.target.closest('[data-close-emails]')) closeEmailer();
     });
-
-    // Esc: animate out instead of the instant native close.
-    dlg.addEventListener('cancel', function (event) { event.preventDefault(); closeEmailer(); });
-
-    // Click on the backdrop (the dialog element itself) closes it.
-    dlg.addEventListener('click', function (event) {
-      if (event.target !== dlg) return;
-      var r = dlg.getBoundingClientRect();
-      var inside = event.clientX >= r.left && event.clientX <= r.right &&
-                   event.clientY >= r.top  && event.clientY <= r.bottom;
-      if (!inside) closeEmailer();
-    });
+    wireDismiss(dlg);
 
     /* ---------------- Structured data ----------------
        Emitted from config rather than hand-maintained in the head, so the

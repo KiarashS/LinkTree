@@ -22,6 +22,10 @@ dependencies, no tracking — just three files you can drop on any static host.
   Dark, so a visitor can always hand control back
 - **Email chooser popup** — one row opens a glass modal listing every address
   (personal, work, press…), each with copy and compose buttons
+- **Latest posts** read live from your blog's Atom/RSS feed, newest first
+- **QR panel** behind a toolbar button, for handing the page over in person
+- **vCard download** built from the same config, so there's no second copy of
+  your details to keep in sync
 - **Glass tooltips** replacing the browser's `title=` popup, with the macOS
   timing: a delay before the first, instant while you keep moving
 - **Copy-to-clipboard** buttons with a toast
@@ -38,6 +42,7 @@ dependencies, no tracking — just three files you can drop on any static host.
 | `avatar.jpg` | Your photo, served from here rather than a third party. |
 | `favicons/` | Tab icon, shared with blog.kiarashs.ir. |
 | `og.jpg` | 1200×630 social preview card. |
+| `qr.svg` | QR code for the site, shown in the toolbar's QR panel. |
 | `CNAME` | Custom domain for GitHub Pages. |
 | `scripts/checks.js` | Optional dev tooling — see [Checks](#checks). |
 | `README.md` | This file. |
@@ -177,6 +182,72 @@ opens the visitor's mail app. The popup closes on Esc, on a backdrop click,
 or via the close button, and returns focus to whatever opened it. Add as many
 or as few addresses as you like — a single one works fine.
 
+### Latest posts from your blog
+
+Point `blog.feed` at an Atom or RSS feed and the page lists your newest posts
+under the links:
+
+```js
+blog: {
+  feed: "https://blog.kiarashs.ir/feed.xml",
+  heading: "Latest writing",
+  count: 3,
+}
+```
+
+Three details worth knowing:
+
+- Posts are sorted by **published** date, not last-modified. Fixing a typo in
+  a 2020 post shouldn't push it back to the top of "latest". RSS only carries
+  `pubDate`, and some Atom feeds omit `published`, so `updated` is the
+  fallback rather than the first choice.
+- The fetch is **deferred to idle** (`requestIdleCallback`, 2.5s timeout) so a
+  slow feed can't hold up first paint. The section appears when it arrives.
+- Any failure — feed down, no CORS header, malformed XML — leaves the section
+  **absent**, silently. There's no error state to design around, and nothing
+  shifts once the page has settled. Your feed does need to allow
+  cross-origin reads (`access-control-allow-origin`), which most static hosts
+  send for free; if yours doesn't, drop `feed` and the section goes away.
+
+Remove the `blog` block entirely to turn the feature off.
+
+### QR code
+
+The toolbar's QR button opens a panel with `qr.image` in it — useful when
+someone's standing in front of you:
+
+```js
+qr: {
+  title: "Scan to open",
+  subtitle: "Point a camera at the code.",
+  image: "qr.svg",
+  url: "https://links.kiarashs.ir/",
+}
+```
+
+`url` is the address the code encodes. It isn't read at runtime — the image is
+a static file — so **regenerate `qr.svg` whenever the URL changes**; `url` is
+there to record what the shipped image actually points at. Any QR generator
+will do, at medium error correction or better.
+
+The code is drawn dark-on-white on its own white tile regardless of theme.
+Letting it go transparent over dark glass would look better and scan worse,
+and a code that doesn't scan has no reason to exist.
+
+### vCard
+
+A link with `action: "vcard"` builds a contact card from the config you've
+already written and downloads it:
+
+```js
+{ label: "Save my contact", description: "Downloads a vCard with my details", action: "vcard", icon: "contact" }
+```
+
+Name, job title, every address in `emailer`, your site and the `sameAs`
+profiles all come from the existing blocks, so there's no separate `.vcf` to
+keep up to date. It's vCard 3.0, which is what Contacts on iOS/macOS,
+Android and Outlook all read without complaint.
+
 ### Changing the colours
 
 Everything is driven by two accent colours in `config.js`:
@@ -237,15 +308,22 @@ filename matter.
 `scripts/checks.js` guards the things that are easy to break by editing
 `config.js` and hard to spot by eye: text contrast in both themes, overflow at
 four widths, placeholder URLs left behind, plain email addresses leaking into
-the source, the popup opening, and the JSON-LD parsing.
+the source, the popup opening, the no-JS fallback still reaching a link, feed
+ordering, and the JSON-LD parsing.
 
 ```bash
 npm i -D playwright pngjs && npx playwright install chromium
 node scripts/checks.js
 ```
 
-It exits non-zero on failure, so CI can use it unchanged. The site itself
-stays dependency-free; nothing here ships to visitors.
+Set `CHROMIUM_PATH` to use a browser you already have instead of Playwright's
+own download.
+
+The feed test runs against a **stub**, so the suite passes offline and a feed
+outage can't turn CI red — console errors coming from the feed host are
+ignored for the same reason. It exits non-zero on failure, so CI can use it
+unchanged. The site itself stays dependency-free; nothing here ships to
+visitors.
 
 ## Deploying to GitHub Pages
 

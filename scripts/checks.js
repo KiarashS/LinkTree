@@ -13,6 +13,7 @@
 
 const { chromium } = require('playwright');
 const path = require('path');
+const fs = require('fs');
 
 const PAGE = 'file://' + path.resolve(__dirname, '..', 'index.html');
 const WIDTHS = [320, 390, 430, 900];
@@ -35,7 +36,10 @@ const contrast = (a, b) => {
 };
 
 (async () => {
-  const browser = await chromium.launch();
+  /* CHROMIUM_PATH lets you point at a browser you already have rather than
+     letting Playwright download its own — handy in a sandbox or on CI. */
+  const browser = await chromium.launch(
+    process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 
   /* ---- 1. Text stays legible in both themes ----------------------
      Sampled from a screenshot rather than computed from CSS: the rows
@@ -96,9 +100,27 @@ const contrast = (a, b) => {
   /* ---- 3. Links are real, and the page is quiet ---- */
   console.log('\ncontent');
   const page = await browser.newPage({ viewport: { width: 900, height: 1400 } });
+  /* The blog feed is optional by design — the section just stays absent if it
+     fails — so a feed outage must not fail this run. Everything else counts. */
+  const cfgSrc = fs.readFileSync(path.resolve(__dirname, '..', 'config.js'), 'utf8');
+  const feedMatch = cfgSrc.match(/feed:\s*["']([^"']+)["']/);
+  const feedHost = feedMatch ? new URL(feedMatch[1]).host : null;
+  /* A failed fetch reports the host in the message sometimes and only in the
+     console location others ("Failed to load resource: net::ERR_…"), so check
+     both before deciding a message is ours. */
+  const external = (m) => {
+    if (!feedHost) return false;
+    const where = (m.location && m.location() && m.location().url) || '';
+    return m.text().includes(feedHost) || where.includes(feedHost);
+  };
+
   const noise = [];
   page.on('pageerror', (e) => noise.push('pageerror: ' + e.message));
-  page.on('console', (m) => { if (m.type() === 'error') noise.push('console: ' + m.text()); });
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return;
+    if (external(m)) return;                     // feed unreachable: tolerated
+    noise.push('console: ' + m.text());
+  });
   await page.goto(PAGE);
   await page.waitForTimeout(2200);
 
@@ -114,7 +136,6 @@ const contrast = (a, b) => {
   if (!hrefs.some(({ href }) => PLACEHOLDERS.some((re) => re.test(href)))) ok('no placeholder URLs');
 
   /* No plain address in the served source — the anti-harvesting split. */
-  const fs = require('fs');
   const sources = ['config.js', 'index.html']
     .map((f) => fs.readFileSync(path.resolve(__dirname, '..', f), 'utf8')).join('\n');
   const leaked = sources.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || [];
@@ -143,6 +164,38 @@ const contrast = (a, b) => {
   fbLinks > 0 ? ok(`no-JS fallback offers ${fbLinks} link${fbLinks === 1 ? '' : 's'}`)
               : bad('no-JS fallback has no links — the page is blank without JavaScript');
   await fb.close();
+
+  /* Feed parsing, against a stub: newest-by-published first, count respected.
+     The live feed is not used here — this must pass offline. */
+  if (feedMatch) {
+    const stub = `<?xml version="1.0" encoding="utf-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+        <entry><title>Older but edited yesterday</title>
+          <link href="https://example.com/a"/>
+          <published>2020-01-01T00:00:00Z</published><updated>2030-01-01T00:00:00Z</updated></entry>
+        <entry><title>Newest post</title>
+          <link href="https://example.com/b"/>
+          <published>2026-05-05T00:00:00Z</published><updated>2026-05-05T00:00:00Z</updated></entry>
+        <entry><title>Middle post</title>
+          <link href="https://example.com/c"/>
+          <published>2023-03-03T00:00:00Z</published><updated>2023-03-03T00:00:00Z</updated></entry>
+      </feed>`;
+    const fp = await browser.newPage({ viewport: { width: 900, height: 1700 } });
+    await fp.route('**/feed*', (r) => r.fulfill({
+      body: stub, contentType: 'application/xml',
+      headers: { 'access-control-allow-origin': '*' } }));
+    await fp.goto(PAGE);
+    await fp.waitForTimeout(3000);
+    const titles = await fp.evaluate(() =>
+      [...document.querySelectorAll('.post__title')].map((e) => e.textContent));
+    titles.length
+      ? ok(`feed renders ${titles.length} posts`)
+      : bad('feed parsed to nothing');
+    titles[0] === 'Newest post'
+      ? ok('posts ordered by published date, not last edit')
+      : bad(`newest post should lead, got "${titles[0]}"`);
+    await fp.close();
+  }
 
   /* Structured data is present and parses. */
   const ld = await page.evaluate(() => {
