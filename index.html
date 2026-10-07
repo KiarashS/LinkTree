@@ -1766,8 +1766,23 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       addrs.forEach(function (a, i) {
         lines.push('EMAIL;TYPE=INTERNET' + (i === 0 ? ';TYPE=PREF' : '') + ':' + v(a));
       });
-      if (seo.url) lines.push('URL:' + v(seo.url));
-      (seo.sameAs || []).forEach(function (u) { lines.push('URL:' + v(u)); });
+      // Only what the page is actually offering right now. seo.sameAs is a
+      // search-engine signal and deliberately lists canonical profiles whether
+      // or not the page links to them, so taking the URLs from there put dead
+      // rows — a commented-out LinkedIn, X, YouTube — into people's address
+      // books. These come from the links and socials as rendered instead, so
+      // commenting a row out of config.js drops it from the card too.
+      var urls = [];
+      function addUrl(raw) {
+        var u = safeUrl(raw);
+        if (!isExternal(u) || urls.indexOf(u) !== -1) return;
+        urls.push(u);
+      }
+      if (seo.url) addUrl(seo.url);
+      [].concat(CFG.links || [], CFG.socials || []).forEach(function (l) {
+        if (l && l.url) addUrl(l.url);        // action rows carry no url
+      });
+      urls.forEach(function (u) { lines.push('URL:' + v(u)); });
       if (profile.handle) lines.push('NICKNAME:' + v(profile.handle.replace(/^@/, '')));
       lines.push('REV:' + new Date().toISOString().replace(/\.\d+Z$/, 'Z'));
       lines.push('END:VCARD');

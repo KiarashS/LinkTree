@@ -14,6 +14,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const PAGE = 'file://' + path.resolve(__dirname, '..', 'index.html');
 const WIDTHS = [320, 390, 430, 900];
@@ -171,6 +172,46 @@ const contrast = (a, b) => {
   });
   rows > 0 ? ok(`email popup lists ${rows} address${rows === 1 ? '' : 'es'}`)
            : bad('email popup did not open');
+
+  /* The vCard may only carry destinations the page is actually offering.
+     It used to be built from seo.sameAs, which lists canonical profiles
+     whether or not they are linked — so commenting a row out of config.js
+     left it in people's address books. */
+  if (await page.locator('[data-vcard]').count()) {
+    const vctx = await browser.newContext({ acceptDownloads: true, viewport: { width: 900, height: 1400 } });
+    const vp = await vctx.newPage();
+    await vp.goto(PAGE);
+    await vp.waitForTimeout(2200);
+    const [dl] = await Promise.all([
+      vp.waitForEvent('download'),
+      vp.click('[data-vcard]'),
+    ]);
+    const file = path.join(os.tmpdir(), 'checks-contact.vcf');
+    await dl.saveAs(file);
+    const card = fs.readFileSync(file, 'utf8');
+    fs.unlinkSync(file);
+
+    /* Everything the page links to, plus its own canonical URL. */
+    const offered = new Set(await vp.evaluate(() => {
+      const u = [...document.querySelectorAll('.link__body[href], .social[href]')]
+        .map((a) => a.getAttribute('href'));
+      const seo = (window.LINKTREE_CONFIG || {}).seo || {};
+      if (seo.url) u.push(seo.url);
+      return u;
+    }));
+    const carried = (card.match(/^URL:(.*)$/gm) || []).map((l) => l.slice(4).trim());
+    const stray = carried.filter((u) => !offered.has(u));
+
+    carried.length ? ok(`vCard carries ${carried.length} URLs`) : bad('vCard carries no URLs');
+    stray.length
+      ? bad(`vCard offers links the page does not: ${stray.join(', ')}`)
+      : ok('every vCard URL is a link the page actually offers');
+    /* CRLF is not cosmetic — some address books reject LF-only cards. */
+    /\r\n/.test(card) && !/[^\r]\n/.test(card)
+      ? ok('vCard uses CRLF line endings')
+      : bad('vCard has bare LF line endings');
+    await vctx.close();
+  }
 
   /* The page renders from JS, so the no-JS path must still reach a link. */
   const fb = await browser.newContext({ javaScriptEnabled: false });

@@ -247,10 +247,22 @@ already written and downloads it:
 { label: "Save my contact", description: "Downloads a vCard with my details", action: "vcard", icon: "contact" }
 ```
 
-Name, job title, every address in `emailer`, your site and the `sameAs`
-profiles all come from the existing blocks, so there's no separate `.vcf` to
-keep up to date. It's vCard 3.0, which is what Contacts on iOS/macOS,
-Android and Outlook all read without complaint.
+Name, job title, every address in `emailer`, and the URL of every link and
+social on the page all come from the existing blocks, so there's no separate
+`.vcf` to keep up to date. It's vCard 3.0, which is what Contacts on
+iOS/macOS, Android and Outlook all read without complaint.
+
+The URLs come from `links` and `socials` — **not** from `seo.sameAs`.
+`sameAs` is a search-engine signal and deliberately lists canonical profiles
+whether or not the page links to them, so building the card from it put rows
+you'd commented out into people's address books. Comment a link out of
+`config.js` and it leaves the card too.
+
+One consequence: the card carries your links exactly as written, so a
+`go.kiarashs.ir/…` shortlink goes in as the shortlink. That's the same URL a
+visitor would get by tapping the row. If you'd rather a contact stored the
+canonical destination, put the canonical URL on the link itself — `sameAs`
+won't do it for you.
 
 ### Changing the colours
 
@@ -335,8 +347,9 @@ filename matter.
 `scripts/checks.js` guards the things that are easy to break by editing
 `config.js` and hard to spot by eye: text contrast in both themes, overflow at
 four widths, placeholder URLs left behind, plain email addresses leaking into
-the source, the popup opening, the no-JS fallback still reaching a link, feed
-ordering, and the JSON-LD parsing.
+the source, the popup opening, the vCard offering only links the page really
+has, the no-JS fallback still reaching a link, feed ordering, and the JSON-LD
+parsing.
 
 The contrast check measures **rendered pixels**, not computed CSS: the rows
 are translucent over a wash, so the number that matters is the colour painted
