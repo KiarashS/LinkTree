@@ -119,29 +119,28 @@ const contrast = (a, b) => {
   /* ---- 3. Links are real, and the page is quiet ---- */
   console.log('\ncontent');
   const page = await browser.newPage({ viewport: { width: 900, height: 1400 } });
-  /* The blog feed is optional by design — the section just stays absent if it
-     fails — so a feed outage must not fail this run. Everything else counts. */
-  const cfgSrc = fs.readFileSync(path.resolve(__dirname, '..', 'config.js'), 'utf8');
-  const feedMatch = cfgSrc.match(/feed:\s*["']([^"']+)["']/);
-  const feedHost = feedMatch ? new URL(feedMatch[1]).host : null;
-  /* A failed fetch reports the host in the message sometimes and only in the
-     console location others ("Failed to load resource: net::ERR_…"), so check
-     both before deciding a message is ours. */
-  const external = (m) => {
-    if (!feedHost) return false;
-    const where = (m.location && m.location() && m.location().url) || '';
-    return m.text().includes(feedHost) || where.includes(feedHost);
-  };
-
+  /* Console errors are buffered with where they came from, and filtered once
+     the page has told us which feed is live — reading config.js as text would
+     match a commented-out block, which is exactly how you turn the section
+     off. The parsed config is the only honest answer. */
   const noise = [];
-  page.on('pageerror', (e) => noise.push('pageerror: ' + e.message));
+  page.on('pageerror', (e) => noise.push({ text: 'pageerror: ' + e.message, from: '' }));
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
-    if (external(m)) return;                     // feed unreachable: tolerated
-    noise.push('console: ' + m.text());
+    const where = (m.location && m.location() && m.location().url) || '';
+    noise.push({ text: 'console: ' + m.text(), from: where });
   });
   await page.goto(PAGE);
   await page.waitForTimeout(2200);
+
+  const feed = await page.evaluate(() => ((window.LINKTREE_CONFIG || {}).blog || {}).feed || null);
+  const feedHost = feed ? new URL(feed).host : null;
+  /* The blog feed is optional by design — the section just stays absent if it
+     fails — so a feed outage must not fail this run. A failed fetch names the
+     host in the message sometimes and only in the console location others
+     ("Failed to load resource: net::ERR_…"), so check both. */
+  const fromFeed = (n) =>
+    feedHost && (n.text.includes(feedHost) || n.from.includes(feedHost));
 
   const hrefs = await page.evaluate(() =>
     [...document.querySelectorAll('.link__body[href], .social[href]')]
@@ -225,8 +224,9 @@ const contrast = (a, b) => {
   await fb.close();
 
   /* Feed parsing, against a stub: newest-by-published first, count respected.
-     The live feed is not used here — this must pass offline. */
-  if (feedMatch) {
+     The live feed is not used here — this must pass offline. Skipped when the
+     blog block is absent or commented out, which is how you turn it off. */
+  if (feed) {
     const stub = `<?xml version="1.0" encoding="utf-8"?>
       <feed xmlns="http://www.w3.org/2005/Atom">
         <entry><title>Older but edited yesterday</title>
@@ -267,7 +267,9 @@ const contrast = (a, b) => {
                           : bad('JSON-LD present but has no name');
   } catch (e) { bad('JSON-LD missing or not valid JSON'); }
 
-  noise.length ? bad('console/page errors: ' + noise.join(' | ')) : ok('no console or page errors');
+  const ours = noise.filter((n) => !fromFeed(n));
+  ours.length ? bad('console/page errors: ' + ours.map((n) => n.text).join(' | '))
+              : ok('no console or page errors');
   await page.close();
 
   await browser.close();
