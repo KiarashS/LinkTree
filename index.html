@@ -39,14 +39,16 @@
 
   --bg:            #f4f5fb;
   --bg-deep:       #e8eaf6;
-  --surface:       rgba(255, 255, 255, 0.82);
-  --surface-2:     rgba(255, 255, 255, 0.95);
+  --surface:       rgba(255, 255, 255, 0.72);
+  /* Rows have to be thin enough to show the card's interior texture, or the
+     glass reads as white paint. 0.95 was opaque in practice. */
+  --surface-2:     rgba(255, 255, 255, 0.50);
   --surface-hover: rgba(15, 18, 45, 0.07);   /* hover darkens in light */
   --border:        rgba(15, 18, 45, 0.10);
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
   --text-soft:     #4d5170;
-  --text-faint:    #6a6f8f;   /* 4.9:1 on the light pane; #7c81a3 was 3.8 */
+  --text-faint:    #5e6386;   /* secondary ink; see the contrast check */
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
   --sheen:         rgba(255, 255, 255, 0.85);
@@ -54,6 +56,9 @@
   --grain-opacity: 0.035;
   --texture-opacity: 0.06;
   --texture-filter: invert(1);
+  /* Texture *inside* the card, behind the rows — see .card__field. */
+  --field-opacity:  0.55;
+  --field-noise:    0.5;
 
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
@@ -108,7 +113,7 @@
     --border-strong: rgba(255, 255, 255, 0.16);
     --text:          #f2f3fb;
     --text-soft:     #b5b9d4;
-    --text-faint:    #7f849f;
+    --text-faint:    #9499b5;
     --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
     --shadow-lg:     0 18px 60px rgba(0, 0, 0, 0.55);
     --sheen:         rgba(255, 255, 255, 0.14);
@@ -116,6 +121,8 @@
     --grain-opacity: 0.05;
     --texture-opacity: 0.14;
     --texture-filter:  none;
+    --field-opacity:   0.30;
+    --field-noise:     0.65;
     --pane:          rgba(17, 18, 28, 0.88);
     --tip-bg:        rgba(26, 27, 41, 0.46);
     --modal-bg:      rgba(17, 18, 28, 0.88);
@@ -144,7 +151,7 @@
   --border-strong: rgba(255, 255, 255, 0.16);
   --text:          #f2f3fb;
   --text-soft:     #b5b9d4;
-  --text-faint:    #7f849f;
+  --text-faint:    #9499b5;
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
   --shadow-lg:     0 18px 60px rgba(0, 0, 0, 0.55);
   --sheen:         rgba(255, 255, 255, 0.14);
@@ -152,6 +159,8 @@
   --grain-opacity: 0.05;
   --texture-opacity: 0.14;
   --texture-filter:  none;
+  --field-opacity:   0.30;
+  --field-noise:     0.65;
   --pane:          rgba(17, 18, 28, 0.88);
   --tip-bg:        rgba(26, 27, 41, 0.46);
   --modal-bg:      rgba(17, 18, 28, 0.88);
@@ -400,6 +409,41 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 .card:hover::before { opacity: 1; }
 
+/* The card's interior, painted behind the rows.
+   A sheet of glass only looks like glass when something uneven shows
+   through it — and the rows sit on the card, not on the page, so the
+   page's own texture never reaches them: --pane occludes it by design,
+   and a backdrop-filter on a row is a no-op (see §2b). The structure
+   therefore has to live here, between the pane and the rows.
+   Two slow accent washes give a luminance gradient across the card, so
+   rows at different heights sit on different tones; the noise adds
+   mid-frequency mottle at ~70px, the scale that survives being seen
+   through a translucent fill. Both stay behind every row and every
+   label, so this costs nothing in legibility. */
+.card__field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;                /* above the pane fill, below the content */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: var(--field-opacity);
+  background-image:
+    radial-gradient(95% 60% at 10% 4%,
+      color-mix(in srgb, var(--accent-from) 46%, transparent), transparent 72%),
+    radial-gradient(85% 65% at 94% 74%,
+      color-mix(in srgb, var(--accent-to) 42%, transparent), transparent 74%);
+}
+.card__field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--field-noise);
+  filter: var(--texture-filter, none);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='c' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.065' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.58'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23c)'/%3E%3C/svg%3E");
+  background-size: 360px 360px;
+}
+
 /* ---------- Profile ---------- */
 .profile { text-align: center; display: grid; gap: 10px; justify-items: center; }
 
@@ -490,7 +534,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   margin: 0;
   font-size: 14.5px;
   font-weight: 500;
-  color: var(--text-faint);
+  /* One step up from the muted ink: the handle sits straight on the card,
+     where the accent wash is strongest, and it is identity rather than
+     description — it should not be the faintest thing on the page. */
+  color: var(--text-soft);
   font-feature-settings: "tnum";
 }
 .tagline {
@@ -1006,7 +1053,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   white-space: nowrap;
 }
 .post__date { flex: none; font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
-@media (max-width: 430px) { .post__date { display: none; } }
+/* Too narrow for title and date on one line, so stack them rather than drop
+   the date — and let the title use the two lines it now has room for. */
+@media (max-width: 430px) {
+  .post { display: grid; gap: 1px; }
+  .post__title {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .post__date { font-size: 11.5px; }
+}
 
 /* ==================================================================
    6. Toast
@@ -1506,7 +1565,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     '</footer>';
 
     var card = document.getElementById('card');
-    card.innerHTML = html;
+    // The interior texture goes in first so it paints behind everything the
+    // card holds, including the sections appended later.
+    card.innerHTML = '<div class="card__field" aria-hidden="true"></div>' + html;
 
     if (profile.name) document.title = profile.name + ' — Links';
 
@@ -1764,14 +1825,18 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           items = items.slice(0, num(cfg.count, 3));
           if (!items.length) return;
 
-          var fmt = new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric' });
+          // The visitor's own locale decides the order — "16 Feb 2026" or
+          // "Feb 16, 2026" — and the <time datetime> carries the ISO form for
+          // anything reading the page rather than looking at it.
+          var fmt = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
           var html = '<h2 class="posts__head">' + esc(cfg.heading || 'Latest writing') + '</h2><ul>';
           items.forEach(function (i) {
             html += '<li><a class="post" href="' + esc(safeUrl(i.href)) + '"' +
                     ' target="_blank" rel="noopener noreferrer">' +
                       '<span class="post__title">' + esc(i.title) + '</span>' +
                       (i.date && !isNaN(i.date) ?
-                        '<span class="post__date">' + esc(fmt.format(i.date)) + '</span>' : '') +
+                        '<time class="post__date" datetime="' + esc(i.date.toISOString().slice(0, 10)) + '">' +
+                          esc(fmt.format(i.date)) + '</time>' : '') +
                     '</a></li>';
           });
           html += '</ul>';

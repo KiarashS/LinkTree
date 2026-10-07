@@ -197,6 +197,10 @@ blog: {
 
 Three details worth knowing:
 
+- Each post shows its publication day, formatted in the **visitor's** locale —
+  "16 Feb 2026" or "Feb 16, 2026" — with the ISO date in a `<time datetime>`
+  for anything reading the page rather than looking at it. Below 430px the
+  date moves under the title instead of disappearing.
 - Posts are sorted by **published** date, not last-modified. Fixing a typo in
   a 2020 post shouldn't push it back to the top of "latest". RSS only carries
   `pubDate`, and some Atom feeds omit `published`, so `updated` is the
@@ -273,6 +277,29 @@ strong the drifting colour is. Lowering `--pane`'s alpha or raising
 `--blob-opacity` makes the page more atmospheric and less readable; the
 shipped values keep every row above 4.5:1 in both themes.
 
+### Why the rows look like glass
+
+A pane only reads as glass when something uneven shows through it, and the
+link rows sit on the **card**, not on the page — so the page's own texture
+never reaches them. `--pane` occludes it on purpose, and a `backdrop-filter`
+on a row is a no-op, because an ancestor that already has one is a *backdrop
+root*: the row would be blurring the card's flat fill. Measured, it changed 0
+of 378,000 pixels.
+
+So the structure lives inside the card instead, as `.card__field`: two slow
+accent washes that give the interior a luminance gradient, plus mid-frequency
+noise at ~70px — the scale that survives being seen through a translucent
+fill, where film grain just averages to a flat tone. `--field-opacity` sets
+how strong it is and `--field-noise` the mottle within it. The rows are then
+thin enough (`--surface-2`) to let it through, which is what makes them read
+as frosted panes rather than white paint.
+
+Both tokens trade directly against legibility, and not evenly across the
+card: a wash peaking under the last row costs that row far more than the
+others. `scripts/checks.js` measures the colour each piece of muted text
+actually sits on — it hides the ink and samples the pixel underneath — in
+both themes, so raising either value will tell you when you've gone too far.
+
 A few accent combinations that work well:
 
 | Look | `accentFrom` → `accentTo` |
@@ -310,6 +337,12 @@ filename matter.
 four widths, placeholder URLs left behind, plain email addresses leaking into
 the source, the popup opening, the no-JS fallback still reaching a link, feed
 ordering, and the JSON-LD parsing.
+
+The contrast check measures **rendered pixels**, not computed CSS: the rows
+are translucent over a wash, so the number that matters is the colour painted
+behind the glyphs. It hides the ink, screenshots, and samples where the text
+was — decorative glyphs (`aria-hidden`) are left out, since a contrast floor
+is about text people have to read.
 
 ```bash
 npm i -D playwright pngjs && npx playwright install chromium

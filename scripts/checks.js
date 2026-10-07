@@ -18,6 +18,12 @@ const fs = require('fs');
 const PAGE = 'file://' + path.resolve(__dirname, '..', 'index.html');
 const WIDTHS = [320, 390, 430, 900];
 const MIN_CONTRAST = 4.5;          // WCAG AA for normal-size text
+/* Everything painted in the muted ink. They sit on different surfaces — a
+   link row, a post row, the card itself — so each needs its own reading. */
+/* aria-hidden ones are decoration — the separator dots and the footer heart —
+   and a contrast floor is about text people have to read. */
+const SECONDARY = ['.link__desc', '.handle', '.post__date', '.posts__head', '.foot span']
+  .map((s) => s + ':not([aria-hidden="true"])');
 const PLACEHOLDERS = [/example\.com/i, /your-handle/i, /YOUR-NUMBER/i, /^#$/];
 
 let failures = 0;
@@ -54,25 +60,37 @@ const contrast = (a, b) => {
 
     if (!PNG) { console.log('  ! pngjs not installed, skipping'); await page.close(); continue; }
 
-    const ink = await page.evaluate(() => {
-      const el = document.querySelector('.link__desc');
-      return el ? getComputedStyle(el).color.match(/\d+/g).slice(0, 3).map(Number) : null;
-    });
-    const spots = await page.evaluate(() =>
-      [...document.querySelectorAll('.link__desc')].map((el, i) => {
+    /* Every surface the muted ink lands on, not just the link rows: the card
+       carries an accent wash behind the rows (.card__field), so text sitting
+       directly on the card is a different measurement from text on a row. */
+    /* Sampling beside the text used to be close enough, but with the card
+       carrying a wash the pixel 14px to the right can belong to a different
+       surface — or to a neighbour's glyphs. So read the colour the glyphs
+       actually sit on: hide the ink, then sample where it was. */
+    const spots = await page.evaluate((sel) =>
+      [...document.querySelectorAll(sel)].flatMap((el) => {
         const r = el.getBoundingClientRect();
-        return { row: i + 1, x: Math.round(r.right + 14), y: Math.round(r.top + r.height / 2) };
-      }));
+        if (!r.width || !r.height) return [];
+        const spot = {
+          what: el.className.split(' ')[0] || el.tagName.toLowerCase(),
+          ink: getComputedStyle(el).color.match(/\d+/g).slice(0, 3).map(Number),
+          x: Math.round(r.left + r.width / 2),
+          y: Math.round(r.top + r.height / 2),
+        };
+        el.style.color = 'transparent';
+        return [spot];
+      }), SECONDARY.join(','));
     const png = PNG.sync.read(await page.screenshot());
-    let worst = { row: null, value: 99 };
+    let worst = { what: null, value: 99 };
     for (const s of spots) {
+      if (s.x >= png.width || s.y >= png.height) continue;
       const i = (png.width * s.y + s.x) << 2;
-      const c = contrast(ink, [png.data[i], png.data[i + 1], png.data[i + 2]]);
-      if (c < worst.value) worst = { row: s.row, value: c };
+      const c = contrast(s.ink, [png.data[i], png.data[i + 1], png.data[i + 2]]);
+      if (c < worst.value) worst = { what: s.what, value: c };
     }
     worst.value >= MIN_CONTRAST
-      ? ok(`secondary text ≥ ${MIN_CONTRAST}:1 on every row (worst ${worst.value}:1)`)
-      : bad(`row ${worst.row} secondary text is ${worst.value}:1, below ${MIN_CONTRAST}:1`);
+      ? ok(`muted text ≥ ${MIN_CONTRAST}:1 on all ${spots.length} spots (worst ${worst.value}:1)`)
+      : bad(`.${worst.what} is ${worst.value}:1, below ${MIN_CONTRAST}:1`);
     await page.close();
   }
 
