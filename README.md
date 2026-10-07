@@ -247,10 +247,17 @@ already written and downloads it:
 { label: "Save my contact", description: "Downloads a vCard with my details", action: "vcard", icon: "contact" }
 ```
 
-Name, job title, every address in `emailer`, and the URL of every link and
-social on the page all come from the existing blocks, so there's no separate
-`.vcf` to keep up to date. It's vCard 3.0, which is what Contacts on
+Name, job title, every address the email chooser offers, and the URL of every
+link and social on the page all come from the existing blocks, so there's no
+separate `.vcf` to keep up to date. It's vCard 3.0, which is what Contacts on
 iOS/macOS, Android and Outlook all read without complaint.
+
+Each address keeps its `label`: `Work` becomes `TYPE=WORK` and `Personal`
+becomes `TYPE=HOME`, so they import filed rather than as a pile of untyped
+addresses. Any other label goes in untyped rather than being forced into a
+category it doesn't fit. The row you mark `primary: true` gets `TYPE=PREF` —
+the inbox a contact app replies to — and if no row is marked, the first one
+does. Duplicates are dropped.
 
 The URLs come from `links` and `socials` — **not** from `seo.sameAs`.
 `sameAs` is a search-engine signal and deliberately lists canonical profiles
@@ -347,9 +354,9 @@ filename matter.
 `scripts/checks.js` guards the things that are easy to break by editing
 `config.js` and hard to spot by eye: text contrast in both themes, overflow at
 four widths, placeholder URLs left behind, plain email addresses leaking into
-the source, the popup opening, the vCard offering only links the page really
-has, the no-JS fallback still reaching a link, feed ordering, and the JSON-LD
-parsing.
+the source, the popup opening, the vCard matching the page link-for-link and
+address-for-address, the no-JS fallback still reaching a link, feed ordering,
+and the JSON-LD parsing.
 
 The contrast check measures **rendered pixels**, not computed CSS: the rows
 are translucent over a wash, so the number that matters is the colour painted

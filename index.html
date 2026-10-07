@@ -1746,9 +1746,22 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       event.preventDefault();
 
       var seo = CFG.seo || {};
+      /* Every address the chooser is offering, in the order it offers them.
+         Commenting a row out of config.js takes it out of both. Duplicates are
+         dropped, since an address book showing the same inbox twice is noise. */
+      var seen = {};
       var addrs = ((CFG.emailer || {}).addresses || []).map(function (m) {
-        return m.address || (m.user && m.domain ? m.user + '@' + m.domain : '');
-      }).filter(Boolean);
+        var at = m.address || (m.user && m.domain ? m.user + '@' + m.domain : '');
+        return { addr: at, label: m.label || '', primary: !!m.primary };
+      }).filter(function (m) {
+        if (!m.addr || seen[m.addr.toLowerCase()]) return false;
+        seen[m.addr.toLowerCase()] = true;
+        return true;
+      });
+      /* PREF marks the inbox to reply to. It used to go to whichever row came
+         first, which is wrong when a later row is the one flagged `primary` —
+         and doubly wrong here, where row one says `primary: false`. */
+      var pref = addrs.filter(function (m) { return m.primary; })[0] || addrs[0];
 
       // Escape per RFC 6350: backslash, comma, semicolon, newline.
       function v(t) {
@@ -1763,8 +1776,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       var lines = ['BEGIN:VCARD', 'VERSION:3.0',
                    'FN:' + v(fullName), 'N:' + v(last) + ';' + v(first) + ';;;'];
       if (seo.jobTitle) lines.push('TITLE:' + v(seo.jobTitle));
-      addrs.forEach(function (a, i) {
-        lines.push('EMAIL;TYPE=INTERNET' + (i === 0 ? ';TYPE=PREF' : '') + ':' + v(a));
+      addrs.forEach(function (m) {
+        /* The chooser's label is a heading, not a vCard type, so map the two
+           that mean something to an address book and let anything else
+           through untyped rather than inventing a category. */
+        var kind = /^work|office|business/i.test(m.label) ? ';TYPE=WORK'
+                 : /^personal|home|private/i.test(m.label) ? ';TYPE=HOME' : '';
+        lines.push('EMAIL;TYPE=INTERNET' + kind +
+                   (m === pref ? ';TYPE=PREF' : '') + ':' + v(m.addr));
       });
       // Only what the page is actually offering right now. seo.sameAs is a
       // search-engine signal and deliberately lists canonical profiles whether

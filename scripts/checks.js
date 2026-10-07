@@ -205,6 +205,31 @@ const contrast = (a, b) => {
     stray.length
       ? bad(`vCard offers links the page does not: ${stray.join(', ')}`)
       : ok('every vCard URL is a link the page actually offers');
+
+    /* Same rule for the inboxes, and in both directions: the chooser is the
+       list of addresses on offer, so the card must carry all of them and
+       nothing else. Read from the opened popup rather than from config, so
+       this measures what a visitor is actually given. */
+    const chooser = await vp.evaluate(async () => {
+      const btn = document.querySelector('[data-open-emails]');
+      if (!btn) return [];
+      btn.click();
+      await new Promise((r) => setTimeout(r, 700));
+      return [...document.querySelectorAll('.mail__addr')].map((e) => e.textContent.trim());
+    });
+    const inCard = (card.match(/^EMAIL[^:]*:(.*)$/gm) || []).map((l) => l.replace(/^[^:]*:/, '').trim());
+    const missing = chooser.filter((a) => !inCard.includes(a));
+    const extra = inCard.filter((a) => !chooser.includes(a));
+
+    !chooser.length || (!missing.length && !extra.length)
+      ? ok(`vCard carries all ${inCard.length} addresses the chooser offers`)
+      : bad(`vCard emails out of step with the chooser —${
+          missing.length ? ' missing: ' + missing.join(', ') : ''}${
+          extra.length ? ' not on the page: ' + extra.join(', ') : ''}`);
+    /* PREF is the inbox a contact app replies to, so exactly one carries it. */
+    const prefs = (card.match(/^EMAIL[^:]*TYPE=PREF[^:]*:/gm) || []).length;
+    prefs === 1 ? ok('exactly one address marked PREF')
+                : bad(`${prefs} addresses marked PREF, expected 1`);
     /* CRLF is not cosmetic — some address books reject LF-only cards. */
     /\r\n/.test(card) && !/[^\r]\n/.test(card)
       ? ok('vCard uses CRLF line endings')
