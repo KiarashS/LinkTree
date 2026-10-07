@@ -133,6 +133,17 @@ const contrast = (a, b) => {
   rows > 0 ? ok(`email popup lists ${rows} address${rows === 1 ? '' : 'es'}`)
            : bad('email popup did not open');
 
+  /* The page renders from JS, so the no-JS path must still reach a link. */
+  const fb = await browser.newContext({ javaScriptEnabled: false });
+  const fbPage = await fb.newPage();
+  await fbPage.goto(PAGE);
+  await fbPage.waitForTimeout(500);
+  const fbLinks = await fbPage.locator('noscript a[href]').count()
+                || await fbPage.locator('a[href]').count();
+  fbLinks > 0 ? ok(`no-JS fallback offers ${fbLinks} link${fbLinks === 1 ? '' : 's'}`)
+              : bad('no-JS fallback has no links — the page is blank without JavaScript');
+  await fb.close();
+
   /* Structured data is present and parses. */
   const ld = await page.evaluate(() => {
     const el = document.querySelector('script[type="application/ld+json"]');

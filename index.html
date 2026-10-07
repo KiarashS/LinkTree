@@ -1039,6 +1039,30 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* Touch has no hover, so a tooltip would only ever flash on tap. */
 @media (hover: none) { .tip { display: none; } }
 
+/* Shown when JavaScript never runs, and when config.js fails to load.
+   Plain and legible rather than styled to match — if we are here, something
+   is already wrong and the only job is getting the visitor to a real link. */
+.fallback {
+  width: min(100%, 512px);
+  padding: 28px 26px;
+  border-radius: var(--radius-lg);
+  background-color: var(--pane);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+.fallback h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: -0.02em; }
+.fallback p { margin: 0 0 16px; color: var(--text-soft); font-size: 14.5px; }
+.fallback ul { display: grid; gap: 10px; }
+.fallback a {
+  display: block;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+.fallback a:hover { background-color: var(--surface-hover); }
+
 /* ==================================================================
    7. Entrance animation
    ================================================================== */
@@ -1099,6 +1123,28 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     </button>
   </div>
 
+  <noscript>
+    <!-- Scripting off: the card never fills, so hide its empty shell, and the
+         toolbar too since Share and the theme control both need JS. A <style>
+         inside <noscript> applies only when scripting is disabled. -->
+    <style>#card, .toolbar { display: none; }</style>
+    <!-- The page renders from config.js, so without JavaScript it would be
+         blank. These are a hand-kept safety net, not generated — if the
+         durable destinations change, change them here too. No mailto: the
+         addresses are split on purpose and must not reappear in the source. -->
+    <div class="fallback">
+      <h1>Kiarash Soleimanzadeh</h1>
+      <p>The full list didn&rsquo;t load. The main links:</p>
+      <ul>
+        <li><a href="https://kiarashs.ir/">Website</a></li>
+        <li><a href="https://profile.kiarashs.ir/">Academic profile</a></li>
+        <li><a href="https://kiarashs.ir/blog">Blog</a></li>
+        <li><a href="https://go.kiarashs.ir/github">GitHub</a></li>
+        <li><a href="https://directory.kiarashs.ir/">Directory</a></li>
+      </ul>
+    </div>
+  </noscript>
+
   <main class="card" id="card">
     <!-- rendered from config.js -->
   </main>
@@ -1116,7 +1162,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   (function () {
     "use strict";
 
-    var CFG = window.LINKTREE_CONFIG || {};
+    var CFG = window.LINKTREE_CONFIG;
+    if (!CFG || !CFG.profile) {
+      // config.js 404'd, was blocked, or has a syntax error. Without this the
+      // card renders empty and the visitor is told nothing.
+      var ns = document.querySelector('noscript');
+      document.getElementById('card').outerHTML =
+        (ns && ns.textContent) || '<div class="fallback"><h1>Kiarash Soleimanzadeh</h1>' +
+        '<p>Something went wrong loading this page. Try ' +
+        '<a href="https://kiarashs.ir/">kiarashs.ir</a>.</p></div>';
+      return;
+    }
     var profile = CFG.profile || {};
     var theme   = CFG.theme   || {};
     var footer  = CFG.footer  || {};
