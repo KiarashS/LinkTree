@@ -290,81 +290,12 @@ not a wallpaper. `--mesh-a` / `--mesh-b` set how far each field carries,
 `--vignette` how hard the edges fall off, and `--bokeh-opacity` /
 `--bokeh-blur` the orbs.
 
-**The two themes are deliberately not symmetrical.** Dark runs the bokeh at
-full strength; light runs it at a quarter. Measured on this page, the orbs at
-dark's strength take light's muted text to 4.38:1, under AA — dark gets away
-with it because its ink is pale and the orbs read as a dark field. Light is
-also where this page is mostly read, on a phone, outdoors.
-
-A flatter wallpaper means flatter buttons but a calmer page. Raising these
-makes the glass more dramatic and the text harder to read, in that order.
-
-### Changing the colours
-
-Everything is driven by two accent colours in `config.js`:
-
-```js
-theme: {
-  accentFrom: "#7c5cff",
-  accentTo:   "#22d3ee",
-  default:    "auto",   // or "dark" / "light" to force one
-}
-```
-
-The glass itself is tuned by a second set of tokens at the top of
-`index.html` — `--glass-blur`, `--rim-top`, `--rim-side`, `--rim-bottom`,
-`--inner-glow` and `--spec`. Raise `--rim-top` and `--spec` for a glassier,
-more reflective surface; lower them for something flatter and calmer. Each is
-defined once per theme.
-
-Two tokens control how much of the background reaches your text. `--pane` is
-the card's own fill — unlike `--surface` it *occludes*, so the aurora reads
-around the card rather than through the words. `--blob-opacity` sets how
-strong the drifting colour is. Lowering `--pane`'s alpha or raising
-`--blob-opacity` makes the page more atmospheric and less readable; the
-shipped values keep every row above 4.5:1 in both themes.
-
-### Why the rows look like glass
-
-A pane only reads as glass when something uneven shows through it. Every
-button here is real glass: a thin fill, its own `backdrop-filter`, and a
-Tahoe-style edge — a bright lip along the top where light catches the bevel,
-a dimmer return along the bottom, a hairline ring, and a tight dark line just
-inside the lip that reads as the thickness. The body stays nearly empty on
-purpose; on this material the edge *is* the material.
-
-> **The trap, if you ever touch the entrance animation.** A row's
-> `backdrop-filter` only works if nothing above it is transformed — Chromium
-> confines a backdrop-filter to the subtree of the nearest transformed
-> ancestor. `.reveal` leaves a transform on each `<li>`, so while that class
-> is attached, every row's blur is a silent no-op that still looks correct in
-> the source. That is why `settleReveals` **removes** the class once the
-> animation ends rather than letting it sit there finished. Measured: 0% of
-> the row's pixels move with the class on, ~12–20% with it off.
->
-> This was misdiagnosed for a long time as "an ancestor with `backdrop-filter`
-> is a backdrop root". That is a real rule, but it was not the cause here —
-> removing the card's blur alone changed nothing. `scripts/checks.js` now
-> toggles the blur and counts pixels, so the no-op cannot come back quietly.
-
-### The wallpaper
-
-Two layers, no image file. A **mesh** in the iOS manner — several broad colour
-fields bleeding into one another rather than one gradient — and **bokeh**
-orbs on top of it.
-
-The bokeh is the part that matters for the glass. A sheet of glass can only
-visibly bend an *edge*, and a mesh is pure gradient: it has none. That is why
-a blurred photograph works so well behind this material — a blurred
-photograph is just big soft-edged shapes. So the shapes are drawn rather than
-photographed: nothing to ship, both themes from one source, and the strength
-is a token per theme.
-
-`--mesh-warm` and `--mesh-deep` are the two hues *outside* the accent pair; a
-mesh built only from `accentFrom` and `accentTo` reads as a two-colour ramp,
-not a wallpaper. `--mesh-a` / `--mesh-b` set how far each field carries,
-`--vignette` how hard the edges fall off, and `--bokeh-opacity` /
-`--bokeh-blur` the orbs.
+Keep `--bokeh-blur` low. Out-of-focus highlights have *defined* circular
+edges — that is what makes them bokeh rather than a wash, and the edge is the
+only thing the glass can visibly bend. Blur them far enough and you are back
+to a gradient with nothing to refract. Sharpening costs almost nothing here:
+the binding contrast constraint on this page is the footer, which sits on the
+card rather than on the wallpaper, so it barely moves with this value.
 
 **The two themes are deliberately not symmetrical.** Dark runs the bokeh at
 full strength; light runs it at a quarter. Measured on this page, the orbs at
