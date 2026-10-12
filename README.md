@@ -305,19 +305,36 @@ on a row is a no-op, because an ancestor that already has one is a *backdrop
 root*: the row would be blurring the card's flat fill. Measured, it changed 0
 of 378,000 pixels.
 
-So the structure lives inside the card instead, as `.card__field`: two slow
-accent washes that give the interior a luminance gradient, plus mid-frequency
-noise at ~70px — the scale that survives being seen through a translucent
-fill, where film grain just averages to a flat tone. `--field-opacity` sets
-how strong it is and `--field-noise` the mottle within it. The rows are then
-thin enough (`--surface-2`) to let it through, which is what makes them read
-as frosted panes rather than white paint.
+So the structure lives inside the card instead, as `.card__field`, in three
+layers:
 
-Both tokens trade directly against legibility, and not evenly across the
-card: a wash peaking under the last row costs that row far more than the
-others. `scripts/checks.js` measures the colour each piece of muted text
-actually sits on — it hides the ink and samples the pixel underneath — in
-both themes, so raising either value will tell you when you've gone too far.
+- **Two slow accent washes**, giving the interior a luminance gradient, so
+  rows at different heights sit on different tones.
+- **Diagonal light bands** — the part that actually sells it. They run across
+  the whole card, so each row crosses a different stretch of one and visibly
+  bends it. Their edges are feathered and the pitch is wide (30px clear, a
+  26px ramp, 30px clear); hard edges on a tight repeat stop reading as light
+  and start reading as a barber pole.
+- **Mid-frequency noise** at ~70px, for material. That's the scale that
+  survives being seen through a translucent fill — film grain just averages
+  to a flat tone.
+
+`--field-opacity` sets the whole layer, `--band-alpha` the bands and
+`--field-noise` the mottle. The rows are then thin enough (`--surface-2`) to
+let it all through, which is what makes them read as frosted panes rather
+than white paint.
+
+All three trade directly against legibility, unevenly and differently per
+theme. A wash peaking under the last row costs that row far more than the
+others. The bands cost dark far more than light — they brighten the card
+behind pale text, so the value light can afford (0.30) takes dark's link
+descriptions to 4.36:1, which is why `--band-alpha` is 0.16 there.
+
+`scripts/checks.js` measures the colour each piece of muted text actually
+sits on — it hides the ink and samples the pixel underneath — in both
+themes, so raising any of these will tell you when you've gone too far.
+Tune by measuring, not by eye: the band that looks fine on your monitor is
+the one eating the contrast on someone else's.
 
 A few accent combinations that work well:
 

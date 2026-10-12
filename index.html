@@ -59,6 +59,10 @@
   /* Texture *inside* the card, behind the rows — see .card__field. */
   --field-opacity:  0.55;
   --field-noise:    0.5;
+  /* Strength of the diagonal light bands. Dark has far less headroom: the
+     bands brighten the card behind pale text, so 0.26 there costs the link
+     descriptions 4.36:1. Measured per theme, not guessed. */
+  --band-alpha:     0.30;
 
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
@@ -122,6 +126,7 @@
     --texture-opacity: 0.14;
     --texture-filter:  none;
     --field-opacity:   0.30;
+    --band-alpha:      0.16;
     --field-noise:     0.65;
     --pane:          rgba(17, 18, 28, 0.88);
     --tip-bg:        rgba(26, 27, 41, 0.46);
@@ -160,6 +165,7 @@
   --texture-opacity: 0.14;
   --texture-filter:  none;
   --field-opacity:   0.30;
+  --band-alpha:      0.16;
   --field-noise:     0.65;
   --pane:          rgba(17, 18, 28, 0.88);
   --tip-bg:        rgba(26, 27, 41, 0.46);
@@ -434,14 +440,25 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     radial-gradient(85% 65% at 94% 74%,
       color-mix(in srgb, var(--accent-to) 42%, transparent), transparent 74%);
 }
+/* Two layers, doing two jobs.
+   The bands are what make a row read as glass: they run diagonally across
+   the whole card, so each row crosses a different part of one and visibly
+   bends it. Their edges are feathered and the pitch is wide — hard edges on
+   a tight repeat stop being light and start being a barber pole. The mottle
+   underneath gives the surface material, which bands alone don't. */
 .card__field::before {
   content: "";
   position: absolute;
   inset: 0;
   opacity: var(--field-noise);
   filter: var(--texture-filter, none);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='c' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.065' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.58'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23c)'/%3E%3C/svg%3E");
-  background-size: 360px 360px;
+  background-image:
+    repeating-linear-gradient(35deg,
+      transparent 0 30px,
+      rgba(255, 255, 255, var(--band-alpha, 0.26)) 56px,
+      transparent 82px 112px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='c' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.065' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.58'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23c)'/%3E%3C/svg%3E");
+  background-size: auto, 360px 360px;
 }
 
 /* ---------- Profile ---------- */
