@@ -52,12 +52,28 @@
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
   --sheen:         rgba(255, 255, 255, 0.85);
-  --blob-opacity:  0.42;
+  --blob-opacity:  0.30;
+  /* Mesh wallpaper: two extra hues plus how far each colour field carries. */
+  --mesh-warm:     #ff9ec4;
+  --mesh-deep:     #6d7bff;
+  --mesh-a:        42%;
+  --mesh-b:        34%;
+  --vignette:      0.42;
+
+  /* Tahoe glass. The fill is deliberately thin — on this material the edge
+     does the work, not the body — and the blur is what keeps text legible
+     over a colourful wallpaper. */
+  --glass-fill:    rgba(255, 255, 255, 0.38);
+  --glass-edge:    blur(18px) saturate(185%) brightness(1.04);
+  --lip-top:       rgba(255, 255, 255, 0.95);
+  --lip-bottom:    rgba(255, 255, 255, 0.60);
+  --lip-ring:      rgba(15, 18, 45, 0.10);
+  --cast:          0 10px 28px rgba(16, 20, 55, 0.14), 0 2px 6px rgba(16, 20, 55, 0.10);
   --grain-opacity: 0.035;
   --texture-opacity: 0.06;
   --texture-filter: invert(1);
   /* Texture *inside* the card, behind the rows — see .card__field. */
-  --field-opacity:  0.55;
+  --field-opacity:  0.30;
   --field-noise:    0.5;
   /* Strength of the diagonal light bands. Dark has far less headroom: the
      bands brighten the card behind pale text, so 0.26 there costs the link
@@ -67,7 +83,7 @@
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
      instead of through the text. */
-  --pane:       rgba(229, 233, 246, 0.84);
+  --pane:       rgba(255, 255, 255, 0.40);
   --tip-bg:     rgba(255, 255, 255, 0.52);
   --modal-bg:   rgba(229, 233, 246, 0.86);
 
@@ -117,18 +133,29 @@
     --border-strong: rgba(255, 255, 255, 0.16);
     --text:          #f2f3fb;
     --text-soft:     #b5b9d4;
-    --text-faint:    #9499b5;
+    --text-faint:    #a2a7c0;
     --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
     --shadow-lg:     0 18px 60px rgba(0, 0, 0, 0.55);
     --sheen:         rgba(255, 255, 255, 0.14);
-    --blob-opacity:  0.26;
+    --blob-opacity:  0.34;
+    --mesh-warm:     #c4518b;
+    --mesh-deep:     #3b4ad8;
+    --mesh-a:        40%;
+    --mesh-b:        34%;
+    --vignette:      0.62;
+    --glass-fill:    rgba(10, 11, 22, 0.30);
+    --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
+    --lip-top:       rgba(255, 255, 255, 0.55);
+    --lip-bottom:    rgba(255, 255, 255, 0.18);
+    --lip-ring:      rgba(255, 255, 255, 0.16);
+    --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
     --grain-opacity: 0.05;
     --texture-opacity: 0.14;
     --texture-filter:  none;
-    --field-opacity:   0.30;
+    --field-opacity:   0.22;
     --band-alpha:      0.16;
     --field-noise:     0.65;
-    --pane:          rgba(17, 18, 28, 0.88);
+    --pane:          rgba(14, 15, 26, 0.50);
     --tip-bg:        rgba(26, 27, 41, 0.46);
     --modal-bg:      rgba(17, 18, 28, 0.88);
     /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -156,18 +183,29 @@
   --border-strong: rgba(255, 255, 255, 0.16);
   --text:          #f2f3fb;
   --text-soft:     #b5b9d4;
-  --text-faint:    #9499b5;
+  --text-faint:    #a2a7c0;
   --shadow-sm:     0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.35);
   --shadow-lg:     0 18px 60px rgba(0, 0, 0, 0.55);
   --sheen:         rgba(255, 255, 255, 0.14);
-  --blob-opacity:  0.26;
+  --blob-opacity:  0.34;
+  --mesh-warm:     #c4518b;
+  --mesh-deep:     #3b4ad8;
+  --mesh-a:        40%;
+  --mesh-b:        34%;
+  --vignette:      0.62;
+  --glass-fill:    rgba(10, 11, 22, 0.30);
+  --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
+  --lip-top:       rgba(255, 255, 255, 0.55);
+  --lip-bottom:    rgba(255, 255, 255, 0.18);
+  --lip-ring:      rgba(255, 255, 255, 0.16);
+  --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
   --grain-opacity: 0.05;
   --texture-opacity: 0.14;
   --texture-filter:  none;
-  --field-opacity:   0.30;
+  --field-opacity:   0.22;
   --band-alpha:      0.16;
   --field-noise:     0.65;
-  --pane:          rgba(17, 18, 28, 0.88);
+  --pane:          rgba(14, 15, 26, 0.50);
   --tip-bg:        rgba(26, 27, 41, 0.46);
   --modal-bg:      rgba(17, 18, 28, 0.88);
   /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -228,40 +266,39 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* Kept pseudo-element-free on purpose: the link rows already spend both
    ::before and ::after on the spotlight and the sheen sweep.
 
-   Two tiers. Panes float directly over the page and carry the real
-   backdrop blur; inset surfaces sit on a pane that has already blurred
-   the background, so they take only the rim and specular. Measured: a
-   backdrop-filter on the rows changes 0 of 378,000 pixels, because an
-   ancestor with backdrop-filter is a backdrop root — the rows would be
-   blurring the card's own flat fill. */
+   One tier now, not two. Every pane carries its own backdrop blur, rows
+   included: the thing that used to stop them was not the card's blur but
+   the transform the entrance animation left on the <li>, which confines a
+   descendant's backdrop-filter to that subtree. With the class dropped once
+   it has played, a row's blur moves 13.6% of its pixels. */
 .card, .toolbar, .modal, .toast,
-.link, .social, .badge, .mail {
-  /* An elliptical highlight anchored to the top edge. Its height is in px
-     so it hugs the edge of a tall card the same way it does a 40px chip,
-     and being radial it fades out on every side — a linear band sized the
-     same way leaves a hard seam where the band stops. */
+.link, .social, .badge, .mail, .post, .chip-well {
+  /* The Tahoe edge. A thin bright lip along the top where light catches the
+     bevel, a dimmer return along the bottom, a hairline ring holding the
+     whole shape, and a tight dark line just inside the lip that reads as the
+     thickness of the glass. The body stays nearly empty on purpose — on this
+     material the edge is the material. */
+  background-color: var(--glass-fill);
   background-image:
-    radial-gradient(150% 88px at 22% 0%, var(--spec), transparent 72%),
-    linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
+    linear-gradient(176deg,
+      color-mix(in srgb, var(--lip-top) 38%, transparent) 0%,
+      transparent 34%),
+    radial-gradient(130% 60% at 50% 112%,
+      color-mix(in srgb, var(--lip-bottom) 42%, transparent), transparent 70%);
+  backdrop-filter: var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-edge);
   box-shadow:
-    inset 0  1.5px 0 var(--rim-top),
-    inset  1px 0   0 var(--rim-side),
-    inset -1px 0   0 var(--rim-side),
-    inset 0 -1px   0 var(--rim-bottom),
-    inset 0 0 26px 2px var(--inner-glow),
-    var(--shadow-sm);
-}
-.card, .toolbar, .modal, .toast {
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+    inset 0  1px   0 var(--lip-top),
+    inset 0  2px   1px -1px rgba(0, 0, 0, 0.10),
+    inset 0 -1px   0 var(--lip-bottom),
+    inset 0  0     0 1px var(--lip-ring),
+    var(--cast);
 }
 .card, .modal {
   box-shadow:
-    inset 0  1.5px 0 var(--rim-top),
-    inset  1px 0   0 var(--rim-side),
-    inset -1px 0   0 var(--rim-side),
-    inset 0 -1px   0 var(--rim-bottom),
-    inset 0 0 40px 4px var(--inner-glow),
+    inset 0  1px 0 var(--lip-top),
+    inset 0 -1px 0 var(--lip-bottom),
+    inset 0  0   0 1px var(--lip-ring),
     var(--shadow-lg);
 }
 
@@ -273,9 +310,20 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   inset: 0;
   z-index: -1;
   overflow: hidden;
+  /* An iOS-style mesh: several broad colour fields bleeding into each other
+     rather than one gradient. The off-accent hues (warm pink, deep indigo)
+     are what stop it reading as a two-colour ramp — a real mesh wallpaper
+     always carries a hue the brand palette does not. */
   background:
-    radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--accent-from) 12%, transparent), transparent 60%),
-    linear-gradient(180deg, var(--bg), var(--bg-deep));
+    radial-gradient(90% 70% at 12% 8%,
+      color-mix(in srgb, var(--accent-from) var(--mesh-a), transparent), transparent 62%),
+    radial-gradient(80% 65% at 88% 18%,
+      color-mix(in srgb, var(--mesh-warm) var(--mesh-b), transparent), transparent 64%),
+    radial-gradient(85% 75% at 78% 88%,
+      color-mix(in srgb, var(--accent-to) var(--mesh-a), transparent), transparent 66%),
+    radial-gradient(70% 60% at 22% 92%,
+      color-mix(in srgb, var(--mesh-deep) var(--mesh-b), transparent), transparent 64%),
+    linear-gradient(165deg, var(--bg), var(--bg-deep));
 }
 .blob {
   position: absolute;
@@ -317,18 +365,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   to   { transform: translate3d(-30%, -70%, 0) scale(1.2) rotate(120deg); }
 }
 
-/* Faint grid + film grain, so the gradients don't look flat. */
+/* A very soft vignette, so the mesh sits rather than floats. The 64px grid
+   that used to live here read as graph paper against a mesh wallpaper. */
 .backdrop::before {
   content: "";
   position: absolute;
   inset: -1px;
-  background-image:
-    linear-gradient(to right, currentColor 1px, transparent 1px),
-    linear-gradient(to bottom, currentColor 1px, transparent 1px);
-  background-size: 64px 64px;
-  color: var(--text);
-  opacity: .038;
-  mask-image: radial-gradient(85% 65% at 50% 40%, #000 20%, transparent 100%);
+  background: radial-gradient(125% 105% at 50% 44%, transparent 38%, var(--bg-deep) 100%);
+  opacity: var(--vignette, .5);
 }
 .backdrop::after {
   content: "";
@@ -416,16 +460,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .card:hover::before { opacity: 1; }
 
 /* The card's interior, painted behind the rows.
-   A sheet of glass only looks like glass when something uneven shows
-   through it — and the rows sit on the card, not on the page, so the
-   page's own texture never reaches them: --pane occludes it by design,
-   and a backdrop-filter on a row is a no-op (see §2b). The structure
-   therefore has to live here, between the pane and the rows.
-   Two slow accent washes give a luminance gradient across the card, so
-   rows at different heights sit on different tones; the noise adds
-   mid-frequency mottle at ~70px, the scale that survives being seen
-   through a translucent fill. Both stay behind every row and every
-   label, so this costs nothing in legibility. */
+   This was built to fake what the rows can now do for real: back when a
+   row's backdrop-filter was a no-op, the only way to give the glass
+   something to bend was to put it here by hand. The rows refract the
+   wallpaper properly now, so this is turned well down — it survives as the
+   diagonal light the bands give the card itself, which the rows then pick
+   up along with everything behind them. Everything here stays behind every
+   row and every label, so it costs nothing in legibility. */
 .card__field {
   position: absolute;
   inset: 0;
@@ -609,7 +650,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text-soft);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   border: 1px solid var(--border);
   border-radius: 999px;
 }
@@ -639,7 +680,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: grid; place-items: center;
   border-radius: 999px;
   color: var(--text-soft);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
@@ -672,7 +713,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   gap: 14px;
   padding: 14px 14px 14px 15px;
   border-radius: var(--radius);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   border: 1px solid var(--border);
   overflow: hidden;
   isolation: isolate;
@@ -774,7 +815,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .copy-btn.is-done { color: #22c55e; }
 
 /* Featured link: animated gradient border. */
-.link--featured { background: var(--surface); border-color: transparent; }
+.link--featured { background-color: var(--glass-fill); border-color: transparent; }
 .link--featured::marker { content: ""; }
 .link--featured .border-glow {
   position: absolute;
@@ -896,7 +937,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   border-radius: 50%;
   color: var(--text-soft);
   border: 1px solid var(--border);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   transition: transform .3s var(--ease), background-color .25s, color .25s;
 }
 .modal__close svg { width: 15px; height: 15px; }
@@ -920,7 +961,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   gap: 12px;
   padding: 13px 12px 13px 14px;
   border-radius: var(--radius);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   border: 1px solid var(--border);
   transition: transform .35s var(--ease), background-color .25s, border-color .25s;
   animation: mail-in .5s var(--ease) backwards;
@@ -1050,7 +1091,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   min-width: 0;
   padding: 11px 14px;
   border-radius: var(--radius-sm);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   border: 1px solid var(--border);
   background-image:
     radial-gradient(150% 60px at 22% 0%, var(--spec), transparent 72%),
@@ -1196,7 +1237,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: block;
   padding: 12px 14px;
   border-radius: var(--radius);
-  background-color: var(--surface-2);
+  background-color: var(--glass-fill);
   border: 1px solid var(--border);
   font-weight: 600;
 }
@@ -1205,6 +1246,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* ==================================================================
    7. Entrance animation
    ================================================================== */
+/* The class is stripped once the animation ends — see `settleReveals`. It has
+   to go, not just finish: a transformed ancestor confines a descendant's
+   backdrop-filter to its own subtree in Chromium, so while this sits on the
+   <li> the glass rows inside have nothing to refract. Measured: removing it
+   takes the row from 0 to 13.6% of pixels changed by its blur. */
 .reveal {
   opacity: 0;
   transform: translateY(18px) scale(.985);
@@ -1588,6 +1634,27 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
     if (profile.name) document.title = profile.name + ' — Links';
 
+    /* ---------------- Settle the entrance ----------------
+       Drop .reveal once it has played. The class is not just finished at that
+       point, it is in the way: Chromium confines a backdrop-filter to the
+       subtree of the nearest transformed ancestor, so the transform this
+       leaves behind stops the glass rows refracting anything. Belt and braces
+       on the timer, because animationend never fires in a backgrounded tab. */
+    settleReveals(card);
+    function settleReveals(root) {
+      var pending = [].slice.call(root.querySelectorAll('.reveal'));
+      if (root.classList && root.classList.contains('reveal')) pending.push(root);
+      if (!pending.length) return;
+      var done = function (el) { el.classList.remove('reveal'); el.style.removeProperty('--delay'); };
+      pending.forEach(function (el) {
+        el.addEventListener('animationend', function (e) {
+          if (e.animationName === 'reveal') done(el);
+        }, { once: true });
+      });
+      // Longest delay in the stagger plus the duration, with a little slack.
+      setTimeout(function () { pending.forEach(done); }, 2400);
+    }
+
     /* ---------------- Tooltip ----------------
        Hover or keyboard focus on anything carrying data-tip. Mirrors the
        macOS behaviour: a delay before the first one, then instant while
@@ -1897,6 +1964,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           section.innerHTML = html;
           var foot = card.querySelector('.foot');
           foot ? card.insertBefore(section, foot) : card.appendChild(section);
+          settleReveals(section);   // this one arrives after the first pass
         })
         .catch(function () { /* feed down or blocked: show nothing */ });
       }

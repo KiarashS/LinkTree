@@ -172,6 +172,40 @@ const contrast = (a, b) => {
   rows > 0 ? ok(`email popup lists ${rows} address${rows === 1 ? '' : 'es'}`)
            : bad('email popup did not open');
 
+  /* The rows' glass is real, not painted on.
+     This is silently breakable: Chromium confines a backdrop-filter to the
+     subtree of the nearest transformed ancestor, so one transform left on a
+     wrapper — the entrance animation used to leave one — turns every row's
+     blur into a no-op that still looks fine in code review. Toggle it and
+     count pixels; a working blur moves ~20% of the row. */
+  const reveals = await page.evaluate(() => document.querySelectorAll('.reveal').length);
+  reveals === 0 ? ok('entrance animation settled, no transforms left behind')
+                : bad(`${reveals} element(s) still carry .reveal — row refraction is dead`);
+
+  if (PNG) {
+    const clip = await page.evaluate(() => {
+      const r = document.querySelectorAll('.link')[2].getBoundingClientRect();
+      return { x: Math.round(r.x), y: Math.round(r.y),
+               width: Math.round(r.width), height: Math.round(r.height) };
+    });
+    const on = PNG.sync.read(await page.screenshot({ clip }));
+    await page.addStyleTag({ content:
+      '.link{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}' });
+    await page.waitForTimeout(300);
+    const off = PNG.sync.read(await page.screenshot({ clip }));
+    let moved = 0;
+    for (let i = 0; i < on.data.length; i += 4) {
+      if (Math.abs(on.data[i] - off.data[i]) > 2 ||
+          Math.abs(on.data[i + 1] - off.data[i + 1]) > 2) moved++;
+    }
+    const pct = (100 * moved / (on.data.length / 4)).toFixed(1);
+    moved > on.data.length / 4 * 0.05
+      ? ok(`row backdrop blur is live (moves ${pct}% of the row)`)
+      : bad(`row backdrop blur is a no-op (${pct}%) — something above it is transformed`);
+    await page.reload();                      // undo the override for later checks
+    await page.waitForTimeout(2600);
+  }
+
   /* The vCard may only carry destinations the page is actually offering.
      It used to be built from seo.sameAs, which lists canonical profiles
      whether or not they are linked — so commenting a row out of config.js

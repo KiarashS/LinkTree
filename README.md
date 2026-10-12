@@ -271,6 +271,19 @@ visitor would get by tapping the row. If you'd rather a contact stored the
 canonical destination, put the canonical URL on the link itself — `sameAs`
 won't do it for you.
 
+### The wallpaper
+
+The background is a mesh in the iOS manner: several broad colour fields
+bleeding into one another rather than one gradient, over a soft vignette.
+`--mesh-warm` and `--mesh-deep` are the two hues *outside* the accent pair —
+a mesh that only uses `accentFrom` and `accentTo` reads as a two-colour ramp,
+not a wallpaper. `--mesh-a` and `--mesh-b` set how far each field carries,
+and `--vignette` how hard the edges fall off.
+
+Everything the glass refracts comes from here, so a flatter wallpaper means
+flatter buttons — but also a calmer page. Raising the mesh values makes the
+glass more dramatic and the text harder to read, in that order.
+
 ### Changing the colours
 
 Everything is driven by two accent colours in `config.js`:
@@ -298,15 +311,28 @@ shipped values keep every row above 4.5:1 in both themes.
 
 ### Why the rows look like glass
 
-A pane only reads as glass when something uneven shows through it, and the
-link rows sit on the **card**, not on the page — so the page's own texture
-never reaches them. `--pane` occludes it on purpose, and a `backdrop-filter`
-on a row is a no-op, because an ancestor that already has one is a *backdrop
-root*: the row would be blurring the card's flat fill. Measured, it changed 0
-of 378,000 pixels.
+A pane only reads as glass when something uneven shows through it. Every
+button here is real glass: a thin fill, its own `backdrop-filter`, and a
+Tahoe-style edge — a bright lip along the top where light catches the bevel,
+a dimmer return along the bottom, a hairline ring, and a tight dark line just
+inside the lip that reads as the thickness. The body stays nearly empty on
+purpose; on this material the edge *is* the material.
 
-So the structure lives inside the card instead, as `.card__field`, in three
-layers:
+> **The trap, if you ever touch the entrance animation.** A row's
+> `backdrop-filter` only works if nothing above it is transformed — Chromium
+> confines a backdrop-filter to the subtree of the nearest transformed
+> ancestor. `.reveal` leaves a transform on each `<li>`, so while that class
+> is attached, every row's blur is a silent no-op that still looks correct in
+> the source. That is why `settleReveals` **removes** the class once the
+> animation ends rather than letting it sit there finished. Measured: 0% of
+> the row's pixels move with the class on, ~12–20% with it off.
+>
+> This was misdiagnosed for a long time as "an ancestor with `backdrop-filter`
+> is a backdrop root". That is a real rule, but it was not the cause here —
+> removing the card's blur alone changed nothing. `scripts/checks.js` now
+> toggles the blur and counts pixels, so the no-op cannot come back quietly.
+
+The card keeps a light interior wash too, as `.card__field`, in three layers:
 
 - **Two slow accent washes**, giving the interior a luminance gradient, so
   rows at different heights sit on different tones.
@@ -320,7 +346,8 @@ layers:
   to a flat tone.
 
 `--field-opacity` sets the whole layer, `--band-alpha` the bands and
-`--field-noise` the mottle. The rows are then thin enough (`--surface-2`) to
+`--field-noise` the mottle. These are turned well down from when they were
+carrying the whole effect on their own. The rows are then thin enough (`--surface-2`) to
 let it all through, which is what makes them read as frosted panes rather
 than white paint.
 
