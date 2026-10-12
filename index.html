@@ -40,8 +40,8 @@
   --bg:            #f4f5fb;
   --bg-deep:       #e8eaf6;
   --surface:       rgba(255, 255, 255, 0.72);
-  /* Rows have to be thin enough to show the card's interior texture, or the
-     glass reads as white paint. 0.95 was opaque in practice. */
+  /* Rows have to be thin enough to show the wallpaper they are sitting on,
+     or the glass reads as white paint. 0.95 was opaque in practice. */
   --surface-2:     rgba(255, 255, 255, 0.50);
   --surface-hover: rgba(15, 18, 45, 0.07);   /* hover darkens in light */
   --border:        rgba(15, 18, 45, 0.10);
@@ -72,14 +72,6 @@
   --bokeh-opacity: 0.24;
   --bokeh-blur:    58px;
   /* Flips the card's own mottle to dark ink on a light surface. */
-  --field-flip:    invert(1);
-  /* Texture *inside* the card, behind the rows — see .card__field. */
-  --field-opacity:  0.30;
-  --field-noise:    0.5;
-  /* Strength of the diagonal light bands. Dark has far less headroom: the
-     bands brighten the card behind pale text, so 0.26 there costs the link
-     descriptions 4.36:1. Measured per theme, not guessed. */
-  --band-alpha:     0.30;
 
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
@@ -152,10 +144,6 @@
     --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
     --bokeh-opacity: 1;
     --bokeh-blur:    26px;
-    --field-flip:    none;
-    --field-opacity:   0.22;
-    --band-alpha:      0.16;
-    --field-noise:     0.65;
     --pane:          rgba(14, 15, 26, 0.50);
     --tip-bg:        rgba(26, 27, 41, 0.46);
     --modal-bg:      rgba(17, 18, 28, 0.88);
@@ -202,10 +190,6 @@
   --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
   --bokeh-opacity: 1;
   --bokeh-blur:    26px;
-  --field-flip:    none;
-  --field-opacity:   0.22;
-  --band-alpha:      0.16;
-  --field-noise:     0.65;
   --pane:          rgba(14, 15, 26, 0.50);
   --tip-bg:        rgba(26, 27, 41, 0.46);
   --modal-bg:      rgba(17, 18, 28, 0.88);
@@ -474,48 +458,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 .card:hover::before { opacity: 1; }
 
-/* The card's interior, painted behind the rows.
-   This was built to fake what the rows can now do for real: back when a
-   row's backdrop-filter was a no-op, the only way to give the glass
-   something to bend was to put it here by hand. The rows refract the
-   wallpaper properly now, so this is turned well down — it survives as the
-   diagonal light the bands give the card itself, which the rows then pick
-   up along with everything behind them. Everything here stays behind every
-   row and every label, so it costs nothing in legibility. */
-.card__field {
-  position: absolute;
-  inset: 0;
-  z-index: -1;                /* above the pane fill, below the content */
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  pointer-events: none;
-  opacity: var(--field-opacity);
-  background-image:
-    radial-gradient(95% 60% at 10% 4%,
-      color-mix(in srgb, var(--accent-from) 46%, transparent), transparent 72%),
-    radial-gradient(85% 65% at 94% 74%,
-      color-mix(in srgb, var(--accent-to) 42%, transparent), transparent 74%);
-}
-/* Two layers, doing two jobs.
-   The bands are what make a row read as glass: they run diagonally across
-   the whole card, so each row crosses a different part of one and visibly
-   bends it. Their edges are feathered and the pitch is wide — hard edges on
-   a tight repeat stop being light and start being a barber pole. The mottle
-   underneath gives the surface material, which bands alone don't. */
-.card__field::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: var(--field-noise);
-  filter: var(--field-flip, none);
-  background-image:
-    repeating-linear-gradient(35deg,
-      transparent 0 30px,
-      rgba(255, 255, 255, var(--band-alpha, 0.26)) 56px,
-      transparent 82px 112px),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='c' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.065' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.58'/%3E%3C/filter%3E%3Crect width='360' height='360' filter='url(%23c)'/%3E%3C/svg%3E");
-  background-size: auto, 360px 360px;
-}
 
 /* ---------- Profile ---------- */
 .profile { text-align: center; display: grid; gap: 10px; justify-items: center; }
@@ -1642,9 +1584,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     '</footer>';
 
     var card = document.getElementById('card');
-    // The interior texture goes in first so it paints behind everything the
-    // card holds, including the sections appended later.
-    card.innerHTML = '<div class="card__field" aria-hidden="true"></div>' + html;
+    card.innerHTML = html;
 
     if (profile.name) document.title = profile.name + ' — Links';
 

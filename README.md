@@ -347,36 +347,92 @@ purpose; on this material the edge *is* the material.
 > removing the card's blur alone changed nothing. `scripts/checks.js` now
 > toggles the blur and counts pixels, so the no-op cannot come back quietly.
 
-The card keeps a light interior wash too, as `.card__field`, in three layers:
+### The wallpaper
 
-- **Two slow accent washes**, giving the interior a luminance gradient, so
-  rows at different heights sit on different tones.
-- **Diagonal light bands** — the part that actually sells it. They run across
-  the whole card, so each row crosses a different stretch of one and visibly
-  bends it. Their edges are feathered and the pitch is wide (30px clear, a
-  26px ramp, 30px clear); hard edges on a tight repeat stop reading as light
-  and start reading as a barber pole.
-- **Mid-frequency noise** at ~70px, for material. That's the scale that
-  survives being seen through a translucent fill — film grain just averages
-  to a flat tone.
+Two layers, no image file. A **mesh** in the iOS manner — several broad colour
+fields bleeding into one another rather than one gradient — and **bokeh**
+orbs on top of it.
 
-`--field-opacity` sets the whole layer, `--band-alpha` the bands and
-`--field-noise` the mottle. These are turned well down from when they were
-carrying the whole effect on their own. The rows are then thin enough (`--surface-2`) to
-let it all through, which is what makes them read as frosted panes rather
-than white paint.
+The bokeh is the part that matters for the glass. A sheet of glass can only
+visibly bend an *edge*, and a mesh is pure gradient: it has none. That is why
+a blurred photograph works so well behind this material — a blurred
+photograph is just big soft-edged shapes. So the shapes are drawn rather than
+photographed: nothing to ship, both themes from one source, and the strength
+is a token per theme.
 
-All three trade directly against legibility, unevenly and differently per
-theme. A wash peaking under the last row costs that row far more than the
-others. The bands cost dark far more than light — they brighten the card
-behind pale text, so the value light can afford (0.30) takes dark's link
-descriptions to 4.36:1, which is why `--band-alpha` is 0.16 there.
+`--mesh-warm` and `--mesh-deep` are the two hues *outside* the accent pair; a
+mesh built only from `accentFrom` and `accentTo` reads as a two-colour ramp,
+not a wallpaper. `--mesh-a` / `--mesh-b` set how far each field carries,
+`--vignette` how hard the edges fall off, and `--bokeh-opacity` /
+`--bokeh-blur` the orbs.
+
+**The two themes are deliberately not symmetrical.** Dark runs the bokeh at
+full strength; light runs it at a quarter. Measured on this page, the orbs at
+dark's strength take light's muted text to 4.38:1, under AA — dark gets away
+with it because its ink is pale and the orbs read as a dark field. Light is
+also where this page is mostly read, on a phone, outdoors.
+
+A flatter wallpaper means flatter buttons but a calmer page. Raising these
+makes the glass more dramatic and the text harder to read, in that order.
+
+### Changing the colours
+
+Everything is driven by two accent colours in `config.js`:
+
+```js
+theme: {
+  accentFrom: "#7c5cff",
+  accentTo:   "#22d3ee",
+  default:    "auto",   // or "dark" / "light" to force one
+}
+```
+
+The glass itself is tuned by a second set of tokens at the top of
+`index.html` — `--glass-blur`, `--rim-top`, `--rim-side`, `--rim-bottom`,
+`--inner-glow` and `--spec`. Raise `--rim-top` and `--spec` for a glassier,
+more reflective surface; lower them for something flatter and calmer. Each is
+defined once per theme.
+
+Two tokens control how much of the background reaches your text. `--pane` is
+the card's own fill — unlike `--surface` it *occludes*, so the aurora reads
+around the card rather than through the words. `--blob-opacity` sets how
+strong the drifting colour is. Lowering `--pane`'s alpha or raising
+`--blob-opacity` makes the page more atmospheric and less readable; the
+shipped values keep every row above 4.5:1 in both themes.
+
+### Why the rows look like glass
+
+A pane only reads as glass when something uneven shows through it. Every
+button here is real glass: a thin fill, its own `backdrop-filter`, and a
+Tahoe-style edge — a bright lip along the top where light catches the bevel,
+a dimmer return along the bottom, a hairline ring, and a tight dark line just
+inside the lip that reads as the thickness. The body stays nearly empty on
+purpose; on this material the edge *is* the material.
+
+> **The trap, if you ever touch the entrance animation.** A row's
+> `backdrop-filter` only works if nothing above it is transformed — Chromium
+> confines a backdrop-filter to the subtree of the nearest transformed
+> ancestor. `.reveal` leaves a transform on each `<li>`, so while that class
+> is attached, every row's blur is a silent no-op that still looks correct in
+> the source. That is why `settleReveals` **removes** the class once the
+> animation ends rather than letting it sit there finished. Measured: 0% of
+> the row's pixels move with the class on, ~12–20% with it off.
+>
+> This was misdiagnosed for a long time as "an ancestor with `backdrop-filter`
+> is a backdrop root". That is a real rule, but it was not the cause here —
+> removing the card's blur alone changed nothing. `scripts/checks.js` now
+> toggles the blur and counts pixels, so the no-op cannot come back quietly.
+
+The rows are thin enough (`--surface-2`) to let the wallpaper through, which
+is what makes them read as frosted panes rather than white paint. There is no
+texture layer on the card or the backdrop — no grain, no mottle, no bands.
+Everything the glass bends is the wallpaper itself.
 
 `scripts/checks.js` measures the colour each piece of muted text actually
-sits on — it hides the ink and samples the pixel underneath — in both
-themes, so raising any of these will tell you when you've gone too far.
-Tune by measuring, not by eye: the band that looks fine on your monitor is
-the one eating the contrast on someone else's.
+sits on — it hides the ink and samples the pixel underneath — in both themes,
+so turning anything up will tell you when you've gone too far. Tune by
+measuring, not by eye: the value that looks fine on your monitor is the one
+eating the contrast on someone else's.
 
 A few accent combinations that work well:
 
