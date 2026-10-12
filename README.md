@@ -13,7 +13,7 @@ dependencies, no tracking — just three files you can drop on any static host.
   capsule controls and springy presses
 - **Typed tagline** that cycles through as many phrases as you like, with a
   blinking cursor and smart backspacing
-- **Animated backdrop** — drifting aurora blobs, a faint grid and film grain
+- **Animated backdrop** — an iOS-style colour mesh with drifting bokeh
 - **Spinning gradient ring** around your avatar
 - **Staggered entrance** animation for every element
 - **Cursor-following spotlight** and a sheen sweep on each link
@@ -273,16 +273,31 @@ won't do it for you.
 
 ### The wallpaper
 
-The background is a mesh in the iOS manner: several broad colour fields
-bleeding into one another rather than one gradient, over a soft vignette.
-`--mesh-warm` and `--mesh-deep` are the two hues *outside* the accent pair —
-a mesh that only uses `accentFrom` and `accentTo` reads as a two-colour ramp,
-not a wallpaper. `--mesh-a` and `--mesh-b` set how far each field carries,
-and `--vignette` how hard the edges fall off.
+Two layers, no image file. A **mesh** in the iOS manner — several broad colour
+fields bleeding into one another rather than one gradient — and **bokeh**
+orbs on top of it.
 
-Everything the glass refracts comes from here, so a flatter wallpaper means
-flatter buttons — but also a calmer page. Raising the mesh values makes the
-glass more dramatic and the text harder to read, in that order.
+The bokeh is the part that matters for the glass. A sheet of glass can only
+visibly bend an *edge*, and a mesh is pure gradient: it has none. That is why
+a blurred photograph works so well behind this material — a blurred
+photograph is just big soft-edged shapes. So the shapes are drawn rather than
+photographed: nothing to ship, both themes from one source, and the strength
+is a token per theme.
+
+`--mesh-warm` and `--mesh-deep` are the two hues *outside* the accent pair; a
+mesh built only from `accentFrom` and `accentTo` reads as a two-colour ramp,
+not a wallpaper. `--mesh-a` / `--mesh-b` set how far each field carries,
+`--vignette` how hard the edges fall off, and `--bokeh-opacity` /
+`--bokeh-blur` the orbs.
+
+**The two themes are deliberately not symmetrical.** Dark runs the bokeh at
+full strength; light runs it at a quarter. Measured on this page, the orbs at
+dark's strength take light's muted text to 4.38:1, under AA — dark gets away
+with it because its ink is pale and the orbs read as a dark field. Light is
+also where this page is mostly read, on a phone, outdoors.
+
+A flatter wallpaper means flatter buttons but a calmer page. Raising these
+makes the glass more dramatic and the text harder to read, in that order.
 
 ### Changing the colours
 

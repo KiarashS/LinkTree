@@ -69,9 +69,10 @@
   --lip-bottom:    rgba(255, 255, 255, 0.60);
   --lip-ring:      rgba(15, 18, 45, 0.10);
   --cast:          0 10px 28px rgba(16, 20, 55, 0.14), 0 2px 6px rgba(16, 20, 55, 0.10);
-  --grain-opacity: 0.035;
-  --texture-opacity: 0.06;
-  --texture-filter: invert(1);
+  --bokeh-opacity: 0.24;
+  --bokeh-blur:    58px;
+  /* Flips the card's own mottle to dark ink on a light surface. */
+  --field-flip:    invert(1);
   /* Texture *inside* the card, behind the rows — see .card__field. */
   --field-opacity:  0.30;
   --field-noise:    0.5;
@@ -149,9 +150,9 @@
     --lip-bottom:    rgba(255, 255, 255, 0.18);
     --lip-ring:      rgba(255, 255, 255, 0.16);
     --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
-    --grain-opacity: 0.05;
-    --texture-opacity: 0.14;
-    --texture-filter:  none;
+    --bokeh-opacity: 1;
+    --bokeh-blur:    26px;
+    --field-flip:    none;
     --field-opacity:   0.22;
     --band-alpha:      0.16;
     --field-noise:     0.65;
@@ -199,9 +200,9 @@
   --lip-bottom:    rgba(255, 255, 255, 0.18);
   --lip-ring:      rgba(255, 255, 255, 0.16);
   --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
-  --grain-opacity: 0.05;
-  --texture-opacity: 0.14;
-  --texture-filter:  none;
+  --bokeh-opacity: 1;
+  --bokeh-blur:    26px;
+  --field-flip:    none;
   --field-opacity:   0.22;
   --band-alpha:      0.16;
   --field-noise:     0.65;
@@ -294,6 +295,16 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     inset 0  0     0 1px var(--lip-ring),
     var(--cast);
 }
+/* The card does NOT blur its own backdrop, deliberately. It used to, and that
+   was harmless while the page carried a noise texture: the card's blur left
+   enough mid-frequency detail for a row's blur to still bite. With the
+   texture gone the card's blur flattens the wallpaper completely, and every
+   row above it is then blurring a constant — a no-op. The rows are the glass
+   here, so they get the backdrop and the card gets out of the way. */
+.card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 .card, .modal {
   box-shadow:
     inset 0  1px 0 var(--lip-top),
@@ -374,27 +385,31 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   background: radial-gradient(125% 105% at 50% 44%, transparent 38%, var(--bg-deep) 100%);
   opacity: var(--vignette, .5);
 }
+/* Bokeh. A blurred photograph is really just big soft-edged shapes, and an
+   edge is the only thing a sheet of glass can visibly bend — the mesh under
+   this is pure gradient, so the rows' refraction had nothing to work on. The
+   orbs are drawn rather than photographed: no image to ship, both themes from
+   one source, and the strength is a token per theme.
+
+   Dark carries it at full strength, which measures fine because the ink there
+   is pale and the orbs are dark-field. Light runs it far softer: the same
+   orbs take the muted text to 4.38:1, under AA. */
 .backdrop::after {
   content: "";
   position: absolute;
-  inset: 0;
-  opacity: var(--grain-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* Mid-frequency texture. The film grain above is nearly per-pixel, so a
-   28px backdrop blur averages it to a flat tone; features at ~60-100px
-   survive the blur as soft structure, which is what gives the glass
-   something to actually refract. Sits behind --pane, so text is unaffected. */
-.texture {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='f' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.055' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.52'/%3E%3C/filter%3E%3Crect width='420' height='420' filter='url(%23f)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800'%3E%3Cfilter id='t' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.013' numOctaves='4' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 -0.42'/%3E%3C/filter%3E%3Crect width='800' height='800' filter='url(%23t)'/%3E%3C/svg%3E");
-  background-size: 420px 420px, cover;
-  background-repeat: repeat, no-repeat;
-  opacity: var(--texture-opacity);
-  filter: var(--texture-filter, none);
+  inset: -10%;
+  opacity: var(--bokeh-opacity);
+  filter: blur(var(--bokeh-blur));
   pointer-events: none;
+  background-image:
+    radial-gradient(circle at 12% 22%, var(--mesh-warm)   0 9%,  transparent 10%),
+    radial-gradient(circle at 78% 12%, var(--accent-to)   0 7%,  transparent 8%),
+    radial-gradient(circle at 90% 62%, var(--mesh-warm)   0 12%, transparent 13%),
+    radial-gradient(circle at 26% 78%, var(--accent-from) 0 10%, transparent 11%),
+    radial-gradient(circle at 58% 92%, var(--mesh-deep)   0 8%,  transparent 9%),
+    radial-gradient(circle at 44% 44%, var(--accent-to)   0 6%,  transparent 7%),
+    radial-gradient(circle at 6%  58%, var(--accent-from) 0 7%,  transparent 8%),
+    radial-gradient(circle at 68% 34%, var(--mesh-deep)   0 5%,  transparent 6%);
 }
 
 /* ==================================================================
@@ -492,7 +507,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   position: absolute;
   inset: 0;
   opacity: var(--field-noise);
-  filter: var(--texture-filter, none);
+  filter: var(--field-flip, none);
   background-image:
     repeating-linear-gradient(35deg,
       transparent 0 30px,
@@ -1283,7 +1298,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     <div class="blob blob--1"></div>
     <div class="blob blob--2"></div>
     <div class="blob blob--3"></div>
-    <div class="texture"></div>
   </div>
 
   <div class="toolbar">

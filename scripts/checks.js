@@ -178,6 +178,11 @@ const contrast = (a, b) => {
      wrapper — the entrance animation used to leave one — turns every row's
      blur into a no-op that still looks fine in code review. Toggle it and
      count pixels; a working blur moves ~20% of the row. */
+  /* The popup check above left a <dialog> open, and its ::backdrop covers the
+     rows in the top layer — every pixel below would read as unchanged. */
+  await page.evaluate(() => document.querySelectorAll('dialog[open]').forEach((d) => d.close()));
+  await page.waitForTimeout(500);
+
   const reveals = await page.evaluate(() => document.querySelectorAll('.reveal').length);
   reveals === 0 ? ok('entrance animation settled, no transforms left behind')
                 : bad(`${reveals} element(s) still carry .reveal — row refraction is dead`);
@@ -188,6 +193,16 @@ const contrast = (a, b) => {
       return { x: Math.round(r.x), y: Math.round(r.y),
                width: Math.round(r.width), height: Math.round(r.height) };
     });
+    /* A test pattern behind the card, because blurring a flat backdrop is a
+       no-op whether or not backdrop-filter works — and the wallpaper is
+       deliberately smooth. This isolates the mechanism from the content: with
+       something high-frequency back there, a live blur must change the row. */
+    await page.addStyleTag({ content:
+      '.backdrop{background-image:repeating-linear-gradient(45deg,#000 0 6px,#fff 6px 12px) !important}' +
+      // The bokeh and the vignette paint over .backdrop, so they would hide
+      // the pattern and make a working blur look dead.
+      '.backdrop::after,.backdrop::before{display:none !important}' });
+    await page.waitForTimeout(300);
     const on = PNG.sync.read(await page.screenshot({ clip }));
     await page.addStyleTag({ content:
       '.link{backdrop-filter:none !important;-webkit-backdrop-filter:none !important}' });
@@ -199,8 +214,8 @@ const contrast = (a, b) => {
           Math.abs(on.data[i + 1] - off.data[i + 1]) > 2) moved++;
     }
     const pct = (100 * moved / (on.data.length / 4)).toFixed(1);
-    moved > on.data.length / 4 * 0.05
-      ? ok(`row backdrop blur is live (moves ${pct}% of the row)`)
+    moved > on.data.length / 4 * 0.20
+      ? ok(`row backdrop blur is live (moves ${pct}% of a test pattern)`)
       : bad(`row backdrop blur is a no-op (${pct}%) — something above it is transformed`);
     await page.reload();                      // undo the override for later checks
     await page.waitForTimeout(2600);
