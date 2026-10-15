@@ -772,7 +772,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .copy-btn.is-done { color: #22c55e; }
 
 /* Featured link: animated gradient border. */
-.link--featured { background-color: var(--glass-fill); border-color: transparent; }
+/* No border at all on a featured row, rather than a transparent one.
+   A 1px transparent border still paints the row's own fill and — the part
+   background-clip cannot reach — its backdrop-filter result, right out to
+   the border box. That showed as a pale hairline outside the gradient ring:
+   measured rgb(248,248,254) against the ring's rgb(123,94,255). The padding
+   takes the border's 1px back so nothing moves. */
+.link--featured {
+  background-color: var(--glass-fill);
+  border-width: 0;
+  padding: 15px 15px 15px 16px;
+}
 .link--featured::marker { content: ""; }
 .link--featured .border-glow {
   position: absolute;
@@ -1004,6 +1014,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    values (an email address, say) still fit on one line. */
 @media (max-width: 430px) {
   .link { gap: 12px; padding: 13px; }
+  .link--featured { padding: 14px; }     /* keeps the borderless row aligned */
   .link__arrow { display: none; }
 }
 
