@@ -23,8 +23,15 @@ const MIN_CONTRAST = 4.5;          // WCAG AA for normal-size text
    link row, a post row, the card itself — so each needs its own reading. */
 /* aria-hidden ones are decoration — the separator dots and the footer heart —
    and a contrast floor is about text people have to read. */
-const SECONDARY = ['.link__desc', '.handle', '.post__date', '.posts__head', '.foot span']
-  .map((s) => s + ':not([aria-hidden="true"])');
+const notHidden = (s) => s + ':not([aria-hidden="true"])';
+const ON_CARD = ['.link__desc', '.handle', '.post__date', '.posts__head', '.foot span']
+  .map(notHidden).join(',');
+/* The chooser is its own glass surface, so making it clearer is a separate
+   risk from making the rows clearer. These go unmeasured unless the dialog
+   is opened — and once it is, its ::backdrop dims everything behind it, so
+   the two sets cannot be read in the same pass. */
+const IN_MODAL = ['.mail__note', '.mail__addr', '.mail__label', '.modal__sub']
+  .map(notHidden).join(',');
 const PLACEHOLDERS = [/example\.com/i, /your-handle/i, /YOUR-NUMBER/i, /^#$/];
 
 let failures = 0;
@@ -61,36 +68,52 @@ const contrast = (a, b) => {
 
     if (!PNG) { console.log('  ! pngjs not installed, skipping'); await page.close(); continue; }
 
-    /* Every surface the muted ink lands on, not just the link rows: the card
-       carries an accent wash behind the rows (.card__field), so text sitting
-       directly on the card is a different measurement from text on a row. */
-    /* Sampling beside the text used to be close enough, but with the card
-       carrying a wash the pixel 14px to the right can belong to a different
-       surface — or to a neighbour's glyphs. So read the colour the glyphs
-       actually sit on: hide the ink, then sample where it was. */
-    const spots = await page.evaluate((sel) =>
-      [...document.querySelectorAll(sel)].flatMap((el) => {
-        const r = el.getBoundingClientRect();
-        if (!r.width || !r.height) return [];
-        const spot = {
-          what: el.className.split(' ')[0] || el.tagName.toLowerCase(),
-          ink: getComputedStyle(el).color.match(/\d+/g).slice(0, 3).map(Number),
-          x: Math.round(r.left + r.width / 2),
-          y: Math.round(r.top + r.height / 2),
-        };
-        el.style.color = 'transparent';
-        return [spot];
-      }), SECONDARY.join(','));
-    const png = PNG.sync.read(await page.screenshot());
-    let worst = { what: null, value: 99 };
-    for (const s of spots) {
-      if (s.x >= png.width || s.y >= png.height) continue;
-      const i = (png.width * s.y + s.x) << 2;
-      const c = contrast(s.ink, [png.data[i], png.data[i + 1], png.data[i + 2]]);
-      if (c < worst.value) worst = { what: s.what, value: c };
-    }
+    /* Open the chooser so its text is measurable. Everything behind it is
+       covered by the dialog's ::backdrop, which is the point — those spots
+       are measured on the first pass below, before this runs. */
+    /* Measured in two passes. The chooser's text only exists once the dialog
+       is open, and while it is open its ::backdrop covers everything behind
+       it — so the card has to be read first, then the modal. */
+    const measure = async (sel) => {
+      const spots = await page.evaluate((sel) =>
+        [...document.querySelectorAll(sel)].flatMap((el) => {
+          const r = el.getBoundingClientRect();
+          if (!r.width || !r.height) return [];
+          const spot = {
+            what: el.className.split(' ')[0] || el.tagName.toLowerCase(),
+            ink: getComputedStyle(el).color.match(/\d+/g).slice(0, 3).map(Number),
+            /* Read the colour the glyphs actually sit on: hide the ink, then
+               sample where it was. Sampling beside the text was close enough
+               on a flat card, but next to a wash that pixel can belong to a
+               different surface — or to a neighbour's glyphs. */
+            x: Math.round(r.left + r.width / 2),
+            y: Math.round(r.top + r.height / 2),
+          };
+          el.style.color = 'transparent';
+          return [spot];
+        }), sel);
+      const png = PNG.sync.read(await page.screenshot());
+      const out = [];
+      for (const s of spots) {
+        if (s.x >= png.width || s.y >= png.height) continue;
+        const i = (png.width * s.y + s.x) << 2;
+        out.push({ what: s.what,
+                   value: contrast(s.ink, [png.data[i], png.data[i + 1], png.data[i + 2]]) });
+      }
+      return out;
+    };
+
+    const readings = await measure(ON_CARD);
+    await page.evaluate(() => {
+      const b = document.querySelector('[data-open-emails]');
+      if (b) b.click();
+    });
+    await page.waitForTimeout(700);
+    readings.push(...await measure(IN_MODAL));
+
+    const worst = readings.reduce((a, r) => (r.value < a.value ? r : a), { what: null, value: 99 });
     worst.value >= MIN_CONTRAST
-      ? ok(`muted text ≥ ${MIN_CONTRAST}:1 on all ${spots.length} spots (worst ${worst.value}:1)`)
+      ? ok(`muted text ≥ ${MIN_CONTRAST}:1 on all ${readings.length} spots (worst ${worst.value}:1)`)
       : bad(`.${worst.what} is ${worst.value}:1, below ${MIN_CONTRAST}:1`);
     await page.close();
   }

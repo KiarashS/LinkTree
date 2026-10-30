@@ -385,8 +385,18 @@ purpose; on this material the edge *is* the material.
 > removing the card's blur alone changed nothing. `scripts/checks.js` now
 > toggles the blur and counts pixels, so the no-op cannot come back quietly.
 
-The rows are thin enough (`--surface-2`) to let the wallpaper through, which
-is what makes them read as frosted panes rather than white paint. There is no
+Every glass surface is thin enough to let the wallpaper through, which is
+what makes them read as panes rather than paint: `--glass-fill` for the rows
+and chips, `--pane` for the card, `--modal-bg` for the chooser, `--tip-bg`
+for tooltips.
+
+How clear they can go is set by the text on them, and the binding element is
+not the obvious one. Make the rows clearer and the first thing to fail is the
+**chooser's subtitle**, because it sits on `--modal-bg` and uses
+`--text-soft` — a different surface and a different ink from anything on the
+card. That is why `scripts/checks.js` opens the dialog and measures inside
+it, in a second pass: while the dialog is open its `::backdrop` dims
+everything behind, so the card and the modal cannot be read together. There is no
 texture layer on the card or the backdrop — no grain, no mottle, no bands.
 Everything the glass bends is the wallpaper itself.
 

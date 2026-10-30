@@ -39,16 +39,16 @@
 
   --bg:            #f7f4f0;
   --bg-deep:       #e7e3e6;
-  --surface:       rgba(255, 255, 255, 0.72);
+  --surface:       rgba(255, 255, 255, 0.42);
   /* Rows have to be thin enough to show the wallpaper they are sitting on,
      or the glass reads as white paint. 0.95 was opaque in practice. */
-  --surface-2:     rgba(255, 255, 255, 0.50);
+  --surface-2:     rgba(255, 255, 255, 0.28);
   --surface-hover: rgba(15, 18, 45, 0.07);   /* hover darkens in light */
   --border:        rgba(15, 18, 45, 0.10);
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
-  --text-soft:     #4d5170;
-  --text-faint:    #565b7c;   /* secondary ink; see the contrast check */
+  --text-soft:     #434763;
+  --text-faint:    #4f5473;   /* secondary ink; see the contrast check */
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
   --sheen:         rgba(255, 255, 255, 0.85);
@@ -68,7 +68,7 @@
   /* Tahoe glass. The fill is deliberately thin — on this material the edge
      does the work, not the body — and the blur is what keeps text legible
      over a colourful wallpaper. */
-  --glass-fill:    rgba(255, 255, 255, 0.38);
+  --glass-fill:    rgba(255, 255, 255, 0.22);
   --glass-edge:    blur(18px) saturate(185%) brightness(1.04);
   --lip-top:       rgba(255, 255, 255, 0.95);
   --lip-bottom:    rgba(255, 255, 255, 0.60);
@@ -81,9 +81,9 @@
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
      instead of through the text. */
-  --pane:       rgba(255, 255, 255, 0.40);
-  --tip-bg:     rgba(255, 255, 255, 0.52);
-  --modal-bg:   rgba(229, 233, 246, 0.86);
+  --pane:       rgba(255, 255, 255, 0.26);
+  --tip-bg:     rgba(255, 255, 255, 0.34);
+  --modal-bg:   rgba(240, 242, 250, 0.52);
 
   /* Liquid glass: a transparent, heavily saturated pane with a bright
      specular top edge, dimmer sides, and a soft inner glow. */
@@ -143,7 +143,7 @@
     --mesh-a:        40%;
     --mesh-b:        34%;
     --vignette:      0.62;
-    --glass-fill:    rgba(10, 11, 22, 0.30);
+    --glass-fill:    rgba(10, 11, 22, 0.12);
     --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
     --lip-top:       rgba(255, 255, 255, 0.55);
     --lip-bottom:    rgba(255, 255, 255, 0.18);
@@ -151,9 +151,9 @@
     --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
     --bokeh-opacity: 1;
     --bokeh-blur:    10px;
-    --pane:          rgba(14, 15, 26, 0.50);
-    --tip-bg:        rgba(26, 27, 41, 0.46);
-    --modal-bg:      rgba(17, 18, 28, 0.88);
+    --pane:          rgba(14, 15, 26, 0.24);
+    --tip-bg:        rgba(26, 27, 41, 0.34);
+    --modal-bg:      rgba(17, 18, 28, 0.50);
     /* Lower saturate/brightness than before: at 200% the filter amplified
        the blob colour before the pane ever covered it. */
     --glass-blur:    blur(28px) saturate(165%) brightness(1.04);
@@ -191,7 +191,7 @@
   --mesh-a:        40%;
   --mesh-b:        34%;
   --vignette:      0.62;
-  --glass-fill:    rgba(10, 11, 22, 0.30);
+  --glass-fill:    rgba(10, 11, 22, 0.12);
   --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
   --lip-top:       rgba(255, 255, 255, 0.55);
   --lip-bottom:    rgba(255, 255, 255, 0.18);
@@ -199,9 +199,9 @@
   --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
   --bokeh-opacity: 1;
   --bokeh-blur:    10px;
-  --pane:          rgba(14, 15, 26, 0.50);
-  --tip-bg:        rgba(26, 27, 41, 0.46);
-  --modal-bg:      rgba(17, 18, 28, 0.88);
+  --pane:          rgba(14, 15, 26, 0.24);
+  --tip-bg:        rgba(26, 27, 41, 0.34);
+  --modal-bg:      rgba(17, 18, 28, 0.50);
   /* Lower saturate/brightness than before: at 200% the filter amplified
      the blob colour before the pane ever covered it. */
   --glass-blur:    blur(28px) saturate(165%) brightness(1.04);
