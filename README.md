@@ -300,11 +300,20 @@ decoration: a photograph behind 13px body text is where this page's contrast
 gets spent, and `scripts/checks.js` is the arbiter — measured here, a busy
 image at photo strength took light to 4.14:1, under AA.
 
-`wallpaperScrim` overrides **both** themes, so it is normally left unset: the
-built-in defaults are per-theme, light `0.56` and dark `0.34`. Light needs
-roughly twice the veil, because its muted text is dark-on-light and loses
-contrast wherever the image goes bright, while dark's pale ink only gains.
-Measured on the shipped pair: at dark's 0.34, light falls to 3.0:1.
+`wallpaperScrim` overrides **both** themes, so it is normally left unset.
+The shipped default is `0` in both: no veil, the wallpaper at full strength.
+
+That is a choice with a price, and it is paid somewhere else. With no veil,
+light's footer sits straight on the image and falls to **2.87:1**. It is back
+over AA by splitting the cost two ways — the card is a little less clear
+(`--pane` 0.26 to 0.36) and the muted ink a little darker (`#3e4360` to
+`#2a2f4a`) — rather than paying it all in one place. Either lever alone would
+have worked: ink at `#1d2138` reaches 4.71 but flattens the gap between a
+label and its description, and `--pane` at 0.55 reaches 4.91 but undoes most
+of the clear glass. Dark needs none of this; it measures 6.23 unveiled,
+because its pale ink only gains where the image brightens.
+
+If you raise the scrim again, you can give those two back.
 
 Re-encode anything you drop in. The shipped files started as 6016x4147 PNGs
 at ~17 MB each; at 3200px wide and WebP q90 they are 55 KB and 49 KB, because
