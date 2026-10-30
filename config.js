@@ -79,9 +79,11 @@ window.LINKTREE_CONFIG = {
     // A photo behind 13px body text is where this page's contrast gets
     // spent: `wallpaperScrim` (0-1) is the veil over it. Run
     // `node scripts/checks.js` after changing either.
-    // wallpaper: "wallpaper.jpg",
-    // wallpaperDark: "wallpaper-night.jpg",   // falls back to `wallpaper`
-    // wallpaperScrim: 0.82,
+    wallpaper: "wallpaper.webp",
+    wallpaperDark: "wallpaper-night.webp",   // falls back to `wallpaper`
+    // wallpaperScrim: 0.56,   // overrides BOTH themes; the built-in
+                            // defaults are per-theme (light 0.56, dark 0.34)
+                            // because light needs far more veil than dark.
   },
 
   /* ---------------------------------------------------------------- */

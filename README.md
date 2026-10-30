@@ -43,6 +43,8 @@ dependencies, no tracking — just three files you can drop on any static host.
 | `favicons/` | Tab icon, shared with blog.kiarashs.ir. |
 | `og.jpg` | 1200×630 social preview card. |
 | `qr.svg` | QR code for the site, shown in the toolbar's QR panel. |
+| `wallpaper.webp` | Background, light theme. |
+| `wallpaper-night.webp` | Background, dark theme. |
 | `CNAME` | Custom domain for GitHub Pages. |
 | `scripts/checks.js` | Optional dev tooling — see [Checks](#checks). |
 | `README.md` | This file. |
@@ -298,9 +300,21 @@ decoration: a photograph behind 13px body text is where this page's contrast
 gets spent, and `scripts/checks.js` is the arbiter — measured here, a busy
 image at photo strength took light to 4.14:1, under AA.
 
-Use an image you have the right to publish. A macOS wallpaper is licensed for
-use on a Mac, not for redistribution from a web server, so it does not belong
-in this repository.
+`wallpaperScrim` overrides **both** themes, so it is normally left unset: the
+built-in defaults are per-theme, light `0.56` and dark `0.34`. Light needs
+roughly twice the veil, because its muted text is dark-on-light and loses
+contrast wherever the image goes bright, while dark's pale ink only gains.
+Measured on the shipped pair: at dark's 0.34, light falls to 3.0:1.
+
+Re-encode anything you drop in. The shipped files started as 6016x4147 PNGs
+at ~17 MB each; at 3200px wide and WebP q90 they are 55 KB and 49 KB, because
+smooth gradient artwork compresses extremely well. Shipping the originals
+would have made the wallpaper 99.7% of the page weight.
+
+**On rights:** these two are Apple's macOS Golden Gate wallpapers, and they
+are here at the repository owner's decision. No licence accompanies them.
+If you are forking this, replace them with artwork you have the right to
+publish rather than inheriting that choice.
 
 #### How the drawn one is built
 

@@ -48,7 +48,7 @@
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
   --text-soft:     #434763;
-  --text-faint:    #4f5473;   /* secondary ink; see the contrast check */
+  --text-faint:    #3e4360;   /* secondary ink; see the contrast check */
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
   --sheen:         rgba(255, 255, 255, 0.85);
@@ -64,6 +64,7 @@
   --mesh-a:        42%;
   --mesh-b:        34%;
   --vignette:      0.42;
+  --wall-scrim:    0.56;
 
   /* Tahoe glass. The fill is deliberately thin — on this material the edge
      does the work, not the body — and the blur is what keeps text legible
@@ -143,6 +144,7 @@
     --mesh-a:        40%;
     --mesh-b:        34%;
     --vignette:      0.62;
+    --wall-scrim:    0.34;
     --glass-fill:    rgba(10, 11, 22, 0.12);
     --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
     --lip-top:       rgba(255, 255, 255, 0.55);
@@ -191,6 +193,7 @@
   --mesh-a:        40%;
   --mesh-b:        34%;
   --vignette:      0.62;
+  --wall-scrim:    0.34;
   --glass-fill:    rgba(10, 11, 22, 0.12);
   --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
   --lip-top:       rgba(255, 255, 255, 0.55);
@@ -426,12 +429,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    vignette becomes a scrim, because a photograph behind 13px body text is
    where this page's contrast gets spent. Raise --wall-scrim if your image is
    busy; `node scripts/checks.js` will tell you when it is enough. */
-:root[data-wallpaper] .backdrop::after { display: none; }
+:root[data-wallpaper] .backdrop::after,
+:root[data-wallpaper] .blob { display: none; }
 :root[data-wallpaper] .backdrop::before {
   background: linear-gradient(180deg,
     color-mix(in srgb, var(--bg) 72%, transparent),
     color-mix(in srgb, var(--bg-deep) 88%, transparent));
-  opacity: var(--wall-scrim, 0.82);
+  opacity: var(--wall-scrim);
 }
 
 /* ==================================================================
