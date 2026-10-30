@@ -273,6 +273,37 @@ won't do it for you.
 
 ### The wallpaper
 
+The shipped one is drawn, not photographed, in a **Golden Gate** palette:
+international orange for the span, low sun through fog, washed morning blue,
+and the bay. Light reads as fog burning off; dark as dusk over the water.
+
+Its four colours (`--wall-span`, `--wall-haze`, `--wall-sky`, `--wall-water`)
+are deliberately **independent of `accentFrom` / `accentTo`**. The accent
+belongs to your name and the featured row; tying the sky to it means one can
+never change without the other.
+
+#### Using a photograph instead
+
+```js
+theme: {
+  wallpaper: "wallpaper.jpg",
+  wallpaperDark: "wallpaper-night.jpg",   // optional, falls back to `wallpaper`
+  wallpaperScrim: 0.82,                   // 0-1, the veil over it
+}
+```
+
+The photo replaces the drawn mesh, the drawn bokeh switches off (a photograph
+brings its own), and the vignette becomes a flat scrim. That scrim is not
+decoration: a photograph behind 13px body text is where this page's contrast
+gets spent, and `scripts/checks.js` is the arbiter — measured here, a busy
+image at photo strength took light to 4.14:1, under AA.
+
+Use an image you have the right to publish. A macOS wallpaper is licensed for
+use on a Mac, not for redistribution from a web server, so it does not belong
+in this repository.
+
+#### How the drawn one is built
+
 Two layers, no image file. A **mesh** in the iOS manner — several broad colour
 fields bleeding into one another rather than one gradient — and **bokeh**
 orbs on top of it.

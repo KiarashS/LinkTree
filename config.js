@@ -68,6 +68,20 @@ window.LINKTREE_CONFIG = {
     // setting. The toggle cycles System -> Light -> Dark, and whatever they
     // pick is remembered — including "auto", so they can hand control back.
     default: "auto",
+
+    // Optional photographic wallpaper. Without one, the page draws its own
+    // (a Golden Gate palette — see "The wallpaper" in the README).
+    //
+    // Use an image you have the right to publish. A macOS wallpaper is
+    // licensed for use on a Mac, not for redistribution from a web server,
+    // so that file should not be committed to this repo.
+    //
+    // A photo behind 13px body text is where this page's contrast gets
+    // spent: `wallpaperScrim` (0-1) is the veil over it. Run
+    // `node scripts/checks.js` after changing either.
+    // wallpaper: "wallpaper.jpg",
+    // wallpaperDark: "wallpaper-night.jpg",   // falls back to `wallpaper`
+    // wallpaperScrim: 0.82,
   },
 
   /* ---------------------------------------------------------------- */

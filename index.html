@@ -37,8 +37,8 @@
   --accent-from: #7c5cff;
   --accent-to:   #22d3ee;
 
-  --bg:            #f4f5fb;
-  --bg-deep:       #e8eaf6;
+  --bg:            #f7f4f0;
+  --bg-deep:       #e7e3e6;
   --surface:       rgba(255, 255, 255, 0.72);
   /* Rows have to be thin enough to show the wallpaper they are sitting on,
      or the glass reads as white paint. 0.95 was opaque in practice. */
@@ -48,14 +48,19 @@
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
   --text-soft:     #4d5170;
-  --text-faint:    #5e6386;   /* secondary ink; see the contrast check */
+  --text-faint:    #565b7c;   /* secondary ink; see the contrast check */
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
   --sheen:         rgba(255, 255, 255, 0.85);
   --blob-opacity:  0.30;
   /* Mesh wallpaper: two extra hues plus how far each colour field carries. */
-  --mesh-warm:     #ff9ec4;
-  --mesh-deep:     #6d7bff;
+  /* Golden Gate. The wallpaper's palette is deliberately independent of
+     accentFrom/accentTo: the brand accent belongs to the name and the
+     featured row, and tying the sky to it forces one to follow the other. */
+  --wall-span:     #e8632a;   /* international orange, the bridge itself */
+  --wall-haze:     #ffcf8f;   /* low sun through fog */
+  --wall-sky:      #9fd3ec;   /* washed morning blue */
+  --wall-water:    #3f7fa6;   /* the bay */
   --mesh-a:        42%;
   --mesh-b:        34%;
   --vignette:      0.42;
@@ -117,8 +122,8 @@
 /* Dark palette — declared twice so the toggle wins in both directions. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:            #07070f;
-    --bg-deep:       #05050b;
+    --bg:            #090c14;
+    --bg-deep:       #05070d;
     --surface:       rgba(255, 255, 255, 0.045);
     --surface-2:     rgba(255, 255, 255, 0.03);
     --surface-hover: rgba(255, 255, 255, 0.085);
@@ -131,8 +136,10 @@
     --shadow-lg:     0 18px 60px rgba(0, 0, 0, 0.55);
     --sheen:         rgba(255, 255, 255, 0.14);
     --blob-opacity:  0.34;
-    --mesh-warm:     #c4518b;
-    --mesh-deep:     #3b4ad8;
+    --wall-span:     #c2491d;
+    --wall-haze:     #b8742c;
+    --wall-sky:      #1d4e6b;
+    --wall-water:    #102d44;
     --mesh-a:        40%;
     --mesh-b:        34%;
     --vignette:      0.62;
@@ -163,8 +170,8 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg:            #07070f;
-  --bg-deep:       #05050b;
+  --bg:            #090c14;
+  --bg-deep:       #05070d;
   --surface:       rgba(255, 255, 255, 0.045);
   --surface-2:     rgba(255, 255, 255, 0.03);
   --surface-hover: rgba(255, 255, 255, 0.085);
@@ -177,8 +184,10 @@
   --shadow-lg:     0 18px 60px rgba(0, 0, 0, 0.55);
   --sheen:         rgba(255, 255, 255, 0.14);
   --blob-opacity:  0.34;
-  --mesh-warm:     #c4518b;
-  --mesh-deep:     #3b4ad8;
+  --wall-span:     #c2491d;
+  --wall-haze:     #b8742c;
+  --wall-sky:      #1d4e6b;
+  --wall-water:    #102d44;
   --mesh-a:        40%;
   --mesh-b:        34%;
   --vignette:      0.62;
@@ -310,14 +319,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
      are what stop it reading as a two-colour ramp — a real mesh wallpaper
      always carries a hue the brand palette does not. */
   background:
-    radial-gradient(90% 70% at 12% 8%,
-      color-mix(in srgb, var(--accent-from) var(--mesh-a), transparent), transparent 62%),
-    radial-gradient(80% 65% at 88% 18%,
-      color-mix(in srgb, var(--mesh-warm) var(--mesh-b), transparent), transparent 64%),
-    radial-gradient(85% 75% at 78% 88%,
-      color-mix(in srgb, var(--accent-to) var(--mesh-a), transparent), transparent 66%),
-    radial-gradient(70% 60% at 22% 92%,
-      color-mix(in srgb, var(--mesh-deep) var(--mesh-b), transparent), transparent 64%),
+    radial-gradient(95% 70% at 14% 6%,
+      color-mix(in srgb, var(--wall-sky) var(--mesh-a), transparent), transparent 64%),
+    radial-gradient(80% 62% at 86% 14%,
+      color-mix(in srgb, var(--wall-haze) var(--mesh-b), transparent), transparent 64%),
+    radial-gradient(90% 78% at 80% 90%,
+      color-mix(in srgb, var(--wall-water) var(--mesh-a), transparent), transparent 68%),
+    radial-gradient(75% 62% at 20% 94%,
+      color-mix(in srgb, var(--wall-span) var(--mesh-b), transparent), transparent 66%),
     linear-gradient(165deg, var(--bg), var(--bg-deep));
 }
 .blob {
@@ -331,18 +340,18 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   transition: opacity .6s var(--ease);
 }
 .blob--1 {
-  background: radial-gradient(circle at 30% 30%, var(--accent-from), transparent 65%);
+  background: radial-gradient(circle at 30% 30%, var(--wall-haze), transparent 65%);
   top: -22vmax; left: -14vmax;
   animation: drift-1 26s ease-in-out infinite alternate;
 }
 .blob--2 {
-  background: radial-gradient(circle at 70% 40%, var(--accent-to), transparent 65%);
+  background: radial-gradient(circle at 70% 40%, var(--wall-water), transparent 65%);
   bottom: -26vmax; right: -16vmax;
   animation: drift-2 32s ease-in-out infinite alternate;
 }
 .blob--3 {
   background: radial-gradient(circle at 50% 50%,
-              color-mix(in srgb, var(--accent-from) 60%, var(--accent-to)), transparent 62%);
+              color-mix(in srgb, var(--wall-span) 60%, var(--wall-sky)), transparent 62%);
   top: 32%; left: 46%;
   width: 34vmax; height: 34vmax;
   animation: drift-3 24s ease-in-out infinite alternate;
@@ -386,14 +395,43 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   filter: blur(var(--bokeh-blur));
   pointer-events: none;
   background-image:
-    radial-gradient(circle at 12% 22%, var(--mesh-warm)   0 9%,  transparent 10%),
-    radial-gradient(circle at 78% 12%, var(--accent-to)   0 7%,  transparent 8%),
-    radial-gradient(circle at 90% 62%, var(--mesh-warm)   0 12%, transparent 13%),
-    radial-gradient(circle at 26% 78%, var(--accent-from) 0 10%, transparent 11%),
-    radial-gradient(circle at 58% 92%, var(--mesh-deep)   0 8%,  transparent 9%),
-    radial-gradient(circle at 44% 44%, var(--accent-to)   0 6%,  transparent 7%),
-    radial-gradient(circle at 6%  58%, var(--accent-from) 0 7%,  transparent 8%),
-    radial-gradient(circle at 68% 34%, var(--mesh-deep)   0 5%,  transparent 6%);
+    radial-gradient(circle at 12% 22%, var(--wall-haze)  0 9%,  transparent 10%),
+    radial-gradient(circle at 78% 12%, var(--wall-sky)   0 7%,  transparent 8%),
+    radial-gradient(circle at 90% 62%, var(--wall-span)  0 12%, transparent 13%),
+    radial-gradient(circle at 26% 78%, var(--wall-water) 0 10%, transparent 11%),
+    radial-gradient(circle at 58% 92%, var(--wall-haze)  0 8%,  transparent 9%),
+    radial-gradient(circle at 44% 44%, var(--wall-span)  0 6%,  transparent 7%),
+    radial-gradient(circle at 6%  58%, var(--wall-water) 0 7%,  transparent 8%),
+    radial-gradient(circle at 68% 34%, var(--wall-sky)   0 5%,  transparent 6%);
+}
+
+/* An actual photograph, if config.js names one. The drawn mesh stays as the
+   fallback and as the no-image default; a photo simply covers it.
+   Three states again, so the toggle wins in both directions. */
+:root[data-wallpaper] .backdrop {
+  background-image: var(--wallpaper);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-wallpaper]:not([data-theme="light"]) .backdrop {
+    background-image: var(--wallpaper-dark, var(--wallpaper));
+  }
+}
+:root[data-theme="dark"][data-wallpaper] .backdrop {
+  background-image: var(--wallpaper-dark, var(--wallpaper));
+}
+/* The drawn bokeh is redundant over a photo — a photo has its own — and the
+   vignette becomes a scrim, because a photograph behind 13px body text is
+   where this page's contrast gets spent. Raise --wall-scrim if your image is
+   busy; `node scripts/checks.js` will tell you when it is enough. */
+:root[data-wallpaper] .backdrop::after { display: none; }
+:root[data-wallpaper] .backdrop::before {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--bg) 72%, transparent),
+    color-mix(in srgb, var(--bg-deep) 88%, transparent));
+  opacity: var(--wall-scrim, 0.82);
 }
 
 /* ==================================================================
@@ -1457,6 +1495,24 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     /* ---------------- Accent ---------------- */
     if (theme.accentFrom) root.style.setProperty('--accent-from', theme.accentFrom);
     if (theme.accentTo)   root.style.setProperty('--accent-to', theme.accentTo);
+
+    /* ---------------- Wallpaper ----------------
+       Optional. Without it the drawn mesh is the wallpaper. The value lands
+       inside url("...") in a style attribute, so quotes, backslashes and
+       whitespace are stripped — they are the characters that could close the
+       string early. Parentheses are left alone: they are legal inside a
+       quoted url() and a data: URI needs them. */
+    var clean = function (u) { return String(u).replace(/["'\\\s]/g, ''); };
+    if (theme.wallpaper) {
+      root.style.setProperty('--wallpaper', 'url("' + clean(theme.wallpaper) + '")');
+      if (theme.wallpaperDark) {
+        root.style.setProperty('--wallpaper-dark', 'url("' + clean(theme.wallpaperDark) + '")');
+      }
+      if (theme.wallpaperScrim != null) {
+        root.style.setProperty('--wall-scrim', String(Number(theme.wallpaperScrim) || 0));
+      }
+      root.setAttribute('data-wallpaper', '');
+    }
 
     /* ---------------- Render ---------------- */
     var step = 70;                 // ms between staggered reveals
