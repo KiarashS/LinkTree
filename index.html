@@ -47,7 +47,7 @@
   --border:        rgba(15, 18, 45, 0.10);
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
-  --text-soft:     #434763;
+  --text-soft:     #2f3349;
   --text-faint:    #2a2f4a;   /* secondary ink; see the contrast check */
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
@@ -69,8 +69,12 @@
   /* Tahoe glass. The fill is deliberately thin — on this material the edge
      does the work, not the body — and the blur is what keeps text legible
      over a colourful wallpaper. */
-  --glass-fill:    rgba(255, 255, 255, 0.22);
-  --glass-edge:    blur(18px) saturate(185%) brightness(1.04);
+  --glass-fill:    rgba(255, 255, 255, 0.30);
+  /* Text plates — the footer and the posts label. Not buttons, and they sit
+     straight on the wallpaper with no card under them, so they carry enough
+     fill to hold dark ink over a dark patch of the artwork. */
+  --plate-fill:    rgba(255, 255, 255, 0.72);
+  --glass-edge:    blur(18px) saturate(140%) brightness(1.45);
   --lip-top:       rgba(255, 255, 255, 0.95);
   --lip-bottom:    rgba(255, 255, 255, 0.60);
   --lip-ring:      rgba(15, 18, 45, 0.10);
@@ -91,7 +95,7 @@
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
      instead of through the text. */
-  --pane:       rgba(255, 255, 255, 0.36);
+  --pane:       rgba(255, 255, 255, 0.34);
   --tip-bg:     rgba(255, 255, 255, 0.34);
   --modal-bg:   rgba(240, 242, 250, 0.52);
 
@@ -154,7 +158,8 @@
     --mesh-b:        34%;
     --vignette:      0.62;
     --wall-scrim:    0;
-    --glass-fill:    rgba(10, 11, 22, 0.12);
+    --glass-fill:    rgba(10, 11, 22, 0.06);
+    --plate-fill:    rgba(12, 14, 24, 0.55);
     --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
     --lip-top:       rgba(255, 255, 255, 0.55);
     --lip-bottom:    rgba(255, 255, 255, 0.18);
@@ -169,7 +174,7 @@
     --sh-drop:       rgba(0, 0, 0, 0.45);
     --bokeh-opacity: 1;
     --bokeh-blur:    10px;
-    --pane:          rgba(14, 15, 26, 0.24);
+    --pane:          rgba(14, 15, 26, 0.14);
     --tip-bg:        rgba(26, 27, 41, 0.34);
     --modal-bg:      rgba(17, 18, 28, 0.50);
     /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -210,7 +215,8 @@
   --mesh-b:        34%;
   --vignette:      0.62;
   --wall-scrim:    0;
-  --glass-fill:    rgba(10, 11, 22, 0.12);
+  --glass-fill:    rgba(10, 11, 22, 0.06);
+  --plate-fill:    rgba(12, 14, 24, 0.55);
   --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
   --lip-top:       rgba(255, 255, 255, 0.55);
   --lip-bottom:    rgba(255, 255, 255, 0.18);
@@ -225,7 +231,7 @@
   --sh-drop:       rgba(0, 0, 0, 0.45);
   --bokeh-opacity: 1;
   --bokeh-blur:    10px;
-  --pane:          rgba(14, 15, 26, 0.24);
+  --pane:          rgba(14, 15, 26, 0.14);
   --tip-bg:        rgba(26, 27, 41, 0.34);
   --modal-bg:      rgba(17, 18, 28, 0.50);
   /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -292,7 +298,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    descendant's backdrop-filter to that subtree. With the class dropped once
    it has played, a row's blur moves 13.6% of its pixels. */
 .card, .modal, .toast,
-.link, .social, .chip, .badge, .mail, .post {
+.link, .social, .chip, .badge, .mail, .post, .foot, .posts__head {
   /* The Tahoe edge. A thin bright lip along the top where light catches the
      bevel, a dimmer return along the bottom, a hairline ring holding the
      whole shape, and a tight dark line just inside the lip that reads as the
@@ -504,12 +510,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    via border-radius: inherit, so pills stay pills and rows stay rows.
    ------------------------------------------------------------------ */
 .link, .social, .chip, .badge, .mail, .post,
-.copy-btn, .mail__btn, .modal__close {
+.copy-btn, .mail__btn, .modal__close, .foot, .posts__head {
   position: relative;
 }
 .link::before, .social::before, .chip::before, .badge::before,
 .mail::before, .post::before, .copy-btn::before, .mail__btn::before,
-.modal__close::before {
+.modal__close::before, .foot::before, .posts__head::before {
   content: "";
   position: absolute;
   inset: -1px;                 /* cover the border box, not the padding box */
@@ -532,7 +538,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 .link::after, .social::after, .chip::after, .badge::after,
 .mail::after, .post::after, .copy-btn::after, .mail__btn::after,
-.modal__close::after {
+.modal__close::after, .foot::after, .posts__head::after {
   content: "";
   position: absolute;
   inset: 1px;
@@ -611,12 +617,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    ================================================================== */
 .card {
   width: min(100%, 512px);
-  padding: clamp(24px, 5vw, 38px) clamp(18px, 4vw, 30px) clamp(20px, 4vw, 28px);
+  padding: clamp(24px, 5vw, 34px) clamp(18px, 4vw, 30px) clamp(22px, 4vw, 30px);
   border-radius: var(--radius-lg);
   background-color: var(--pane);
   border: 1px solid var(--border);
   position: relative;
   isolation: isolate;
+}
+/* Everything the card no longer holds. Not a surface of its own — it only
+   sets the column width, so each row below is glass against the wallpaper. */
+.stack {
+  width: min(100%, 512px);
+  display: grid;
+  gap: 18px;
 }
 /* A wide specular that tracks the pointer across the whole pane, the way
    light slides over a curved sheet of glass. */
@@ -952,10 +965,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 
 /* ---------- Footer ---------- */
+/* A plate of its own now, not a ruled-off strip at the bottom of the card. */
+.foot, .posts__head { background-color: var(--plate-fill); }
 .foot {
-  margin-top: 26px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  padding: 11px 18px;
+  border-radius: 999px;
+  justify-self: center;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -1191,7 +1206,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .posts { margin-top: 22px; display: grid; gap: 10px; }
 .posts__head {
-  margin: 0 2px 2px;
+  margin: 0 0 2px;
+  justify-self: start;
+  padding: 5px 12px;
+  border-radius: 999px;
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: .09em;
@@ -1457,8 +1475,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   </noscript>
 
   <main class="card" id="card">
-    <!-- rendered from config.js -->
+    <!-- rendered from config.js: the profile only -->
   </main>
+
+  <!-- Everything else floats on the wallpaper as its own piece of glass. -->
+  <div class="stack" id="stack">
+    <!-- rendered from config.js -->
+  </div>
 
   <dialog class="modal" id="emailer" aria-labelledby="emailer-title">
     <!-- rendered from config.js -->
@@ -1681,13 +1704,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     if (profile.status)   badges += '<span class="badge"><span class="dot"></span>' + esc(profile.status) + '</span>';
     if (profile.location) badges += '<span class="badge">' + svg('pin') + esc(profile.location) + '</span>';
 
-    var html = '<section class="profile">' +
+    var profileHtml = '<section class="profile">' +
       '<div class="avatar-ring reveal" ' + delay() + '>' + avatar + '</div>' +
       '<h1 class="name reveal" ' + delay() + '>' + nameHtml + '</h1>' +
       (profile.handle  ? '<p class="handle reveal" ' + delay() + '>' + esc(profile.handle) + '</p>' : '') +
       taglineHtml +
       (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '') +
     '</section>';
+
+    /* The card holds the profile and nothing else now. Links, socials, posts
+       and the footer are siblings below it, each its own glass. */
+    var html = '';
 
     var socials = CFG.socials || [];
     if (socials.length) {
@@ -1765,7 +1792,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     '</footer>';
 
     var card = document.getElementById('card');
-    card.innerHTML = html;
+    var stack = document.getElementById('stack');
+    card.innerHTML = profileHtml;
+    stack.innerHTML = html;
 
     if (profile.name) document.title = profile.name + ' — Links';
 
@@ -1776,6 +1805,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
        leaves behind stops the glass rows refracting anything. Belt and braces
        on the timer, because animationend never fires in a backgrounded tab. */
     settleReveals(card);
+    settleReveals(stack);
     function settleReveals(root) {
       var pending = [].slice.call(root.querySelectorAll('.reveal'));
       if (root.classList && root.classList.contains('reveal')) pending.push(root);
@@ -2300,8 +2330,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           var section = document.createElement('section');
           section.className = 'posts reveal';
           section.innerHTML = html;
-          var foot = card.querySelector('.foot');
-          foot ? card.insertBefore(section, foot) : card.appendChild(section);
+          var foot = stack.querySelector('.foot');
+          foot ? stack.insertBefore(section, foot) : stack.appendChild(section);
           settleReveals(section);   // this one arrives after the first pass
         })
         .catch(function () { /* feed down or blocked: show nothing */ });

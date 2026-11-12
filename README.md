@@ -415,6 +415,20 @@ strong the drifting colour is. Lowering `--pane`'s alpha or raising
 `--blob-opacity` makes the page more atmospheric and less readable; the
 shipped values keep every row above 4.5:1 in both themes.
 
+### Layout
+
+The card holds the profile only — avatar, name, handle, typed roles and the
+status pill. Everything else (socials, link rows, posts, footer) sits below
+it in `.stack`, which is not a surface at all: it only sets the column width,
+so each row is glass directly against the wallpaper.
+
+Two pieces of text lost the card they used to sit on, and neither survives a
+photograph on its own: the footer and the posts label. They became small
+plates with their own `--plate-fill`, which is much denser than
+`--glass-fill`. They are not buttons, so the "clear glass" rule does not
+apply to them, and on a varied image no single ink works — dark ink fails
+over the dark part of the artwork, light ink over the bright part.
+
 ### Why the rows look like glass
 
 A pane only reads as glass when something uneven shows through it. Every
@@ -423,6 +437,14 @@ Tahoe-style edge — a bright lip along the top where light catches the bevel,
 a dimmer return along the bottom, a hairline ring, and a tight dark line just
 inside the lip that reads as the thickness. The body stays nearly empty on
 purpose; on this material the edge *is* the material.
+
+What lifts a row off a dark patch of wallpaper is **brightness in the
+backdrop filter**, not opacity. `--glass-edge` carries `brightness(1.45)` in
+light for exactly this: frosted glass scatters light forward, so it is the
+physical lever as well as the legible one, and it buys contrast without
+making the pane milky. Measured on this page, raising brightness from 1.04
+to 1.45 did as much for the link descriptions as a 0.12 step of fill, with
+none of the cloudiness.
 
 Each control also carries a **moulded bevel**, adapted from a glass-button
 design: a conic gradient whose dark arcs sit at opposite sides of the ring —
