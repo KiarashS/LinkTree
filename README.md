@@ -424,6 +424,25 @@ a dimmer return along the bottom, a hairline ring, and a tight dark line just
 inside the lip that reads as the thickness. The body stays nearly empty on
 purpose; on this material the edge *is* the material.
 
+Each control also carries a **moulded bevel**, adapted from a glass-button
+design: a conic gradient whose dark arcs sit at opposite sides of the ring —
+the parts of a raised edge turned away from the light — over a flat light
+ring for the rest, hollowed to a hairline with `mask-composite: exclude`. A
+second layer sweeps one band of light across the face in `mix-blend-mode:
+screen`, so it adds rather than covers.
+
+Both ride on registered `@property` angles (`--angle-1`, `--angle-2`).
+Registration is the whole trick: an unregistered custom property is a string
+to the engine, so a gradient built on one snaps between values instead of
+sweeping. On hover the conic rotates 50° and the sweep slides; on press the
+sweep tips.
+
+The radius comes from each control via `border-radius: inherit`, so pills
+stay pills and rows stay rows — the source design is pill-only. The toolbar
+chips are deliberately left out: that bar is one capsule with the chips
+riding inside it, and moulding each one turned it into three separate
+buttons.
+
 > **The trap, if you ever touch the entrance animation.** A row's
 > `backdrop-filter` only works if nothing above it is transformed — Chromium
 > confines a backdrop-filter to the subtree of the nearest transformed

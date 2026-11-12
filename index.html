@@ -75,6 +75,15 @@
   --lip-bottom:    rgba(255, 255, 255, 0.60);
   --lip-ring:      rgba(15, 18, 45, 0.10);
   --cast:          0 10px 28px rgba(16, 20, 55, 0.14), 0 2px 6px rgba(16, 20, 55, 0.10);
+  /* Bevel. The conic's dark arcs are the shaded sides of a moulded edge;
+     the linear under it is the lit remainder of the ring. */
+  --bevel-dark:    rgba(0, 0, 0, 0.50);
+  --bevel-light:   rgba(255, 255, 255, 0.55);
+  --sweep:         rgba(255, 255, 255, 0.50);
+  --sh-top-in:     rgba(0, 0, 0, 0.05);
+  --sh-bot-in:     rgba(255, 255, 255, 0.50);
+  --sh-glow-in:    rgba(255, 255, 255, 0.22);
+  --sh-drop:       rgba(0, 0, 0, 0.20);
   --bokeh-opacity: 0.24;
   --bokeh-blur:    3px;
   /* Flips the card's own mottle to dark ink on a light surface. */
@@ -151,6 +160,13 @@
     --lip-bottom:    rgba(255, 255, 255, 0.18);
     --lip-ring:      rgba(255, 255, 255, 0.16);
     --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+    --bevel-dark:    rgba(0, 0, 0, 0.62);
+    --bevel-light:   rgba(255, 255, 255, 0.30);
+    --sweep:         rgba(255, 255, 255, 0.30);
+    --sh-top-in:     rgba(0, 0, 0, 0.28);
+    --sh-bot-in:     rgba(255, 255, 255, 0.14);
+    --sh-glow-in:    rgba(255, 255, 255, 0.07);
+    --sh-drop:       rgba(0, 0, 0, 0.45);
     --bokeh-opacity: 1;
     --bokeh-blur:    10px;
     --pane:          rgba(14, 15, 26, 0.24);
@@ -200,6 +216,13 @@
   --lip-bottom:    rgba(255, 255, 255, 0.18);
   --lip-ring:      rgba(255, 255, 255, 0.16);
   --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --bevel-dark:    rgba(0, 0, 0, 0.62);
+  --bevel-light:   rgba(255, 255, 255, 0.30);
+  --sweep:         rgba(255, 255, 255, 0.30);
+  --sh-top-in:     rgba(0, 0, 0, 0.28);
+  --sh-bot-in:     rgba(255, 255, 255, 0.14);
+  --sh-glow-in:    rgba(255, 255, 255, 0.07);
+  --sh-drop:       rgba(0, 0, 0, 0.45);
   --bokeh-opacity: 1;
   --bokeh-blur:    10px;
   --pane:          rgba(14, 15, 26, 0.24);
@@ -285,10 +308,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   backdrop-filter: var(--glass-edge);
   -webkit-backdrop-filter: var(--glass-edge);
   box-shadow:
-    inset 0  1px   0 var(--lip-top),
-    inset 0  2px   1px -1px rgba(0, 0, 0, 0.10),
-    inset 0 -1px   0 var(--lip-bottom),
-    inset 0  0     0 1px var(--lip-ring),
+    inset 0  2px 2px var(--sh-top-in),      /* light stopped by the top edge */
+    inset 0 -2px 2px var(--sh-bot-in),      /* and returning off the bottom  */
+    inset 0  0   2px 4px var(--sh-glow-in), /* the glow inside the wall      */
+    inset 0  0   0 1px var(--lip-ring),
+    0 4px 2px -2px var(--sh-drop),
     var(--cast);
 }
 /* The card does NOT blur its own backdrop, deliberately. It used to, and that
@@ -457,6 +481,95 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .lens.is-ready { opacity: 1; }
 @media print { .lens { display: none; } }
 
+
+/* ------------------------------------------------------------------
+   The bevel, shared by every control.
+
+   Two layers on the same ring. A conic gradient whose dark arcs sit at
+   opposite sides of the edge — the parts of a moulded rim turned away from
+   the light — over a flat light ring for the rest. mask-composite: exclude
+   hollows the middle out so only a hairline survives. --angle-1 travels on
+   hover, which walks the shading around the rim the way tilting real glass
+   would.
+
+   Then a sweep: one band of light across the face, blended with screen so it
+   adds rather than covers, sliding on hover and tipping on press.
+
+   Not on the toolbar chips: that bar is one capsule with the chips riding
+   inside it, and moulding each one turned it into three separate buttons.
+
+   Both are inherited from the glass-button design in the attached archive.
+   Geometry is this page's, not that one's: the radius comes from the control
+   via border-radius: inherit, so pills stay pills and rows stay rows.
+   ------------------------------------------------------------------ */
+.link, .social, .badge, .mail, .post,
+.copy-btn, .mail__btn, .modal__close {
+  position: relative;
+}
+.link::before, .social::before, .badge::before,
+.mail::before, .post::before, .copy-btn::before, .mail__btn::before,
+.modal__close::before {
+  content: "";
+  position: absolute;
+  inset: -1px;                 /* cover the border box, not the padding box */
+  border-radius: inherit;
+  padding: 1px;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    conic-gradient(from var(--angle-1) at 50% 50%,
+      var(--bevel-dark), transparent 5% 40%,
+      var(--bevel-dark) 50%, transparent 60% 95%,
+      var(--bevel-dark)),
+    linear-gradient(180deg, var(--bevel-light), var(--bevel-light));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  transition: --angle-1 500ms ease;
+}
+.link::after, .social::after, .badge::after,
+.mail::after, .post::after, .copy-btn::after, .mail__btn::after,
+.modal__close::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(var(--angle-2),
+    transparent 0%, var(--sweep) 40% 50%, transparent 55%);
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  transition: background-position 500ms var(--ease), --angle-2 500ms var(--ease);
+}
+.link:hover::before, .social:hover::before,
+.mail:hover::before, .post:hover::before, .copy-btn:hover::before,
+.mail__btn:hover::before, .modal__close:hover::before { --angle-1: -125deg; }
+.link:hover::after, .social:hover::after,
+.mail:hover::after, .post:hover::after, .copy-btn:hover::after,
+.mail__btn:hover::after, .modal__close:hover::after { background-position: 25% 50%; }
+.link:active::after, .social:active::after,
+.mail:active::after, .post:active::after, .copy-btn:active::after,
+.mail__btn:active::after, .modal__close:active::after {
+  background-position: 50% 15%;
+  --angle-2: -15deg;
+}
+/* Touch has no hover, so the travel would only ever fire on tap. */
+@media (hover: none) and (pointer: coarse) {
+  .link::before, .social::before, .badge::before,
+  .mail::before, .post::before, .copy-btn::before, .mail__btn::before,
+  .modal__close::before { --angle-1: -75deg; }
+  .link::after, .social::after, .badge::after,
+  .mail::after, .post::after, .copy-btn::after, .mail__btn::after,
+  .modal__close::after { --angle-2: -45deg; }
+}
+/* The featured row draws the accent ring in that slot instead. */
+.link--featured::before { display: none; }
+
 /* ==================================================================
    4. Top bar (theme + share)
    ================================================================== */
@@ -537,6 +650,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   box-shadow: 0 0 0 1px var(--border), 0 12px 34px color-mix(in srgb, var(--accent-from) 28%, transparent);
 }
 @property --spin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+/* The bevel's two travelling angles. Registering them is what lets a conic
+   and a linear gradient animate at all — an unregistered custom property is
+   a string to the engine, so it snaps instead of sweeping. */
+@property --angle-1 { syntax: "<angle>"; inherits: false; initial-value: -75deg; }
+@property --angle-2 { syntax: "<angle>"; inherits: false; initial-value: -45deg; }
 @keyframes spin { to { --spin: 360deg; } }
 /* Fallback for engines without @property: rotate the element itself. */
 @supports not (background: conic-gradient(from var(--spin, 0deg), red, blue)) {
@@ -705,15 +823,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   transition: transform .45s var(--spring), color .25s, border-color .25s;
 }
 .social svg { width: 19px; height: 19px; position: relative; z-index: 1; transition: transform .35s var(--ease); }
-.social::before {
-  content: "";
-  position: absolute; inset: 0;
-  background: var(--hover-fill);
-  opacity: 0;
-  transition: opacity .3s var(--ease);
-}
 .social:hover { transform: translateY(-4px); color: var(--text); border-color: var(--border-strong); }
-.social:hover::before { opacity: 1; }
 .social:hover svg { transform: scale(1.12); }
 .social:active { transform: translateY(-1px) scale(.9); transition-duration: .1s; }
 
@@ -737,36 +847,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   isolation: isolate;
   transition: transform .45s var(--spring), background-color .3s, border-color .3s, box-shadow .4s var(--ease);
 }
-/* Cursor-following spotlight. */
-.link::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(240px circle at var(--mx) var(--my),
-              var(--hover-glow), transparent 70%);
-  opacity: 0;
-  transition: opacity .35s var(--ease);
-  z-index: -1;
-}
-/* Diagonal sheen sweep on hover. */
-.link::after {
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0;
-  left: -60%;
-  width: 45%;
-  background: linear-gradient(100deg, transparent, var(--sheen), transparent);
-  transform: skewX(-18deg);
-  opacity: 0;
-  z-index: -1;
-}
 .link:hover {
   transform: translateY(-3px);
   background-color: var(--surface-hover);
   border-color: var(--border-strong);
 }
-.link:hover::before { opacity: 1; }
-.link:hover::after { opacity: .5; animation: sweep .85s var(--ease); }
 @keyframes sweep { to { left: 115%; } }
 .link:active { transform: translateY(-1px) scale(.975); transition-duration: .1s; }
 
