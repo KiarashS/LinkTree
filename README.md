@@ -439,9 +439,9 @@ sweep tips.
 
 The radius comes from each control via `border-radius: inherit`, so pills
 stay pills and rows stay rows — the source design is pill-only. Every
-control carries it, the toolbar chips included; that makes the bar read as
-three buttons in a tray rather than one capsule with chips inside it, which
-is the intended look here.
+control carries it, the toolbar chips included. There is no bar behind them
+any more: the capsule used to be the glass with the chips riding inside it,
+and now each chip is its own puck with its own fill, blur and drop shadow.
 
 > **The trap, if you ever touch the entrance animation.** A row's
 > `backdrop-filter` only works if nothing above it is transformed — Chromium

@@ -291,8 +291,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    the transform the entrance animation left on the <li>, which confines a
    descendant's backdrop-filter to that subtree. With the class dropped once
    it has played, a row's blur moves 13.6% of its pixels. */
-.card, .toolbar, .modal, .toast,
-.link, .social, .badge, .mail, .post, .chip-well {
+.card, .modal, .toast,
+.link, .social, .chip, .badge, .mail, .post {
   /* The Tahoe edge. A thin bright lip along the top where light catches the
      bevel, a dimmer return along the bottom, a hairline ring holding the
      whole shape, and a tight dark line just inside the lip that reads as the
@@ -576,15 +576,15 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    ================================================================== */
 /* The controls cluster into one floating capsule rather than sitting as
    separate buttons — the glass is the bar, the chips ride inside it. */
+/* No bar: three separate pucks. The capsule used to be the glass and the
+   chips rode inside it; now each chip is its own piece, so the container is
+   nothing but a flex row that positions them. */
 .toolbar {
   position: fixed;
   top: max(16px, env(safe-area-inset-top));
   right: 16px;
   display: flex;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
+  gap: 8px;
   z-index: 10;
 }
 .chip {
@@ -596,7 +596,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   color: var(--text-soft);
   transition: transform .4s var(--spring), background-color .3s, color .3s;
 }
-.chip:hover { color: var(--text); background-color: var(--surface-hover); }
+.chip:hover { color: var(--text); }
 .chip:active { transform: scale(.88); transition-duration: .1s; }
 .chip svg { width: 19px; height: 19px; }
 #theme svg { display: none; }
