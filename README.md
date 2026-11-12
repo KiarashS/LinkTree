@@ -454,25 +454,6 @@ That is also the physically honest lever — frosted glass scatters light, it
 does not add paint — and it buys contrast with no milkiness, which an opacity
 fill cannot.
 
-Each control also carries a **moulded bevel**, adapted from a glass-button
-design: a conic gradient whose dark arcs sit at opposite sides of the ring —
-the parts of a raised edge turned away from the light — over a flat light
-ring for the rest, hollowed to a hairline with `mask-composite: exclude`. A
-second layer sweeps one band of light across the face in `mix-blend-mode:
-screen`, so it adds rather than covers.
-
-Both ride on registered `@property` angles (`--angle-1`, `--angle-2`).
-Registration is the whole trick: an unregistered custom property is a string
-to the engine, so a gradient built on one snaps between values instead of
-sweeping. On hover the conic rotates 50° and the sweep slides; on press the
-sweep tips.
-
-The radius comes from each control via `border-radius: inherit`, so pills
-stay pills and rows stay rows — the source design is pill-only. Every
-control carries it, the toolbar chips included. There is no bar behind them
-any more: the capsule used to be the glass with the chips riding inside it,
-and now each chip is its own puck with its own fill, blur and drop shadow.
-
 > **The trap, if you ever touch the entrance animation.** A row's
 > `backdrop-filter` only works if nothing above it is transformed — Chromium
 > confines a backdrop-filter to the subtree of the nearest transformed
@@ -499,8 +480,7 @@ not the obvious one. Make the rows clearer and the first thing to fail is the
 card. That is why `scripts/checks.js` opens the dialog and measures inside
 it, in a second pass: while the dialog is open its `::backdrop` dims
 everything behind, so the card and the modal cannot be read together. No control has a
-border either: the bevel is the only edge, which also removed a hover bug
-where `.social`'s leftover `overflow: hidden` clipped the ring. There is no
+border either; the hairline ring in the shadow stack is the only edge. There is no
 texture layer on the card or the backdrop — no grain, no mottle, no bands.
 Everything the glass bends is the wallpaper itself.
 
