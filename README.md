@@ -422,6 +422,8 @@ status pill. Everything else (socials, link rows, posts, footer) sits below
 it in `.stack`, which is not a surface at all: it only sets the column width,
 so each row is glass directly against the wallpaper.
 
+The status pill floats too, so it is measured like everything else.
+
 Two pieces of text lost the card they used to sit on, and neither survives a
 photograph on its own: the footer and the posts label. They became small
 plates with their own `--plate-fill`, which is much denser than
@@ -438,13 +440,19 @@ a dimmer return along the bottom, a hairline ring, and a tight dark line just
 inside the lip that reads as the thickness. The body stays nearly empty on
 purpose; on this material the edge *is* the material.
 
-What lifts a row off a dark patch of wallpaper is **brightness in the
-backdrop filter**, not opacity. `--glass-edge` carries `brightness(1.45)` in
-light for exactly this: frosted glass scatters light forward, so it is the
-physical lever as well as the legible one, and it buys contrast without
-making the pane milky. Measured on this page, raising brightness from 1.04
-to 1.45 did as much for the link descriptions as a 0.12 step of fill, with
-none of the cloudiness.
+**The buttons have no fill at all.** `--glass-fill` is `transparent`; what
+keeps text on them legible is `--glass-edge`, the backdrop filter.
+
+The two themes pull in opposite directions, and this is the part worth
+remembering. Light **brightens** what is behind the glass — `brightness(2.05)`
+— and dark **darkens** it — `brightness(0.75)`. Brightening a dark backdrop
+makes things worse, because it closes the gap with pale ink: measured with
+no fill, dark went 3.35:1 at `1.45` down to **1.59:1** at `2.35`, while light
+went 2.86 up to 5.38 over the same range.
+
+That is also the physically honest lever — frosted glass scatters light, it
+does not add paint — and it buys contrast with no milkiness, which an opacity
+fill cannot.
 
 Each control also carries a **moulded bevel**, adapted from a glass-button
 design: a conic gradient whose dark arcs sit at opposite sides of the ring —
@@ -490,7 +498,9 @@ not the obvious one. Make the rows clearer and the first thing to fail is the
 `--text-soft` — a different surface and a different ink from anything on the
 card. That is why `scripts/checks.js` opens the dialog and measures inside
 it, in a second pass: while the dialog is open its `::backdrop` dims
-everything behind, so the card and the modal cannot be read together. There is no
+everything behind, so the card and the modal cannot be read together. No control has a
+border either: the bevel is the only edge, which also removed a hover bug
+where `.social`'s leftover `overflow: hidden` clipped the ring. There is no
 texture layer on the card or the backdrop — no grain, no mottle, no bands.
 Everything the glass bends is the wallpaper itself.
 

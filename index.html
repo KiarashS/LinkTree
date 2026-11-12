@@ -69,12 +69,17 @@
   /* Tahoe glass. The fill is deliberately thin — on this material the edge
      does the work, not the body — and the blur is what keeps text legible
      over a colourful wallpaper. */
-  --glass-fill:    rgba(255, 255, 255, 0.30);
+  /* Completely clear: no fill at all. What keeps text legible is the
+     backdrop filter, and the two themes pull in opposite directions —
+     light brightens what is behind the glass, dark darkens it. Measured,
+     brightening a dark backdrop made it worse: 3.35 at 1.45 down to 1.59
+     at 2.35, because it closes the gap with pale ink. */
+  --glass-fill:    transparent;
   /* Text plates — the footer and the posts label. Not buttons, and they sit
      straight on the wallpaper with no card under them, so they carry enough
      fill to hold dark ink over a dark patch of the artwork. */
   --plate-fill:    rgba(255, 255, 255, 0.72);
-  --glass-edge:    blur(18px) saturate(140%) brightness(1.45);
+  --glass-edge:    blur(20px) saturate(150%) brightness(2.05);
   --lip-top:       rgba(255, 255, 255, 0.95);
   --lip-bottom:    rgba(255, 255, 255, 0.60);
   --lip-ring:      rgba(15, 18, 45, 0.10);
@@ -158,9 +163,9 @@
     --mesh-b:        34%;
     --vignette:      0.62;
     --wall-scrim:    0;
-    --glass-fill:    rgba(10, 11, 22, 0.06);
+    --glass-fill:    transparent;
     --plate-fill:    rgba(12, 14, 24, 0.55);
-    --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
+    --glass-edge:    blur(20px) saturate(150%) brightness(0.75);
     --lip-top:       rgba(255, 255, 255, 0.55);
     --lip-bottom:    rgba(255, 255, 255, 0.18);
     --lip-ring:      rgba(255, 255, 255, 0.16);
@@ -215,9 +220,9 @@
   --mesh-b:        34%;
   --vignette:      0.62;
   --wall-scrim:    0;
-  --glass-fill:    rgba(10, 11, 22, 0.06);
+  --glass-fill:    transparent;
   --plate-fill:    rgba(12, 14, 24, 0.55);
-  --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
+  --glass-edge:    blur(20px) saturate(150%) brightness(0.75);
   --lip-top:       rgba(255, 255, 255, 0.55);
   --lip-bottom:    rgba(255, 255, 255, 0.18);
   --lip-ring:      rgba(255, 255, 255, 0.16);
@@ -796,12 +801,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 12px 5px 10px;
+  padding: 6px 13px 6px 11px;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text-soft);
   background-color: var(--glass-fill);
-  border: 1px solid var(--border);
   border-radius: 999px;
 }
 .badge svg { width: 13px; height: 13px; opacity: .8; }
@@ -825,19 +829,22 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   gap: 10px;
   margin: 18px 0 4px;
 }
+/* No overflow clip and no border. The clip was left over from a hover-fill
+   pseudo that no longer exists, and it cut the bevel ring — which sits at
+   inset -1px to cover the border box — leaving a part-ring that went dark
+   and patchy as the conic rotated on hover. The border was the second edge
+   underneath it. The bevel is the edge now. */
 .social {
   width: 46px; height: 46px;
   display: grid; place-items: center;
   border-radius: 999px;
   color: var(--text-soft);
   background-color: var(--glass-fill);
-  border: 1px solid var(--border);
   position: relative;
-  overflow: hidden;
-  transition: transform .45s var(--spring), color .25s, border-color .25s;
+  transition: transform .45s var(--spring), color .25s;
 }
 .social svg { width: 19px; height: 19px; position: relative; z-index: 1; transition: transform .35s var(--ease); }
-.social:hover { transform: translateY(-4px); color: var(--text); border-color: var(--border-strong); }
+.social:hover { transform: translateY(-4px); color: var(--text); }
 .social:hover svg { transform: scale(1.12); }
 .social:active { transform: translateY(-1px) scale(.9); transition-duration: .1s; }
 
@@ -853,10 +860,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 14px 14px 15px;
+  padding: 15px 15px 15px 16px;
   border-radius: var(--radius);
   background-color: var(--glass-fill);
-  border: 1px solid var(--border);
   overflow: hidden;
   isolation: isolate;
   transition: transform .45s var(--spring), background-color .3s, border-color .3s, box-shadow .4s var(--ease);
@@ -932,17 +938,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .copy-btn.is-done { color: #22c55e; }
 
 /* Featured link: animated gradient border. */
-/* No border at all on a featured row, rather than a transparent one.
-   A 1px transparent border still paints the row's own fill and — the part
-   background-clip cannot reach — its backdrop-filter result, right out to
-   the border box. That showed as a pale hairline outside the gradient ring:
-   measured rgb(248,248,254) against the ring's rgb(123,94,255). The padding
-   takes the border's 1px back so nothing moves. */
-.link--featured {
-  background-color: var(--glass-fill);
-  border-width: 0;
-  padding: 15px 15px 15px 16px;
-}
+/* Every row is borderless now, so the featured one needs no special case
+   beyond its accent ring. A 1px transparent border would still paint the
+   row's fill and its backdrop-filter result out to the border box, which
+   showed as a pale hairline outside the gradient. */
+.link--featured { background-color: var(--glass-fill); }
 .link--featured::marker { content: ""; }
 .link--featured .border-glow {
   position: absolute;
@@ -1065,7 +1065,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: grid; place-items: center;
   border-radius: 50%;
   color: var(--text-soft);
-  border: 1px solid var(--border);
   background-color: var(--glass-fill);
   transition: transform .3s var(--ease), background-color .25s, color .25s;
 }
@@ -1088,10 +1087,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 12px 13px 14px;
+  padding: 14px 13px 14px 15px;
   border-radius: var(--radius);
   background-color: var(--glass-fill);
-  border: 1px solid var(--border);
   transition: transform .35s var(--ease), background-color .25s, border-color .25s;
   animation: mail-in .5s var(--ease) backwards;
   animation-delay: calc(var(--i, 0) * 65ms + 120ms);
@@ -1175,8 +1173,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* On phones, reclaim the space taken by the decorative arrow so long
    values (an email address, say) still fit on one line. */
 @media (max-width: 430px) {
-  .link { gap: 12px; padding: 13px; }
-  .link--featured { padding: 14px; }     /* keeps the borderless row aligned */
+  .link { gap: 12px; padding: 14px; }
   .link__arrow { display: none; }
 }
 
@@ -1222,10 +1219,9 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   align-items: baseline;
   gap: 12px;
   min-width: 0;
-  padding: 11px 14px;
+  padding: 12px 15px;
   border-radius: var(--radius-sm);
   background-color: var(--glass-fill);
-  border: 1px solid var(--border);
   background-image:
     radial-gradient(150% 60px at 22% 0%, var(--spec), transparent 72%),
     linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
@@ -1709,12 +1705,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       '<h1 class="name reveal" ' + delay() + '>' + nameHtml + '</h1>' +
       (profile.handle  ? '<p class="handle reveal" ' + delay() + '>' + esc(profile.handle) + '</p>' : '') +
       taglineHtml +
-      (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '') +
     '</section>';
 
     /* The card holds the profile and nothing else now. Links, socials, posts
        and the footer are siblings below it, each its own glass. */
-    var html = '';
+    var html = (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '');
 
     var socials = CFG.socials || [];
     if (socials.length) {

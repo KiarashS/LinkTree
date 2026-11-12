@@ -49,7 +49,10 @@ const MIN_CONTRAST = 4.5;          // WCAG AA for normal-size text
 /* aria-hidden ones are decoration — the separator dots and the footer heart —
    and a contrast floor is about text people have to read. */
 const notHidden = (s) => s + ':not([aria-hidden="true"])';
-const ON_CARD = ['.link__desc', '.handle', '.post__date', '.posts__head', '.foot span']
+/* .badge moved out of the card and onto the wallpaper, so it needs
+   measuring like everything else that floats. */
+const ON_CARD = ['.link__desc', '.handle', '.post__date', '.posts__head',
+                 '.foot span', '.badge']
   .map(notHidden).join(',');
 /* The chooser is its own glass surface, so making it clearer is a separate
    risk from making the rows clearer. These go unmeasured unless the dialog
