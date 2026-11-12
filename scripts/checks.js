@@ -16,7 +16,32 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-const PAGE = 'file://' + path.resolve(__dirname, '..', 'index.html');
+/* Served over HTTP rather than opened from disk. The refraction canvas
+   loads the wallpaper as a WebGL texture, and a file:// page cannot: the
+   image is treated as a foreign origin and the load is refused. On file://
+   the lens silently does nothing, so every measurement below would be of a
+   page the visitor never sees. */
+const ROOT = path.resolve(__dirname, '..');
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
+                '.webp': 'image/webp', '.jpg': 'image/jpeg', '.png': 'image/png',
+                '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.xml': 'application/xml' };
+let PAGE = null;
+function serve() {
+  const http = require('http');
+  const server = http.createServer((req, res) => {
+    const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
+    const file = path.join(ROOT, rel);
+    if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+      res.writeHead(404); return res.end();
+    }
+    res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    fs.createReadStream(file).pipe(res);
+  });
+  return new Promise((ok) => server.listen(0, '127.0.0.1', () => {
+    PAGE = `http://127.0.0.1:${server.address().port}/index.html`;
+    ok(server);
+  }));
+}
 const WIDTHS = [320, 390, 430, 900];
 const MIN_CONTRAST = 4.5;          // WCAG AA for normal-size text
 /* Everything painted in the muted ink. They sit on different surfaces — a
@@ -52,8 +77,12 @@ const contrast = (a, b) => {
 (async () => {
   /* CHROMIUM_PATH lets you point at a browser you already have rather than
      letting Playwright download its own — handy in a sandbox or on CI. */
-  const browser = await chromium.launch(
-    process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
+  const site = await serve();
+  /* SwiftShader so WebGL exists in headless — without it the lens is absent
+     and the contrast readings would again be of the wrong page. */
+  const browser = await chromium.launch(Object.assign(
+    { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
+    process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}));
 
   /* ---- 1. Text stays legible in both themes ----------------------
      Sampled from a screenshot rather than computed from CSS: the rows
@@ -244,6 +273,42 @@ const contrast = (a, b) => {
     await page.waitForTimeout(2600);
   }
 
+  /* The refraction canvas is drawing.
+     It fails quietly in several ways — no WebGL, a shader that will not
+     compile, a texture that will not load — and every one of them leaves a
+     page that still looks fine, just flat. So check the canvas said it was
+     ready, and that hiding it actually changes pixels inside the card. */
+  const lensReady = await page.evaluate(() => {
+    const c = document.getElementById('lens');
+    return !c ? 'absent' : (c.classList.contains('is-ready') ? 'ready' : 'idle');
+  });
+  if (lensReady === 'absent') {
+    ok('no refraction canvas on this page');
+  } else if (PNG) {
+    const clip = await page.evaluate(() => {
+      const r = document.getElementById('card').getBoundingClientRect();
+      return { x: Math.round(r.left + 4), y: Math.round(r.top + 8),
+               width: 60, height: Math.round(r.height - 16) };
+    });
+    const on = PNG.sync.read(await page.screenshot({ clip }));
+    await page.addStyleTag({ content: '.lens{display:none !important}' });
+    await page.waitForTimeout(250);
+    const off = PNG.sync.read(await page.screenshot({ clip }));
+    let moved = 0;
+    for (let i = 0; i < on.data.length; i += 4) {
+      if (Math.abs(on.data[i] - off.data[i]) > 2 ||
+          Math.abs(on.data[i + 1] - off.data[i + 1]) > 2) moved++;
+    }
+    const pct = (100 * moved / (on.data.length / 4)).toFixed(1);
+    /* 2%: the bend is confined to the rim, so even a working lens only
+       moves a slice of this strip. Absent, it moves exactly none of it. */
+    lensReady === 'ready' && moved > on.data.length / 4 * 0.02
+      ? ok(`refraction lens is drawing (${pct}% of the card edge)`)
+      : bad(`refraction lens is not drawing (${lensReady}, ${pct}%)`);
+    await page.reload();
+    await page.waitForTimeout(3000);
+  }
+
   /* The vCard may only carry destinations the page is actually offering.
      It used to be built from seo.sameAs, which lists canonical profiles
      whether or not they are linked — so commenting a row out of config.js
@@ -370,6 +435,7 @@ const contrast = (a, b) => {
   await page.close();
 
   await browser.close();
+  site.close();
   console.log(failures ? `\n${failures} check(s) failed` : '\nall checks passed');
   process.exit(failures ? 1 : 0);
 })();

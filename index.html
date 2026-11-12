@@ -438,6 +438,25 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   opacity: var(--wall-scrim);
 }
 
+/* The refraction layer sits between the wallpaper and the card. It paints
+   the same wallpaper the backdrop does, but bent through the card's shape —
+   so the card magnifies and displaces what is behind it the way a thick
+   lens does, which no amount of backdrop-filter can imitate. Hidden until
+   the script says it has something to show. */
+.lens {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s var(--ease);
+}
+.lens.is-ready { opacity: 1; }
+@media print { .lens { display: none; } }
+
 /* ==================================================================
    4. Top bar (theme + share)
    ================================================================== */
@@ -1295,6 +1314,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     <div class="blob blob--3"></div>
   </div>
 
+  <!-- Refraction layer. Only used when a wallpaper image is set and WebGL is
+       available; otherwise it stays empty and the CSS glass is the whole
+       effect. See `lens` in the script below. -->
+  <canvas class="lens" id="lens" aria-hidden="true"></canvas>
+
   <div class="toolbar">
     <button class="chip" id="share" type="button" aria-label="Share this page" data-tip="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1925,6 +1949,209 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
       showToast('Contact card downloaded');
     });
+
+    /* ---------------- Refraction lens ----------------
+       A thick sheet of glass does two things CSS cannot: it magnifies what
+       is behind it, and it bends hardest at the rim, where the glass is
+       thickest. backdrop-filter only blurs and tints — the image behind a
+       row never actually moves. This draws the wallpaper again on a canvas
+       under the card, displaced through the card's own rounded rectangle,
+       so the artwork visibly swims at the edges.
+
+       Adapted from the WebGL approach in Shingi Dad's "Liquid Glass Shader"
+       (codepen.io/shingidad/pen/jEPxMgW). That one follows the pointer with
+       a squircle and samples a photograph; this one is pinned to the card's
+       rect, uses a rounded-rectangle distance field so the corner radius
+       matches the DOM, and draws only when something moves.
+
+       Entirely optional: no wallpaper image, no WebGL, or a context that
+       fails to build, and the canvas stays empty behind the CSS glass. */
+    (function lens() {
+      var cv = document.getElementById('lens');
+      var card = document.getElementById('card');
+      if (!cv || !card || !root.hasAttribute('data-wallpaper')) return;
+
+      var gl = null;
+      try {
+        gl = cv.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: false });
+      } catch (e) { /* no WebGL: the CSS glass is already the fallback */ }
+      if (!gl) return;
+
+      var VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+      var FS = [
+        'precision highp float;',
+        'uniform vec2 uRes;',          // canvas size, device px
+        'uniform vec4 uRect;',         // card: centre xy, half size xy
+        'uniform float uRadius;',      // corner radius
+        'uniform float uBend;',        // how far the rim displaces, px
+        'uniform float uRim;',         // rim light strength
+        'uniform vec4 uCover;',        // texture cover transform: scale xy, offset xy
+        'uniform sampler2D uTex;',
+        // Signed distance to a rounded rectangle: negative inside.
+        'float sdRound(vec2 p, vec2 b, float r){',
+        '  vec2 q = abs(p) - b + r;',
+        '  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;',
+        '}',
+        'vec4 pick(vec2 px){',
+        '  vec2 uv = px / uRes * uCover.xy + uCover.zw;',
+        '  return texture2D(uTex, uv);',
+        '}',
+        'void main(){',
+        '  vec2 px = gl_FragCoord.xy;',
+        '  vec2 rel = px - uRect.xy;',
+        '  float d = sdRound(rel, uRect.zw, uRadius);',
+        '  if (d > 0.0) { discard; }',   // outside the card: let CSS show through
+        // Thickness profile. A real lens is flat in the middle and steep at
+        // the rim, so the displacement rides on the distance to the edge.
+        '  float t = clamp(-d / uBend, 0.0, 1.0);',
+        '  float profile = pow(1.0 - t, 2.5);',
+        // Surface normal from the gradient of the distance field.
+        '  vec2 e = vec2(1.0, 0.0);',
+        '  vec2 n = normalize(vec2(',
+        '    sdRound(rel + e.xy, uRect.zw, uRadius) - sdRound(rel - e.xy, uRect.zw, uRadius),',
+        '    sdRound(rel + e.yx, uRect.zw, uRadius) - sdRound(rel - e.yx, uRect.zw, uRadius)',
+        '  ) + 1e-6);',
+        '  vec2 bent = px - n * profile * uBend;',
+        // A few taps across the bend soften the sample the way thick glass does.
+        '  vec4 c = vec4(0.0);',
+        '  for (int i = -2; i <= 2; i++) {',
+        '    c += pick(bent + n * float(i) * 1.5);',
+        '  }',
+        '  c /= 5.0;',
+        // Rim light: brightest in the last couple of pixels before the edge.
+        '  float rim = smoothstep(0.0, 1.0, pow(1.0 - clamp(-d / 14.0, 0.0, 1.0), 3.0));',
+        '  c.rgb = clamp(c.rgb + rim * uRim, 0.0, 1.0);',
+        '  gl_FragColor = vec4(c.rgb, 1.0);',
+        '}'
+      ].join('\n');
+
+      function build(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) { gl.deleteShader(sh); return null; }
+        return sh;
+      }
+      var vs = build(gl.VERTEX_SHADER, VS), fs = build(gl.FRAGMENT_SHADER, FS);
+      if (!vs || !fs) return;
+      var prog = gl.createProgram();
+      gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+      gl.useProgram(prog);
+
+      var buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+      var U = {};
+      ['uRes','uRect','uRadius','uBend','uRim','uCover','uTex'].forEach(function (n) {
+        U[n] = gl.getUniformLocation(prog, n);
+      });
+
+      var tex = gl.createTexture();
+      var texW = 0, texH = 0, ready = false;
+
+      /* The canvas has to show the wallpaper at exactly the scale CSS paints
+         it, or the bend would not line up with the image around the card.
+         This is `background-size: cover; background-position: center` in
+         arithmetic. */
+      function cover(w, h) {
+        if (!texW || !texH) return [1, 1, 0, 0];
+        var s = Math.max(w / texW, h / texH);
+        var dw = texW * s, dh = texH * s;
+        return [w / dw, h / dh, (dw - w) / 2 / dw, (dh - h) / 2 / dh];
+      }
+
+      function draw() {
+        if (!ready) return;
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
+        if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+        gl.viewport(0, 0, w, h);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        var r = card.getBoundingClientRect();
+        var radius = parseFloat(getComputedStyle(card).borderRadius) || 32;
+        // WebGL's y runs up from the bottom; getBoundingClientRect's runs down.
+        var cx = (r.left + r.width / 2) * dpr;
+        var cy = (cv.clientHeight - (r.top + r.height / 2)) * dpr;
+
+        gl.uniform2f(U.uRes, w, h);
+        gl.uniform4f(U.uRect, cx, cy, r.width / 2 * dpr, r.height / 2 * dpr);
+        gl.uniform1f(U.uRadius, radius * dpr);
+        gl.uniform1f(U.uBend, 26 * dpr);
+        gl.uniform1f(U.uRim, 0.10);
+        var c = cover(w, h);
+        gl.uniform4f(U.uCover, c[0], c[1], c[2], c[3]);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform1i(U.uTex, 0);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        cv.classList.add('is-ready');
+      }
+
+      /* Which wallpaper is showing depends on the resolved theme, so this
+         re-reads the custom property rather than the config value. */
+      function currentUrl() {
+        var cs = getComputedStyle(root);
+        var dark = matchMedia('(prefers-color-scheme: dark)').matches;
+        var mode = root.getAttribute('data-theme');
+        var want = (mode === 'dark' || (mode !== 'light' && dark))
+          ? (cs.getPropertyValue('--wallpaper-dark') || cs.getPropertyValue('--wallpaper'))
+          : cs.getPropertyValue('--wallpaper');
+        var m = String(want).match(/url\(\s*"?([^")]+)"?\s*\)/);
+        return m ? m[1] : null;
+      }
+
+      var loadedFor = null;
+      function load() {
+        var url = currentUrl();
+        if (!url || url === loadedFor) { draw(); return; }
+        loadedFor = url;
+        var img = new Image();
+        /* No crossOrigin: the wallpaper is same-origin, and asking for CORS
+           makes the load fail from file:// and from any host that does not
+           answer with the header. Tainting the canvas costs nothing here
+           because the pixels are only ever drawn, never read back. */
+        img.onload = function () {
+          texW = img.naturalWidth; texH = img.naturalHeight;
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          ready = true;
+          draw();
+        };
+        img.onerror = function () { loadedFor = null; };
+        img.src = url;
+      }
+
+      /* Nothing here animates, so it draws on change rather than on a frame
+         loop — no rAF running forever behind a static page. */
+      var queued = false;
+      function schedule() {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(function () { queued = false; draw(); });
+      }
+      window.addEventListener('resize', schedule, { passive: true });
+      window.addEventListener('scroll', schedule, { passive: true });
+      if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(card);
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', load);
+      new MutationObserver(load).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+      load();
+      // The card grows as the entrance animation lands and as posts arrive.
+      setTimeout(schedule, 900);
+      setTimeout(schedule, 2600);
+    })();
 
     /* ---------------- Latest posts ----------------
        Pulled live from the blog's Atom feed. Entirely optional: any failure

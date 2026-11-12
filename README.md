@@ -325,6 +325,36 @@ are here at the repository owner's decision. No licence accompanies them.
 If you are forking this, replace them with artwork you have the right to
 publish rather than inheriting that choice.
 
+#### Refraction
+
+With a wallpaper set, a WebGL canvas sits between it and the card and redraws
+the same image bent through the card's own rounded rectangle. Real glass does
+two things `backdrop-filter` cannot: it **magnifies** what is behind it, and
+it bends hardest at the rim where the glass is thickest. A backdrop filter
+only blurs and tints — the artwork behind the card never actually moves.
+Here the wallpaper's curves visibly swim as they cross the edge.
+
+The technique is adapted from Shingi Dad's
+[Liquid Glass Shader](https://codepen.io/shingidad/pen/jEPxMgW). That pen
+follows the pointer with a squircle and samples a photograph; this version is
+pinned to the card's rect, uses a rounded-rectangle signed distance field so
+the corner radius tracks the CSS, and draws on change instead of on a frame
+loop — nothing here animates, so there is no `requestAnimationFrame` running
+behind a static page.
+
+It is entirely optional. No wallpaper image, no WebGL, a shader that will not
+compile or a texture that will not load, and the canvas stays empty behind
+the CSS glass, which is the whole effect on its own. Because every one of
+those failures leaves a page that still looks fine — just flat —
+`scripts/checks.js` asserts the canvas reported ready **and** that hiding it
+changes pixels inside the card.
+
+One consequence for development: the checks now serve the site over HTTP on a
+loopback port instead of opening `index.html` from disk. A `file://` page
+treats its own sibling image as a foreign origin and refuses to upload it as
+a WebGL texture, so on `file://` the lens silently does nothing and every
+measurement would be of a page no visitor sees.
+
 #### How the drawn one is built
 
 Two layers, no image file. A **mesh** in the iOS manner — several broad colour
