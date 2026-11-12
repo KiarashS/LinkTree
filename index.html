@@ -47,7 +47,7 @@
   --border:        rgba(15, 18, 45, 0.10);
   --border-strong: rgba(15, 18, 45, 0.18);
   --text:          #14162b;
-  --text-soft:     #2f3349;
+  --text-soft:     #434763;
   --text-faint:    #2a2f4a;   /* secondary ink; see the contrast check */
   --shadow-sm:     0 1px 2px rgba(16, 20, 55, 0.06), 0 4px 14px rgba(16, 20, 55, 0.06);
   --shadow-lg:     0 10px 40px rgba(16, 20, 55, 0.13);
@@ -69,17 +69,8 @@
   /* Tahoe glass. The fill is deliberately thin — on this material the edge
      does the work, not the body — and the blur is what keeps text legible
      over a colourful wallpaper. */
-  /* Completely clear: no fill at all. What keeps text legible is the
-     backdrop filter, and the two themes pull in opposite directions —
-     light brightens what is behind the glass, dark darkens it. Measured,
-     brightening a dark backdrop made it worse: 3.35 at 1.45 down to 1.59
-     at 2.35, because it closes the gap with pale ink. */
-  --glass-fill:    transparent;
-  /* Text plates — the footer and the posts label. Not buttons, and they sit
-     straight on the wallpaper with no card under them, so they carry enough
-     fill to hold dark ink over a dark patch of the artwork. */
-  --plate-fill:    rgba(255, 255, 255, 0.72);
-  --glass-edge:    blur(20px) saturate(150%) brightness(2.05);
+  --glass-fill:    rgba(255, 255, 255, 0.22);
+  --glass-edge:    blur(18px) saturate(185%) brightness(1.04);
   --lip-top:       rgba(255, 255, 255, 0.95);
   --lip-bottom:    rgba(255, 255, 255, 0.60);
   --lip-ring:      rgba(15, 18, 45, 0.10);
@@ -91,7 +82,7 @@
   /* Panes that carry content. --surface is a veil that only lightens what
      is behind it; --pane occludes, so the aurora reads *around* the card
      instead of through the text. */
-  --pane:       rgba(255, 255, 255, 0.34);
+  --pane:       rgba(255, 255, 255, 0.36);
   --tip-bg:     rgba(255, 255, 255, 0.34);
   --modal-bg:   rgba(240, 242, 250, 0.52);
 
@@ -154,16 +145,15 @@
     --mesh-b:        34%;
     --vignette:      0.62;
     --wall-scrim:    0;
-    --glass-fill:    transparent;
-    --plate-fill:    rgba(12, 14, 24, 0.55);
-    --glass-edge:    blur(20px) saturate(150%) brightness(0.75);
+    --glass-fill:    rgba(10, 11, 22, 0.12);
+    --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
     --lip-top:       rgba(255, 255, 255, 0.55);
     --lip-bottom:    rgba(255, 255, 255, 0.18);
     --lip-ring:      rgba(255, 255, 255, 0.16);
     --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
     --bokeh-opacity: 1;
     --bokeh-blur:    10px;
-    --pane:          rgba(14, 15, 26, 0.14);
+    --pane:          rgba(14, 15, 26, 0.24);
     --tip-bg:        rgba(26, 27, 41, 0.34);
     --modal-bg:      rgba(17, 18, 28, 0.50);
     /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -204,16 +194,15 @@
   --mesh-b:        34%;
   --vignette:      0.62;
   --wall-scrim:    0;
-  --glass-fill:    transparent;
-  --plate-fill:    rgba(12, 14, 24, 0.55);
-  --glass-edge:    blur(20px) saturate(150%) brightness(0.75);
+  --glass-fill:    rgba(10, 11, 22, 0.12);
+  --glass-edge:    blur(20px) saturate(170%) brightness(1.08);
   --lip-top:       rgba(255, 255, 255, 0.55);
   --lip-bottom:    rgba(255, 255, 255, 0.18);
   --lip-ring:      rgba(255, 255, 255, 0.16);
   --cast:          0 12px 34px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
   --bokeh-opacity: 1;
   --bokeh-blur:    10px;
-  --pane:          rgba(14, 15, 26, 0.14);
+  --pane:          rgba(14, 15, 26, 0.24);
   --tip-bg:        rgba(26, 27, 41, 0.34);
   --modal-bg:      rgba(17, 18, 28, 0.50);
   /* Lower saturate/brightness than before: at 200% the filter amplified
@@ -279,8 +268,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    the transform the entrance animation left on the <li>, which confines a
    descendant's backdrop-filter to that subtree. With the class dropped once
    it has played, a row's blur moves 13.6% of its pixels. */
-.card, .modal, .toast,
-.link, .social, .chip, .badge, .mail, .post, .foot, .posts__head {
+.card, .toolbar, .modal, .toast,
+.link, .social, .badge, .mail, .post, .chip-well {
   /* The Tahoe edge. A thin bright lip along the top where light catches the
      bevel, a dimmer return along the bottom, a hairline ring holding the
      whole shape, and a tight dark line just inside the lip that reads as the
@@ -449,41 +438,20 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   opacity: var(--wall-scrim);
 }
 
-/* The refraction layer sits between the wallpaper and the card. It paints
-   the same wallpaper the backdrop does, but bent through the card's shape —
-   so the card magnifies and displaces what is behind it the way a thick
-   lens does, which no amount of backdrop-filter can imitate. Hidden until
-   the script says it has something to show. */
-.lens {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  display: block;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .4s var(--ease);
-}
-.lens.is-ready { opacity: 1; }
-@media print { .lens { display: none; } }
-
-
-
 /* ==================================================================
    4. Top bar (theme + share)
    ================================================================== */
 /* The controls cluster into one floating capsule rather than sitting as
    separate buttons — the glass is the bar, the chips ride inside it. */
-/* No bar: three separate pucks. The capsule used to be the glass and the
-   chips rode inside it; now each chip is its own piece, so the container is
-   nothing but a flex row that positions them. */
 .toolbar {
   position: fixed;
   top: max(16px, env(safe-area-inset-top));
   right: 16px;
   display: flex;
-  gap: 8px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
   z-index: 10;
 }
 .chip {
@@ -495,7 +463,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   color: var(--text-soft);
   transition: transform .4s var(--spring), background-color .3s, color .3s;
 }
-.chip:hover { color: var(--text); }
+.chip:hover { color: var(--text); background-color: var(--surface-hover); }
 .chip:active { transform: scale(.88); transition-duration: .1s; }
 .chip svg { width: 19px; height: 19px; }
 #theme svg { display: none; }
@@ -510,19 +478,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    ================================================================== */
 .card {
   width: min(100%, 512px);
-  padding: clamp(24px, 5vw, 34px) clamp(18px, 4vw, 30px) clamp(22px, 4vw, 30px);
+  padding: clamp(24px, 5vw, 38px) clamp(18px, 4vw, 30px) clamp(20px, 4vw, 28px);
   border-radius: var(--radius-lg);
   background-color: var(--pane);
   border: 1px solid var(--border);
   position: relative;
   isolation: isolate;
-}
-/* Everything the card no longer holds. Not a surface of its own — it only
-   sets the column width, so each row below is glass against the wallpaper. */
-.stack {
-  width: min(100%, 512px);
-  display: grid;
-  gap: 18px;
 }
 /* A wide specular that tracks the pointer across the whole pane, the way
    light slides over a curved sheet of glass. */
@@ -684,11 +645,12 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 13px 6px 11px;
+  padding: 5px 12px 5px 10px;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--text-soft);
   background-color: var(--glass-fill);
+  border: 1px solid var(--border);
   border-radius: 999px;
 }
 .badge svg { width: 13px; height: 13px; opacity: .8; }
@@ -712,21 +674,18 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   gap: 10px;
   margin: 18px 0 4px;
 }
-/* No overflow clip and no border. The clip was left over from a hover-fill
-   pseudo that no longer exists, and it cut the bevel ring — which sits at
-   inset -1px to cover the border box — leaving a part-ring that went dark
-   and patchy as the conic rotated on hover. The border was the second edge
-   underneath it. The bevel is the edge now. */
 .social {
   width: 46px; height: 46px;
   display: grid; place-items: center;
   border-radius: 999px;
   color: var(--text-soft);
   background-color: var(--glass-fill);
+  border: 1px solid var(--border);
   position: relative;
-  overflow: hidden;      /* clips the hover fill below to the circle */
-  transition: transform .45s var(--spring), color .25s;
+  overflow: hidden;
+  transition: transform .45s var(--spring), color .25s, border-color .25s;
 }
+.social svg { width: 19px; height: 19px; position: relative; z-index: 1; transition: transform .35s var(--ease); }
 .social::before {
   content: "";
   position: absolute; inset: 0;
@@ -734,8 +693,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   opacity: 0;
   transition: opacity .3s var(--ease);
 }
-.social svg { width: 19px; height: 19px; position: relative; z-index: 1; transition: transform .35s var(--ease); }
-.social:hover { transform: translateY(-4px); color: var(--text); }
+.social:hover { transform: translateY(-4px); color: var(--text); border-color: var(--border-strong); }
 .social:hover::before { opacity: 1; }
 .social:hover svg { transform: scale(1.12); }
 .social:active { transform: translateY(-1px) scale(.9); transition-duration: .1s; }
@@ -752,9 +710,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 15px 15px 15px 16px;
+  padding: 14px 14px 14px 15px;
   border-radius: var(--radius);
   background-color: var(--glass-fill);
+  border: 1px solid var(--border);
   overflow: hidden;
   isolation: isolate;
   transition: transform .45s var(--spring), background-color .3s, border-color .3s, box-shadow .4s var(--ease);
@@ -785,6 +744,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .link:hover {
   transform: translateY(-3px);
   background-color: var(--surface-hover);
+  border-color: var(--border-strong);
 }
 .link:hover::before { opacity: 1; }
 .link:hover::after { opacity: .5; animation: sweep .85s var(--ease); }
@@ -854,11 +814,17 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .copy-btn.is-done { color: #22c55e; }
 
 /* Featured link: animated gradient border. */
-/* Every row is borderless now, so the featured one needs no special case
-   beyond its accent ring. A 1px transparent border would still paint the
-   row's fill and its backdrop-filter result out to the border box, which
-   showed as a pale hairline outside the gradient. */
-.link--featured { background-color: var(--glass-fill); }
+/* No border at all on a featured row, rather than a transparent one.
+   A 1px transparent border still paints the row's own fill and — the part
+   background-clip cannot reach — its backdrop-filter result, right out to
+   the border box. That showed as a pale hairline outside the gradient ring:
+   measured rgb(248,248,254) against the ring's rgb(123,94,255). The padding
+   takes the border's 1px back so nothing moves. */
+.link--featured {
+  background-color: var(--glass-fill);
+  border-width: 0;
+  padding: 15px 15px 15px 16px;
+}
 .link--featured::marker { content: ""; }
 .link--featured .border-glow {
   position: absolute;
@@ -881,12 +847,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 
 /* ---------- Footer ---------- */
-/* A plate of its own now, not a ruled-off strip at the bottom of the card. */
-.foot, .posts__head { background-color: var(--plate-fill); }
 .foot {
-  padding: 11px 18px;
-  border-radius: 999px;
-  justify-self: center;
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -981,6 +945,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: grid; place-items: center;
   border-radius: 50%;
   color: var(--text-soft);
+  border: 1px solid var(--border);
   background-color: var(--glass-fill);
   transition: transform .3s var(--ease), background-color .25s, color .25s;
 }
@@ -1003,9 +968,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 13px 14px 15px;
+  padding: 13px 12px 13px 14px;
   border-radius: var(--radius);
   background-color: var(--glass-fill);
+  border: 1px solid var(--border);
   transition: transform .35s var(--ease), background-color .25s, border-color .25s;
   animation: mail-in .5s var(--ease) backwards;
   animation-delay: calc(var(--i, 0) * 65ms + 120ms);
@@ -1089,7 +1055,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* On phones, reclaim the space taken by the decorative arrow so long
    values (an email address, say) still fit on one line. */
 @media (max-width: 430px) {
-  .link { gap: 12px; padding: 14px; }
+  .link { gap: 12px; padding: 13px; }
+  .link--featured { padding: 14px; }     /* keeps the borderless row aligned */
   .link__arrow { display: none; }
 }
 
@@ -1119,10 +1086,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .posts { margin-top: 22px; display: grid; gap: 10px; }
 .posts__head {
-  margin: 0 0 2px;
-  justify-self: start;
-  padding: 5px 12px;
-  border-radius: 999px;
+  margin: 0 2px 2px;
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: .09em;
@@ -1135,9 +1099,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   align-items: baseline;
   gap: 12px;
   min-width: 0;
-  padding: 12px 15px;
+  padding: 11px 14px;
   border-radius: var(--radius-sm);
   background-color: var(--glass-fill);
+  border: 1px solid var(--border);
   background-image:
     radial-gradient(150% 60px at 22% 0%, var(--spec), transparent 72%),
     linear-gradient(150deg, var(--spec-soft) 0%, transparent 60%);
@@ -1330,11 +1295,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     <div class="blob blob--3"></div>
   </div>
 
-  <!-- Refraction layer. Only used when a wallpaper image is set and WebGL is
-       available; otherwise it stays empty and the CSS glass is the whole
-       effect. See `lens` in the script below. -->
-  <canvas class="lens" id="lens" aria-hidden="true"></canvas>
-
   <div class="toolbar">
     <button class="chip" id="share" type="button" aria-label="Share this page" data-tip="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1387,13 +1347,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   </noscript>
 
   <main class="card" id="card">
-    <!-- rendered from config.js: the profile only -->
-  </main>
-
-  <!-- Everything else floats on the wallpaper as its own piece of glass. -->
-  <div class="stack" id="stack">
     <!-- rendered from config.js -->
-  </div>
+  </main>
 
   <dialog class="modal" id="emailer" aria-labelledby="emailer-title">
     <!-- rendered from config.js -->
@@ -1616,16 +1571,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     if (profile.status)   badges += '<span class="badge"><span class="dot"></span>' + esc(profile.status) + '</span>';
     if (profile.location) badges += '<span class="badge">' + svg('pin') + esc(profile.location) + '</span>';
 
-    var profileHtml = '<section class="profile">' +
+    var html = '<section class="profile">' +
       '<div class="avatar-ring reveal" ' + delay() + '>' + avatar + '</div>' +
       '<h1 class="name reveal" ' + delay() + '>' + nameHtml + '</h1>' +
       (profile.handle  ? '<p class="handle reveal" ' + delay() + '>' + esc(profile.handle) + '</p>' : '') +
       taglineHtml +
+      (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '') +
     '</section>';
-
-    /* The card holds the profile and nothing else now. Links, socials, posts
-       and the footer are siblings below it, each its own glass. */
-    var html = (badges ? '<div class="meta reveal" ' + delay() + '>' + badges + '</div>' : '');
 
     var socials = CFG.socials || [];
     if (socials.length) {
@@ -1703,9 +1655,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
     '</footer>';
 
     var card = document.getElementById('card');
-    var stack = document.getElementById('stack');
-    card.innerHTML = profileHtml;
-    stack.innerHTML = html;
+    card.innerHTML = html;
 
     if (profile.name) document.title = profile.name + ' — Links';
 
@@ -1716,7 +1666,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
        leaves behind stops the glass rows refracting anything. Belt and braces
        on the timer, because animationend never fires in a backgrounded tab. */
     settleReveals(card);
-    settleReveals(stack);
     function settleReveals(root) {
       var pending = [].slice.call(root.querySelectorAll('.reveal'));
       if (root.classList && root.classList.contains('reveal')) pending.push(root);
@@ -1977,209 +1926,6 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
       showToast('Contact card downloaded');
     });
 
-    /* ---------------- Refraction lens ----------------
-       A thick sheet of glass does two things CSS cannot: it magnifies what
-       is behind it, and it bends hardest at the rim, where the glass is
-       thickest. backdrop-filter only blurs and tints — the image behind a
-       row never actually moves. This draws the wallpaper again on a canvas
-       under the card, displaced through the card's own rounded rectangle,
-       so the artwork visibly swims at the edges.
-
-       Adapted from the WebGL approach in Shingi Dad's "Liquid Glass Shader"
-       (codepen.io/shingidad/pen/jEPxMgW). That one follows the pointer with
-       a squircle and samples a photograph; this one is pinned to the card's
-       rect, uses a rounded-rectangle distance field so the corner radius
-       matches the DOM, and draws only when something moves.
-
-       Entirely optional: no wallpaper image, no WebGL, or a context that
-       fails to build, and the canvas stays empty behind the CSS glass. */
-    (function lens() {
-      var cv = document.getElementById('lens');
-      var card = document.getElementById('card');
-      if (!cv || !card || !root.hasAttribute('data-wallpaper')) return;
-
-      var gl = null;
-      try {
-        gl = cv.getContext('webgl', { alpha: true, premultipliedAlpha: false, antialias: false });
-      } catch (e) { /* no WebGL: the CSS glass is already the fallback */ }
-      if (!gl) return;
-
-      var VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-      var FS = [
-        'precision highp float;',
-        'uniform vec2 uRes;',          // canvas size, device px
-        'uniform vec4 uRect;',         // card: centre xy, half size xy
-        'uniform float uRadius;',      // corner radius
-        'uniform float uBend;',        // how far the rim displaces, px
-        'uniform float uRim;',         // rim light strength
-        'uniform vec4 uCover;',        // texture cover transform: scale xy, offset xy
-        'uniform sampler2D uTex;',
-        // Signed distance to a rounded rectangle: negative inside.
-        'float sdRound(vec2 p, vec2 b, float r){',
-        '  vec2 q = abs(p) - b + r;',
-        '  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;',
-        '}',
-        'vec4 pick(vec2 px){',
-        '  vec2 uv = px / uRes * uCover.xy + uCover.zw;',
-        '  return texture2D(uTex, uv);',
-        '}',
-        'void main(){',
-        '  vec2 px = gl_FragCoord.xy;',
-        '  vec2 rel = px - uRect.xy;',
-        '  float d = sdRound(rel, uRect.zw, uRadius);',
-        '  if (d > 0.0) { discard; }',   // outside the card: let CSS show through
-        // Thickness profile. A real lens is flat in the middle and steep at
-        // the rim, so the displacement rides on the distance to the edge.
-        '  float t = clamp(-d / uBend, 0.0, 1.0);',
-        '  float profile = pow(1.0 - t, 2.5);',
-        // Surface normal from the gradient of the distance field.
-        '  vec2 e = vec2(1.0, 0.0);',
-        '  vec2 n = normalize(vec2(',
-        '    sdRound(rel + e.xy, uRect.zw, uRadius) - sdRound(rel - e.xy, uRect.zw, uRadius),',
-        '    sdRound(rel + e.yx, uRect.zw, uRadius) - sdRound(rel - e.yx, uRect.zw, uRadius)',
-        '  ) + 1e-6);',
-        '  vec2 bent = px - n * profile * uBend;',
-        // A few taps across the bend soften the sample the way thick glass does.
-        '  vec4 c = vec4(0.0);',
-        '  for (int i = -2; i <= 2; i++) {',
-        '    c += pick(bent + n * float(i) * 1.5);',
-        '  }',
-        '  c /= 5.0;',
-        // Rim light: brightest in the last couple of pixels before the edge.
-        '  float rim = smoothstep(0.0, 1.0, pow(1.0 - clamp(-d / 14.0, 0.0, 1.0), 3.0));',
-        '  c.rgb = clamp(c.rgb + rim * uRim, 0.0, 1.0);',
-        '  gl_FragColor = vec4(c.rgb, 1.0);',
-        '}'
-      ].join('\n');
-
-      function build(type, src) {
-        var sh = gl.createShader(type);
-        gl.shaderSource(sh, src);
-        gl.compileShader(sh);
-        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) { gl.deleteShader(sh); return null; }
-        return sh;
-      }
-      var vs = build(gl.VERTEX_SHADER, VS), fs = build(gl.FRAGMENT_SHADER, FS);
-      if (!vs || !fs) return;
-      var prog = gl.createProgram();
-      gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-      gl.useProgram(prog);
-
-      var buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-      var loc = gl.getAttribLocation(prog, 'p');
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
-      var U = {};
-      ['uRes','uRect','uRadius','uBend','uRim','uCover','uTex'].forEach(function (n) {
-        U[n] = gl.getUniformLocation(prog, n);
-      });
-
-      var tex = gl.createTexture();
-      var texW = 0, texH = 0, ready = false;
-
-      /* The canvas has to show the wallpaper at exactly the scale CSS paints
-         it, or the bend would not line up with the image around the card.
-         This is `background-size: cover; background-position: center` in
-         arithmetic. */
-      function cover(w, h) {
-        if (!texW || !texH) return [1, 1, 0, 0];
-        var s = Math.max(w / texW, h / texH);
-        var dw = texW * s, dh = texH * s;
-        return [w / dw, h / dh, (dw - w) / 2 / dw, (dh - h) / 2 / dh];
-      }
-
-      function draw() {
-        if (!ready) return;
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
-        var w = Math.round(cv.clientWidth * dpr), h = Math.round(cv.clientHeight * dpr);
-        if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
-        gl.viewport(0, 0, w, h);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        var r = card.getBoundingClientRect();
-        var radius = parseFloat(getComputedStyle(card).borderRadius) || 32;
-        // WebGL's y runs up from the bottom; getBoundingClientRect's runs down.
-        var cx = (r.left + r.width / 2) * dpr;
-        var cy = (cv.clientHeight - (r.top + r.height / 2)) * dpr;
-
-        gl.uniform2f(U.uRes, w, h);
-        gl.uniform4f(U.uRect, cx, cy, r.width / 2 * dpr, r.height / 2 * dpr);
-        gl.uniform1f(U.uRadius, radius * dpr);
-        gl.uniform1f(U.uBend, 26 * dpr);
-        gl.uniform1f(U.uRim, 0.10);
-        var c = cover(w, h);
-        gl.uniform4f(U.uCover, c[0], c[1], c[2], c[3]);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.uniform1i(U.uTex, 0);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        cv.classList.add('is-ready');
-      }
-
-      /* Which wallpaper is showing depends on the resolved theme, so this
-         re-reads the custom property rather than the config value. */
-      function currentUrl() {
-        var cs = getComputedStyle(root);
-        var dark = matchMedia('(prefers-color-scheme: dark)').matches;
-        var mode = root.getAttribute('data-theme');
-        var want = (mode === 'dark' || (mode !== 'light' && dark))
-          ? (cs.getPropertyValue('--wallpaper-dark') || cs.getPropertyValue('--wallpaper'))
-          : cs.getPropertyValue('--wallpaper');
-        var m = String(want).match(/url\(\s*"?([^")]+)"?\s*\)/);
-        return m ? m[1] : null;
-      }
-
-      var loadedFor = null;
-      function load() {
-        var url = currentUrl();
-        if (!url || url === loadedFor) { draw(); return; }
-        loadedFor = url;
-        var img = new Image();
-        /* No crossOrigin: the wallpaper is same-origin, and asking for CORS
-           makes the load fail from file:// and from any host that does not
-           answer with the header. Tainting the canvas costs nothing here
-           because the pixels are only ever drawn, never read back. */
-        img.onload = function () {
-          texW = img.naturalWidth; texH = img.naturalHeight;
-          gl.bindTexture(gl.TEXTURE_2D, tex);
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-          ready = true;
-          draw();
-        };
-        img.onerror = function () { loadedFor = null; };
-        img.src = url;
-      }
-
-      /* Nothing here animates, so it draws on change rather than on a frame
-         loop — no rAF running forever behind a static page. */
-      var queued = false;
-      function schedule() {
-        if (queued) return;
-        queued = true;
-        requestAnimationFrame(function () { queued = false; draw(); });
-      }
-      window.addEventListener('resize', schedule, { passive: true });
-      window.addEventListener('scroll', schedule, { passive: true });
-      if ('ResizeObserver' in window) new ResizeObserver(schedule).observe(card);
-      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', load);
-      new MutationObserver(load).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-
-      load();
-      // The card grows as the entrance animation lands and as posts arrive.
-      setTimeout(schedule, 900);
-      setTimeout(schedule, 2600);
-    })();
-
     /* ---------------- Latest posts ----------------
        Pulled live from the blog's Atom feed. Entirely optional: any failure
        leaves the section absent rather than showing an error, because this is
@@ -2241,8 +1987,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           var section = document.createElement('section');
           section.className = 'posts reveal';
           section.innerHTML = html;
-          var foot = stack.querySelector('.foot');
-          foot ? stack.insertBefore(section, foot) : stack.appendChild(section);
+          var foot = card.querySelector('.foot');
+          foot ? card.insertBefore(section, foot) : card.appendChild(section);
           settleReveals(section);   // this one arrives after the first pass
         })
         .catch(function () { /* feed down or blocked: show nothing */ });

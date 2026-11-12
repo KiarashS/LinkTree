@@ -325,36 +325,6 @@ are here at the repository owner's decision. No licence accompanies them.
 If you are forking this, replace them with artwork you have the right to
 publish rather than inheriting that choice.
 
-#### Refraction
-
-With a wallpaper set, a WebGL canvas sits between it and the card and redraws
-the same image bent through the card's own rounded rectangle. Real glass does
-two things `backdrop-filter` cannot: it **magnifies** what is behind it, and
-it bends hardest at the rim where the glass is thickest. A backdrop filter
-only blurs and tints — the artwork behind the card never actually moves.
-Here the wallpaper's curves visibly swim as they cross the edge.
-
-The technique is adapted from Shingi Dad's
-[Liquid Glass Shader](https://codepen.io/shingidad/pen/jEPxMgW). That pen
-follows the pointer with a squircle and samples a photograph; this version is
-pinned to the card's rect, uses a rounded-rectangle signed distance field so
-the corner radius tracks the CSS, and draws on change instead of on a frame
-loop — nothing here animates, so there is no `requestAnimationFrame` running
-behind a static page.
-
-It is entirely optional. No wallpaper image, no WebGL, a shader that will not
-compile or a texture that will not load, and the canvas stays empty behind
-the CSS glass, which is the whole effect on its own. Because every one of
-those failures leaves a page that still looks fine — just flat —
-`scripts/checks.js` asserts the canvas reported ready **and** that hiding it
-changes pixels inside the card.
-
-One consequence for development: the checks now serve the site over HTTP on a
-loopback port instead of opening `index.html` from disk. A `file://` page
-treats its own sibling image as a foreign origin and refuses to upload it as
-a WebGL texture, so on `file://` the lens silently does nothing and every
-measurement would be of a page no visitor sees.
-
 #### How the drawn one is built
 
 Two layers, no image file. A **mesh** in the iOS manner — several broad colour
@@ -415,22 +385,6 @@ strong the drifting colour is. Lowering `--pane`'s alpha or raising
 `--blob-opacity` makes the page more atmospheric and less readable; the
 shipped values keep every row above 4.5:1 in both themes.
 
-### Layout
-
-The card holds the profile only — avatar, name, handle, typed roles and the
-status pill. Everything else (socials, link rows, posts, footer) sits below
-it in `.stack`, which is not a surface at all: it only sets the column width,
-so each row is glass directly against the wallpaper.
-
-The status pill floats too, so it is measured like everything else.
-
-Two pieces of text lost the card they used to sit on, and neither survives a
-photograph on its own: the footer and the posts label. They became small
-plates with their own `--plate-fill`, which is much denser than
-`--glass-fill`. They are not buttons, so the "clear glass" rule does not
-apply to them, and on a varied image no single ink works — dark ink fails
-over the dark part of the artwork, light ink over the bright part.
-
 ### Why the rows look like glass
 
 A pane only reads as glass when something uneven shows through it. Every
@@ -439,20 +393,6 @@ Tahoe-style edge — a bright lip along the top where light catches the bevel,
 a dimmer return along the bottom, a hairline ring, and a tight dark line just
 inside the lip that reads as the thickness. The body stays nearly empty on
 purpose; on this material the edge *is* the material.
-
-**The buttons have no fill at all.** `--glass-fill` is `transparent`; what
-keeps text on them legible is `--glass-edge`, the backdrop filter.
-
-The two themes pull in opposite directions, and this is the part worth
-remembering. Light **brightens** what is behind the glass — `brightness(2.05)`
-— and dark **darkens** it — `brightness(0.75)`. Brightening a dark backdrop
-makes things worse, because it closes the gap with pale ink: measured with
-no fill, dark went 3.35:1 at `1.45` down to **1.59:1** at `2.35`, while light
-went 2.86 up to 5.38 over the same range.
-
-That is also the physically honest lever — frosted glass scatters light, it
-does not add paint — and it buys contrast with no milkiness, which an opacity
-fill cannot.
 
 > **The trap, if you ever touch the entrance animation.** A row's
 > `backdrop-filter` only works if nothing above it is transformed — Chromium
@@ -479,8 +419,7 @@ not the obvious one. Make the rows clearer and the first thing to fail is the
 `--text-soft` — a different surface and a different ink from anything on the
 card. That is why `scripts/checks.js` opens the dialog and measures inside
 it, in a second pass: while the dialog is open its `::backdrop` dims
-everything behind, so the card and the modal cannot be read together. No control has a
-border either; the hairline ring in the shadow stack is the only edge. There is no
+everything behind, so the card and the modal cannot be read together. There is no
 texture layer on the card or the backdrop — no grain, no mottle, no bands.
 Everything the glass bends is the wallpaper itself.
 
