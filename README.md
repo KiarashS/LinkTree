@@ -438,10 +438,10 @@ sweeping. On hover the conic rotates 50° and the sweep slides; on press the
 sweep tips.
 
 The radius comes from each control via `border-radius: inherit`, so pills
-stay pills and rows stay rows — the source design is pill-only. The toolbar
-chips are deliberately left out: that bar is one capsule with the chips
-riding inside it, and moulding each one turned it into three separate
-buttons.
+stay pills and rows stay rows — the source design is pill-only. Every
+control carries it, the toolbar chips included; that makes the bar read as
+three buttons in a tray rather than one capsule with chips inside it, which
+is the intended look here.
 
 > **The trap, if you ever touch the entrance animation.** A row's
 > `backdrop-filter` only works if nothing above it is transformed — Chromium

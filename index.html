@@ -495,18 +495,19 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
    Then a sweep: one band of light across the face, blended with screen so it
    adds rather than covers, sliding on hover and tipping on press.
 
-   Not on the toolbar chips: that bar is one capsule with the chips riding
-   inside it, and moulding each one turned it into three separate buttons.
+   The toolbar chips carry it as well. That reads as three buttons in a tray
+   rather than one capsule with chips inside it, which is a deliberate choice
+   here, not an oversight.
 
    Both are inherited from the glass-button design in the attached archive.
    Geometry is this page's, not that one's: the radius comes from the control
    via border-radius: inherit, so pills stay pills and rows stay rows.
    ------------------------------------------------------------------ */
-.link, .social, .badge, .mail, .post,
+.link, .social, .chip, .badge, .mail, .post,
 .copy-btn, .mail__btn, .modal__close {
   position: relative;
 }
-.link::before, .social::before, .badge::before,
+.link::before, .social::before, .chip::before, .badge::before,
 .mail::before, .post::before, .copy-btn::before, .mail__btn::before,
 .modal__close::before {
   content: "";
@@ -529,7 +530,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
           mask-composite: exclude;
   transition: --angle-1 500ms ease;
 }
-.link::after, .social::after, .badge::after,
+.link::after, .social::after, .chip::after, .badge::after,
 .mail::after, .post::after, .copy-btn::after, .mail__btn::after,
 .modal__close::after {
   content: "";
@@ -546,13 +547,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   mix-blend-mode: screen;
   transition: background-position 500ms var(--ease), --angle-2 500ms var(--ease);
 }
-.link:hover::before, .social:hover::before,
+.link:hover::before, .social:hover::before, .chip:hover::before,
 .mail:hover::before, .post:hover::before, .copy-btn:hover::before,
 .mail__btn:hover::before, .modal__close:hover::before { --angle-1: -125deg; }
-.link:hover::after, .social:hover::after,
+.link:hover::after, .social:hover::after, .chip:hover::after,
 .mail:hover::after, .post:hover::after, .copy-btn:hover::after,
 .mail__btn:hover::after, .modal__close:hover::after { background-position: 25% 50%; }
-.link:active::after, .social:active::after,
+.link:active::after, .social:active::after, .chip:active::after,
 .mail:active::after, .post:active::after, .copy-btn:active::after,
 .mail__btn:active::after, .modal__close:active::after {
   background-position: 50% 15%;
@@ -560,10 +561,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 }
 /* Touch has no hover, so the travel would only ever fire on tap. */
 @media (hover: none) and (pointer: coarse) {
-  .link::before, .social::before, .badge::before,
+  .link::before, .social::before, .chip::before, .badge::before,
   .mail::before, .post::before, .copy-btn::before, .mail__btn::before,
   .modal__close::before { --angle-1: -75deg; }
-  .link::after, .social::after, .badge::after,
+  .link::after, .social::after, .chip::after, .badge::after,
   .mail::after, .post::after, .copy-btn::after, .mail__btn::after,
   .modal__close::after { --angle-2: -45deg; }
 }
